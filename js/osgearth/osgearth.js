@@ -150,6 +150,22 @@ osg.Geometry.destroy = function(geom) {
     }
 };
 
+osg.Program.destroy = function(p) {
+    if (p !== undefined && p !== null) {
+        if (p.program !== undefined && p.program !== null) {
+            gl.deleteProgram(p.program);
+        }
+    }
+};
+
+osg.Shader.destroy = function(s) {
+    if (s !== undefined && s !== null) {
+        if (s.shader !== undefined && s.shader !== null) {
+            gl.deleteShader(s.shader);
+        }
+    }
+};
+
 osg.Texture.destroy = function(tex) {
     if (tex !== undefined && tex !== null) {
         if (tex.textureObject !== null) {
