@@ -15,14 +15,41 @@ import commands
 import shutil
 
 READYMAP = [
-        "readymap.js",
-		"jquery/jquery.mousewheel.js",
+        "jquery/jquery.mousewheel.js",
+		"array.js",
+        "readymap.js",		
 		"osgjs/osg-debug-0.0.4.js",
-		"osgearth/osgearth.js",
-		"readymap/readymap.ui.js",
-		"readymap/readymap.data.js",
-		"readymap/readymap.experimental.js",
-		"readymap/readymap.controls.js",
+		"osgjs/osg-extras.js",
+		"osgearth/osgearth.js",		
+        "readymap/PositionedElement.js",
+        "readymap/PositionEngine.js",       
+		"readymap/Icon.js",       
+		"readymap/Label.js",       
+]
+
+READYMAP_UI = [
+        "readymap/ui/Manipulator.js",
+        "readymap/ui/EarthManipulator.js",		
+		"readymap/ui/MapManipulator.js",
+		"readymap/ui/MapView.js"
+]
+
+READYMAP_DATA = [
+        "readymap/data/ArcGISImageLayer.js",
+		"readymap/data/GeoRSSLayer.js",
+		"readymap/data/GeoRSSReader.js",
+		"readymap/data/Map.js",
+		"readymap/data/TMSImageLayer.js",
+		"readymap/data/WMSImageLayer.js",	
+		"readymap/data/WOEIDWeatherLayer.js"	
+]
+
+
+READYMAP_CONTROLS = [
+        "readymap/controls/Controls.js",
+        "readymap/controls/GeoRSSList.js",
+        "readymap/controls/LayerSwitcher.js",
+        "readymap/controls/PlaceSearch.js"		
 ]
 
 version = '0.0.0'
@@ -161,7 +188,7 @@ def main(argv=None):
 	unminified = args.unminified
 
 	config = [
-                ['readymap', 'includes', READYMAP, args],
+                ['readymap', 'includes', READYMAP + READYMAP_UI + READYMAP_DATA + READYMAP_CONTROLS, args],
                 ]
 
         global version

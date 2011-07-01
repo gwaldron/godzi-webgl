@@ -1,4 +1,112 @@
+/*! Copyright (c) 2010 Brandon Aaron (http://brandonaaron.net)
+ * Licensed under the MIT License (LICENSE.txt).
+ *
+ * Thanks to: http://adomas.org/javascript-mouse-wheel/ for some pointers.
+ * Thanks to: Mathias Bank(http://www.mathias-bank.de) for a scope bug fix.
+ * Thanks to: Seamus Leahy for adding deltaX and deltaY
+ *
+ * Version: 3.0.4
+ * 
+ * Requires: 1.2.2+
+ */
+
+(function($) {
+
+var types = ['DOMMouseScroll', 'mousewheel'];
+
+$.event.special.mousewheel = {
+    setup: function() {
+        if ( this.addEventListener ) {
+            for ( var i=types.length; i; ) {
+                this.addEventListener( types[--i], handler, false );
+            }
+        } else {
+            this.onmousewheel = handler;
+        }
+    },
+    
+    teardown: function() {
+        if ( this.removeEventListener ) {
+            for ( var i=types.length; i; ) {
+                this.removeEventListener( types[--i], handler, false );
+            }
+        } else {
+            this.onmousewheel = null;
+        }
+    }
+};
+
+$.fn.extend({
+    mousewheel: function(fn) {
+        return fn ? this.bind("mousewheel", fn) : this.trigger("mousewheel");
+    },
+    
+    unmousewheel: function(fn) {
+        return this.unbind("mousewheel", fn);
+    }
+});
+
+
+function handler(event) {
+    var orgEvent = event || window.event, args = [].slice.call( arguments, 1 ), delta = 0, returnValue = true, deltaX = 0, deltaY = 0;
+    event = $.event.fix(orgEvent);
+    event.type = "mousewheel";
+    
+    // Old school scrollwheel delta
+    if ( event.wheelDelta ) { delta = event.wheelDelta/120; }
+    if ( event.detail     ) { delta = -event.detail/3; }
+    
+    // New school multidimensional scroll (touchpads) deltas
+    deltaY = delta;
+    
+    // Gecko
+    if ( orgEvent.axis !== undefined && orgEvent.axis === orgEvent.HORIZONTAL_AXIS ) {
+        deltaY = 0;
+        deltaX = -1*delta;
+    }
+    
+    // Webkit
+    if ( orgEvent.wheelDeltaY !== undefined ) { deltaY = orgEvent.wheelDeltaY/120; }
+    if ( orgEvent.wheelDeltaX !== undefined ) { deltaX = -1*orgEvent.wheelDeltaX/120; }
+    
+    // Add event and delta to the front of the arguments
+    args.unshift(event, delta, deltaX, deltaY);
+    
+    return $.event.handle.apply(this, args);
+}
+
+})(jQuery);/**
+* ReadyMap/WebGL
+* (c) Copyright 2011 Pelican Mapping
+* License: LGPL
+* http://ReadyMap.org
+*/
+
 /**
+* Array utility functions
+*/
+
+//........................................................................
+
+if (!Array.prototype.indexOf) {
+    Array.prototype.indexOf = function(elt /*, from*/) {
+        var len = this.length;
+
+        var from = Number(arguments[1]) || 0;
+        from = (from < 0)
+         ? Math.ceil(from)
+         : Math.floor(from);
+        if (from < 0)
+            from += len;
+
+        for (; from < len; from++) {
+            if (from in this &&
+          this[from] === elt)
+                return from;
+        }
+        return -1;
+    };
+}/**
 * ReadyMap/WebGL
 * (c) Copyright 2011 Pelican Mapping
 * License: LGPL
@@ -90,28 +198,7 @@ jQuery.extend({
 
 
 
-if (!Array.prototype.indexOf)
-{
-  Array.prototype.indexOf = function(elt /*, from*/)
-  {
-    var len = this.length;
 
-    var from = Number(arguments[1]) || 0;
-    from = (from < 0)
-         ? Math.ceil(from)
-         : Math.floor(from);
-    if (from < 0)
-      from += len;
-
-    for (; from < len; from++)
-    {
-      if (from in this &&
-          this[from] === elt)
-        return from;
-    }
-    return -1;
-  };
-}
 
 
 
@@ -149,84 +236,7 @@ ReadyMap.getWindowSize = function() {
     }
     return { 'w': myWidth, 'h': myHeight };
 };
-/*! Copyright (c) 2010 Brandon Aaron (http://brandonaaron.net)
- * Licensed under the MIT License (LICENSE.txt).
- *
- * Thanks to: http://adomas.org/javascript-mouse-wheel/ for some pointers.
- * Thanks to: Mathias Bank(http://www.mathias-bank.de) for a scope bug fix.
- * Thanks to: Seamus Leahy for adding deltaX and deltaY
- *
- * Version: 3.0.4
- * 
- * Requires: 1.2.2+
- */
-
-(function($) {
-
-var types = ['DOMMouseScroll', 'mousewheel'];
-
-$.event.special.mousewheel = {
-    setup: function() {
-        if ( this.addEventListener ) {
-            for ( var i=types.length; i; ) {
-                this.addEventListener( types[--i], handler, false );
-            }
-        } else {
-            this.onmousewheel = handler;
-        }
-    },
-    
-    teardown: function() {
-        if ( this.removeEventListener ) {
-            for ( var i=types.length; i; ) {
-                this.removeEventListener( types[--i], handler, false );
-            }
-        } else {
-            this.onmousewheel = null;
-        }
-    }
-};
-
-$.fn.extend({
-    mousewheel: function(fn) {
-        return fn ? this.bind("mousewheel", fn) : this.trigger("mousewheel");
-    },
-    
-    unmousewheel: function(fn) {
-        return this.unbind("mousewheel", fn);
-    }
-});
-
-
-function handler(event) {
-    var orgEvent = event || window.event, args = [].slice.call( arguments, 1 ), delta = 0, returnValue = true, deltaX = 0, deltaY = 0;
-    event = $.event.fix(orgEvent);
-    event.type = "mousewheel";
-    
-    // Old school scrollwheel delta
-    if ( event.wheelDelta ) { delta = event.wheelDelta/120; }
-    if ( event.detail     ) { delta = -event.detail/3; }
-    
-    // New school multidimensional scroll (touchpads) deltas
-    deltaY = delta;
-    
-    // Gecko
-    if ( orgEvent.axis !== undefined && orgEvent.axis === orgEvent.HORIZONTAL_AXIS ) {
-        deltaY = 0;
-        deltaX = -1*delta;
-    }
-    
-    // Webkit
-    if ( orgEvent.wheelDeltaY !== undefined ) { deltaY = orgEvent.wheelDeltaY/120; }
-    if ( orgEvent.wheelDeltaX !== undefined ) { deltaX = -1*orgEvent.wheelDeltaX/120; }
-    
-    // Add event and delta to the front of the arguments
-    args.unshift(event, delta, deltaX, deltaY);
-    
-    return $.event.handle.apply(this, args);
-}
-
-})(jQuery);// osg-debug-0.0.4.js commit 0 - http://github.com/cedricpinson/osgjs
+// osg-debug-0.0.4.js commit 0 - http://github.com/cedricpinson/osgjs
 var osg = {};
 
 osg.version = '0.0.4';
@@ -8119,6 +8129,27 @@ osgGA.FirstPersonManipulator.prototype = {
     }
 };
 /**
+* ReadyMap/WebGL
+* (c) Copyright 2011 Pelican Mapping
+* License: LGPL
+* http://ReadyMap.org
+*/
+
+/**
+* Extra functionality added to osgjs
+*/
+
+//........................................................................
+osg.Matrix.equals = function(a,b) {
+  if (a == b) return true;
+  
+  if (a.length != b.length) return false;
+  
+  for (var i = 0; i < a.length; i++) {
+    if (a[i] != b[i]) return false;
+  }
+  return true;
+}/**
 * Godzi/WebGL
 * (c) Copyright 2011 Pelican Mapping
 * License: LGPL
@@ -9421,1061 +9452,6 @@ osg.CullVisitor.prototype[osgearth.Tile.prototype.objectType] = function(node) {
 * http://ReadyMap.org
 */
 
-/**
- * EarthManipulator
- * Mouse/keyboard motion model for navigating a 3D global map
- */
-
-//........................................................................
-
-osg.Matrix.equals = function(a,b) {
-  if (a == b) return true;
-  
-  if (a.length != b.length) return false;
-  
-  for (var i = 0; i < a.length; i++) {
-    if (a[i] != b[i]) return false;
-  }
-  return true;
-}
-
-//........................................................................
-
-ReadyMap.Manipulator = function(map) {
-    this.map = map;
-    this.center = [0, 0, 0];
-    this.minDistance = 0.001;
-    this.maxDistance = 1e10;
-    this.buttonup = true;
-    this.rotation = osg.Quat.makeIdentity();
-    this.localAzim = 0;
-    this.localPitch = Math.deg2rad(-90);
-    this.settingVP = false;
-    
-};
-
-ReadyMap.Manipulator.prototype = {
-
-    init: function() {
-    },
-
-    reset: function() {
-        this.init();
-    },
-
-    setNode: function(node) {
-        this.node = node;
-    },
-
-    mouseup: function(ev) {
-        this.dragging = false;
-        this.panning = false;
-        this.releaseButton(ev);
-    },
-
-    mousedown: function(ev) {
-        this.panning = true;
-        this.dragging = true;
-        var pos = this.convertEventToCanvas(ev);
-        this.clientX = pos[0];
-        this.clientY = pos[1];
-        this.pushButton(ev);
-    },
-
-    pushButton: function() {
-        this.dx = this.dy = 0;
-        this.buttonup = false;
-    },
-
-    releaseButton: function() {
-        this.buttonup = true;
-    },
-
-    setDistance: function(d) {
-        this.distance = d;
-        if (this.distance < this.minDistance)
-            this.distance = this.minDistance;
-        else if (this.distance > this.maxDistance)
-            this.distance = this.maxDistance;
-    },
-    
-    getViewpoint: function() {
-        var vp = {};
-        vp.center = osg.Vec3.copy(this.center, []);
-        vp.heading = Math.rad2deg(this.localAzim);
-        vp.pitch = Math.rad2deg(this.localPitch);
-        vp.range = this.distance;
-        return vp;
-    },
-    
-    startViewpointTransition: function(lat,lon,alt,heading,pitch,range,seconds) {
-
-        var newCenter = this.map.lla2world( [Math.deg2rad(lon), Math.deg2rad(lat), alt] );
-        
-        this.startVP = this.getViewpoint();
-        this.deltaHeading = heading - this.startVP.heading;
-        this.deltaPitch = pitch - this.startVP.pitch;
-        this.deltaRange = range - this.startVP.range;
-        this.deltaCenter = osg.Vec3.sub( newCenter, this.startVP.center, [] );
-        
-        while( this.deltaHeading > 180 ) this.deltaHeading -= 360;
-        while( this.deltaHeading < -180 ) this.deltaHeading += 360;
-        
-        var h0 = this.startVP.range * Math.sin( Math.deg2rad(-this.startVP.pitch));
-        var h1 = range * Math.sin( Math.deg2rad(-pitch));
-        var dh = h1-h0;
-        
-        var de;
-        if ( this.map.geocentric ) {
-            var startFP = this.startVP.center;
-            var xyz0 = [this.startVP.center[0], this.startVP.center[1], 0];
-            var xyz1 = this.map.lla2world( [Math.deg2rad(lon), Math.deg2rad(lat), 0] );
-            de = osg.Vec3.length( osg.Vec3.sub(xyz0, xyz1, []) );
-        }
-        else {
-            de = osg.Vec3.length(this.deltaCenter);
-        }    
-        
-        this.arcHeight = Math.max( de-Math.abs(dh), 0 );
-        if ( this.arcHeight > 0 ) {
-            var h_apex = 2*(h0+h1) + this.arcHeight;
-            var dh2_up = Math.abs(h_apex - h0)/100000.0;
-            this.setVPaccel = Math.log10(dh2_up);
-            var dh2_down = Math.abs(h_apex - h1)/100000.0;
-            this.setVPaccel2 = -Math.log10(dh2_down);                            
-        }
-        else { 
-            var dh2 = (h1-h0)/100000.0;
-            this.setVPaccel = Math.abs(dh2) <= 1.0? 0.0 : dh2 > 0.0? Math.log10(dh2) : -Math.log10(-dh2);
-            if ( Math.abs( this.setVPaccel ) < 1.0 )
-                this.setVPaccel = 0.0;
-        }
-        
-        this.setVPstartTime_ms = new Date().getTime();
-        
-        //TODO: auto viewpoint duration code (from osgEarth)
-        // auto time:
-        if ( this.map.geocentric ) {
-            var maxDistance = this.map.profile.ellipsoid.radiusEquator;
-            var ratio = Math.clamp( de/maxDistance, 0, 1 );
-            ratio = Math.accelerationInterp( ratio, -4.5 );
-            var minDur = 2.0;
-            var maxDur = Math.max(seconds, minDur);
-            this.setVPduration_ms = (minDur + ratio*(maxDur-minDur)) * 1000.0;
-        }
-        else {
-            this.setVPduration_ms = seconds * 1000.0;
-        }
-        
-        this.settingVP = true;
-    },
-    
-    updateSetViewpoint: function() {
-        var now = new Date().getTime();
-        var t = (now - this.setVPstartTime_ms)/this.setVPduration_ms;
-        var tp = t;
-        
-        if ( t >= 1.0 ) {
-            t = 1.0;
-            tp = 1.0;
-            this.settingVP = false;
-        }
-        else if ( this.arcHeight > 0.0 ) {
-            if ( tp <= 0.5 ) {
-                var t2 = 2.0*tp;
-                t2 = Math.accelerationInterp( t2, this.setVPaccel );
-                tp = 0.5*t2;
-            }
-            else {
-                var t2 = 2.0*(tp-0.5);
-                t2 = Math.accelerationInterp( t2, this.setVPaccel2 );
-                tp = 0.5+(0.5*t2);
-            }
-            tp = Math.smoothStepInterp( tp );
-            //tp = Math.smoothStepInterp( tp );
-        }
-        else if ( t > 0.0 ) {
-            tp = Math.accelerationInterp( tp, this.setVPaccel );
-            tp = Math.smoothStepInterp( tp );
-        }
-        
-        var lla = this.map.world2lla( osg.Vec3.add( this.startVP.center, osg.Vec3.mult( this.deltaCenter, tp, [] ), [] ) );
-        
-        this.setViewpoint(
-            Math.rad2deg( lla[1] ),
-            Math.rad2deg( lla[0] ),
-            lla[2],
-            this.startVP.heading + this.deltaHeading * tp,
-            this.startVP.pitch + this.deltaPitch * tp,
-            this.startVP.range + this.deltaRange * tp + (Math.sin(Math.PI*tp)*this.arcHeight) );
-    }
-};
-
-//........................................................................
-
-ReadyMap.EarthManipulator = function(map) {
-    ReadyMap.Manipulator.call(this, map);
-    this.minPitch = Math.deg2rad(-89.9);
-    this.maxPitch = Math.deg2rad(-10.0);
-    this.buttonup = true;
-    this.centerRotation = osg.Quat.makeIdentity();
-    this.lockAzimWhilePanning = true;
-    this.settingVP = false;
-    this.computeHomePosition();
-}
-
-ReadyMap.EarthManipulator.prototype = osg.objectInehrit( ReadyMap.Manipulator.prototype, {
-
-    computeHomePosition: function() {
-        this.setViewpoint(0, -90, 0, 0, -90, 1e7);
-    },
-
-    keydown: function(ev) {
-        if (ev.keyCode === 32) {
-            this.computeHomePosition();
-        } else if (ev.keyCode === 33) { // pageup
-            this.distanceIncrease();
-            return false;
-        } else if (ev.keyCode === 34) { //pagedown
-            this.distanceDecrease();
-            return false;
-        }
-        else if (ev.keyCode === 13) { // mode
-            this.mode = 1 - this.mode;
-            return false;
-        }
-    },
-
-    mousemove: function(ev) {
-        if (this.buttonup === true) {
-            return;
-        }
-        var scaleFactor;
-        var curX;
-        var curY;
-        var deltaX;
-        var deltaY;
-        var pos = this.convertEventToCanvas(ev);
-        curX = pos[0];
-        curY = pos[1];
-
-        scaleFactor = 100.0;
-        deltaX = (this.clientX - curX) / scaleFactor;
-        deltaY = (this.clientY - curY) / scaleFactor;
-        this.clientX = curX;
-        this.clientY = curY;
-
-        if (ev.shiftKey)
-            this.rotateModel(-deltaX, -deltaY);
-        else if (ev.ctrlKey)
-            this.zoomModel(0, -deltaY);
-        else
-            this.panModel(-deltaX, -deltaY);
-
-        return false;
-    },
-
-    mousewheel: function(ev, intDelta, deltaX, deltaY) {
-        this.zoomModel(0, intDelta * 0.1);
-    },
-
-    dblclick: function(ev) {
-    },
-
-    touchDown: function(ev) {
-    },
-
-    touchUp: function(ev) {
-    },
-
-    touchMove: function(ev) {
-    },
-
-    getCoordFrame: function(point) {
-        var l2w = this.map.profile.ellipsoid.local2worldFromECEF(point);
-        var trans = osg.Matrix.getTrans(l2w);
-        var x = osg.Matrix.transform3x3(l2w, [1, 0, 0]);
-        var y = osg.Matrix.transform3x3(l2w, [0, 1, 0]);
-        var z = osg.Matrix.transform3x3(l2w, [0, 0, 1]);
-        var scale = osg.Matrix.makeScale(1.0 / osg.Vec3.length(x), 1.0 / osg.Vec3.length(y), 1.0 / osg.Vec3.length(z));
-        osg.Matrix.postMult(scale, l2w);
-        osg.Matrix.setTrans(l2w, trans[0], trans[1], trans[2]);
-        return l2w;
-    },
-
-    normalizeAzimRad: function(azim) {
-        if (Math.abs(azim) > 2 * Math.PI)
-            azim = azim % (2 * Math.PI);
-        while (azim < -Math.PI)
-            azim += 2 * Math.PI;
-        while (azim > Math.PI)
-            azim -= 2 * Math.PI;
-        return azim;
-    },
-
-    getSideVector: function(m) {
-        return [osg.Matrix.get(m, 0, 0), osg.Matrix.get(m, 0, 1), osg.Matrix.get(m, 0, 2)];
-    },
-
-    getFrontVector: function(m) {
-        return [osg.Matrix.get(m, 1, 0), osg.Matrix.get(m, 1, 1), osg.Matrix.get(m, 1, 2)];
-    },
-
-    getUpVector: function(m) {
-        return [osg.Matrix.get(m, 2, 0), osg.Matrix.get(m, 2, 1), osg.Matrix.get(m, 2, 2)];
-    },
-
-    getAzimuth: function(frame) {
-        return this.localAzim;
-
-//        var m = this.getMatrix();
-//        var frameInv = osg.Matrix.inverse(frame);
-//        osg.Matrix.postMult(frameInv, m);
-
-//        var look = osg.Vec3.normalize(osg.Vec3.neg(this.getUpVector(m),[]), []);
-//        var up = osg.Vec3.normalize(this.getFrontVector(m), []);
-
-//        var azim;
-//        if (look[2] < -0.9)
-//            azim = Math.atan2(up[0], up[1]);
-//        else if (look[2] > 0.9)
-//            azim = Math.atan2(-up[0], -up[1]);
-//        else
-//            azim = Math.atan2(look[0], look[1]);
-
-//        return this.normalizeAzimRad(azim);
-    },
-
-    recalcLocalPitchAndAzim: function() {
-        var rot = osg.Matrix.makeRotateFromQuat(this.rotation);
-        this.localPitch = Math.asin(osg.Matrix.get(rot, 1, 2));
-        if (Math.abs(this.localPitch - Math.PI / 2) < 0.000001)
-            this.localAzim = Math.atan2(osg.Matrix.get(rot, 0, 1), osg.Matrix.get(rot, 0, 0));
-        else
-            this.localAzim = Math.atan2(osg.Matrix.get(rot, 1, 0), osg.Matrix.get(rot, 1, 1));
-        this.localPitch -= Math.PI / 2.0;
-    },
-
-    recalculateCenter: function(localFrame) {
-        var lla = this.map.profile.ellipsoid.ecef2lla(osg.Matrix.getTrans(localFrame));
-        lla[2] = 0.0;
-        this.center = this.map.profile.ellipsoid.lla2ecef(lla);
-    },
-
-    panModel: function(dx, dy) {
-        var scale = -0.3 * this.distance;
-        var oldFrame = this.getCoordFrame(this.center);
-
-        var oldAzim = this.getAzimuth(oldFrame);
-
-        var rotMatrix = osg.Matrix.makeRotateFromQuat(osg.Quat.multiply(this.rotation, this.centerRotation));
-
-        var side = this.getSideVector(rotMatrix);
-        var previousUp = this.getUpVector(oldFrame);
-
-        var forward = osg.Vec3.cross(previousUp, side, []);
-        side = osg.Vec3.cross(forward, previousUp, []);
-
-        osg.Vec3.normalize(forward, forward);
-        osg.Vec3.normalize(side, side);
-
-        var dv = osg.Vec3.add(osg.Vec3.mult(forward, (dy * scale), []), osg.Vec3.mult(side, (dx * scale), []), [])
-
-        this.center = osg.Vec3.add(this.center, dv, []);
-
-        var newFrame = this.getCoordFrame(this.center);
-
-        if (this.lockAzimWhilePanning) {
-            this.centerRotation = osg.Matrix.getRotate(newFrame);
-        }
-        else {
-            var newUp = this.getUpVector(newFrame);
-            var panRot = osg.Quat.rotateVecOnToVec(previousUp, newUp);
-            if (!osg.Quat.zeroRotation(panRot)) {
-                osg.Quat.multiply(this.centerRotation, panRot, this.centerRotation);
-            }
-        }
-
-        this.recalculateCenter(newFrame);
-        this.recalcLocalPitchAndAzim();
-    },
-
-    rotateModel: function(dx, dy) {
-
-        if (dy + this.localPitch > this.maxPitch || dy + this.localPitch < this.minPitch)
-            dy = 0;
-
-        var rotMat = osg.Matrix.makeRotateFromQuat(this.rotation);
-
-        var side = this.getSideVector(rotMat);
-        var front = osg.Vec3.cross([0, 0, 1], side, []);
-        side = osg.Vec3.cross(front, [0, 0, 1], []);
-
-        osg.Vec3.normalize(front, front);
-        osg.Vec3.normalize(side, side);
-
-        this.pv = side;
-
-        var p = osg.Quat.makeRotate(dy, side[0], side[1], side[2]);
-        var a = osg.Quat.makeRotate(-dx, 0, 0, 1);
-
-        this.rotation = osg.Quat.multiply(this.rotation, osg.Quat.multiply(p, a));
-
-        this.recalcLocalPitchAndAzim();
-    },
-
-    zoomModel: function(dx, dy) {
-        var fd = 1000;
-        var scale = 1 + dy;
-        if (fd * scale > this.minDistance) {
-            this.setDistance(this.distance * scale);
-        }
-        else {
-            this.setDistance(this.minDistance);
-        }
-    },
-
-    getRotation: function(point) {
-        var cf = this.getCoordFrame(point);
-        var look = osg.Vec3.neg(this.getUpVector(cf), []);
-        var worldUp = [0, 0, 1];
-        var dot = Math.abs(osg.Vec3.dot(worldUp, look));
-        if (Math.abs(dot - 1.0) < 0.000001)
-            worldUp = [0, 1, 0];
-        var side = osg.Vec3.cross(look, worldUp, []);
-        var up = osg.Vec3.normalize(osg.Vec3.cross(side, look, []), []);
-
-        var offset = 1e-6;
-        return osg.Matrix.makeLookAt(osg.Vec3.sub(point, osg.Vec3.mult(look, offset, []), []), point, up);
-    },
-
-    setViewpoint: function(lat, lon, alt, heading, pitch, range, seconds) {
-    
-        var lla = [Math.deg2rad(lon), Math.deg2rad(lat), alt];
-            
-        if ( seconds === undefined ) {
-            this.center = this.map.lla2world(lla);
-
-            var newPitch = Math.clamp(Math.deg2rad(pitch), this.minPitch, this.maxPitch);
-            var newAzim = this.normalizeAzimRad(Math.deg2rad(heading));
-
-            this.setDistance(range);
-
-            var localFrame = this.getCoordFrame(this.center);
-            this.centerRotation = osg.Matrix.getRotate(localFrame);
-
-            var azim_q = osg.Quat.makeRotate(newAzim, 0, 0, 1);
-            var pitch_q = osg.Quat.makeRotate(-newPitch - (Math.PI / 2.0), 1, 0, 0);
-            var newRot_m = osg.Matrix.makeRotateFromQuat(osg.Quat.multiply(azim_q, pitch_q));
-            this.rotation = osg.Matrix.getRotate(osg.Matrix.inverse(newRot_m));
-
-            this.localPitch = newPitch;
-            this.localAzim = newAzim;
-
-            this.recalcLocalPitchAndAzim();
-            this.recalculateCenter(localFrame);
-        }
-        else {
-            this.startViewpointTransition(lat,lon,alt,heading,pitch,range,seconds);            
-            this.recalculateCenter(this.getCoordFrame(this.center));
-        }
-    },
-    
-    frame: function() {
-        if ( this.settingVP ) {
-            this.updateSetViewpoint();
-        }        
-    },
-
-    getMatrix: function() {
-        var m = osg.Matrix.makeTranslate(0, 0, this.distance);
-        osg.Matrix.postMult(osg.Matrix.makeRotateFromQuat(this.rotation), m);
-        osg.Matrix.postMult(osg.Matrix.makeRotateFromQuat(this.centerRotation), m);
-        osg.Matrix.postMult(osg.Matrix.makeTranslate(this.center[0], this.center[1], this.center[2]), m);
-        return m;
-    },
-
-    getInverseMatrix: function() {
-        this.frame();
-        var m = osg.Matrix.makeTranslate(-this.center[0], -this.center[1], -this.center[2]);
-        osg.Matrix.postMult(osg.Matrix.makeRotateFromQuat(osg.Quat.inverse(this.centerRotation)), m);
-        osg.Matrix.postMult(osg.Matrix.makeRotateFromQuat(osg.Quat.inverse(this.rotation)), m);
-        osg.Matrix.postMult(osg.Matrix.makeTranslate(0, 0, -this.distance), m);
-        return m;
-    }
-});
-
-//........................................................................
-
-ReadyMap.MapManipulator = function(map) {
-    ReadyMap.Manipulator.call(this, map);
-    this.computeHomePosition();
-};
-
-ReadyMap.MapManipulator.prototype = osg.objectInehrit(ReadyMap.Manipulator.prototype, {
-
-    computeHomePosition: function() {
-        this.center = [0,0,0];
-        this.distance = osgearth.Extent.width(this.map.profile.extent)/2;
-        this.maxDistance = this.distance * 1.5;        
-    },
-    
-    setViewpoint: function(lat, lon, alt, heading, pitch, range, seconds) {
-        if ( seconds === undefined || seconds == 0 ) {
-            var lla = [Math.deg2rad(lon), Math.deg2rad(lat), alt];
-            this.center = this.map.lla2world(lla);
-            this.setDistance(range);
-        }
-        else {
-            this.startViewpointTransition(lat, lon, alt, heading, pitch, range, seconds );
-        }
-    },
-    
-    panModel: function(dx, dy) {
-        var scale = -0.3 * this.distance;
-        this.center = osg.Vec3.add(this.center, [dx*scale, dy*scale, 0], []);
-        osgearth.Extent.clamp( this.map.profile.extent, this.center );
-    },
-    
-    zoomModel: function(dx, dy) {
-        var fd = 1000;
-        var scale = 1 + dy;
-        if (fd * scale > this.minDistance)
-            this.setDistance(this.distance * scale);
-        else
-            this.setDistance(this.minDistance);
-    },
-    
-    frame: function() {
-        if ( this.settingVP ) {
-            this.updateSetViewpoint();
-        }
-    },
-
-    getInverseMatrix: function() {
-        this.frame();
-        var eye = [];
-        osg.Vec3.copy( this.center, eye );
-        eye[2] = this.distance;
-        var m = osg.Matrix.makeLookAt( eye, this.center, [0,1,0] );
-        return m;
-    },
-
-    mousemove: function(ev) {
-        if (this.buttonup === true) 
-            return;
-            
-        var pos = this.convertEventToCanvas(ev);
-        var curX = pos[0];
-        var curY = pos[1];
-
-        var scaleFactor = 100.0;
-        var deltaX = (this.clientX - curX) / scaleFactor;
-        var deltaY = (this.clientY - curY) / scaleFactor;
-        this.clientX = curX;
-        this.clientY = curY;
-
-        this.panModel(-deltaX, -deltaY);
-        return false;
-    },
-
-    mousewheel: function(ev, intDelta, deltaX, deltaY) {
-        this.zoomModel(0, intDelta * 0.1);
-    }
-} );
-
-//........................................................................
-
-/**
-* MapView
-* Installs a 3D WebGL viewer within an HTML5 canvas elements.
-*/
-ReadyMap.MapView = function(elementId, size, map) {
-
-    this.map = map;
-    this.viewer = null;
-    this.endFrame = undefined;
-    var canvas = document.getElementById(elementId);
-    canvas.width = size.w;
-    canvas.height = size.h;
-
-    //try {
-    this.viewer = new osgViewer.Viewer(canvas);   
-     
-    //If you don't do this then the mouse manipulators listen for mouse events on the whole dom
-    //so dragging other controls end up moving the canvas view.
-    this.viewer.eventNode = this.viewer.canvas;
- 
-    this.viewer.init();
-    if ( map.geocentric )
-        this.viewer.setupManipulator(new ReadyMap.EarthManipulator(map));
-    else
-        this.viewer.setupManipulator(new ReadyMap.MapManipulator(map));
-    this.viewer.setScene( new osgearth.MapNode(map) ); //map.createNode());
-    delete this.viewer.view.light;
-    this.viewer.getManipulator().computeHomePosition();
-    //this.viewer.run();
-    this.run();
-    //}
-    //catch (er) {
-    //osg.log("exception in osgViewer " + er);
-    //}
-    
-    this.frameEnd=[];
-};
-
-ReadyMap.MapView.prototype = {
-
-    home: function() {
-        this.viewer.getManipulator().computeHomePosition();
-    },
-    
-    projectObjectIntoWindow: function(object) {
-        var viewMatrix = this.viewer.view.getViewMatrix();
-        var projectionMatrix = this.viewer.view.getProjectionMatrix();
-        var windowMatrix = null;
-        var vp = this.viewer.view.getViewport();
-        if (vp !== undefined) {
-        windowMatrix = vp.computeWindowMatrix();
-        }
-
-        var matrix = []; 
-        osg.Matrix.copy(windowMatrix, matrix);
-        osg.Matrix.preMult(matrix, projectionMatrix);
-        osg.Matrix.preMult(matrix, viewMatrix);
-
-        var result = osg.Matrix.transformVec3(matrix, object);
-        var height = this.viewer.canvas.height;
-        result[1] = height - result[1] - 1;
-        return result;
-    },
-
-    run: function() {
-        var that = this;
-        var render = function() {
-            window.requestAnimationFrame(render, this.canvas);
-            that.viewer.frame();
-            if (that.frameEnd !== undefined && that.frameEnd != null) {
-                //Fire off any frame end callbacks
-                for (var i = 0; i < that.frameEnd.length; i++) {
-                  that.frameEnd[i]();
-                }
-            }
-            that.map.frame();
-        };
-        render();
-    },
-    
-    addFrameEndCallback: function(callback) {
-      this.frameEnd.push( callback );
-    }
-};
-/**
-* ReadyMap/WebGL
-* (c) Copyright 2011 Pelican Mapping
-* License: LGPL
-* http://ReadyMap.org
-*/
- 
-ReadyMap.Map = function(args) {
-    osgearth.Map.call(this, args);
-};
-
-ReadyMap.Map.prototype = osg.objectInehrit(osgearth.Map.prototype, {
-});
-
-//...................................................................
-
-ReadyMap.TMSImageLayer = function(settings) {
-    osgearth.ImageLayer.call(this, settings.name);
-    this.url = settings.url;
-    this.flipY = settings.tmsType === "google";
-    this.extension = settings.imageType !== undefined ? settings.imageType : "jpg";
-    this.baseLevel = settings.baseLevel !== undefined ? settings.baseLevel : 0;
-    this.args = settings.args !== undefined ? settings.args : null;
-};
-
-ReadyMap.TMSImageLayer.prototype = osg.objectInehrit(osgearth.ImageLayer.prototype, {
-
-    getURL: function(key, profile) {
-        var y = key[1];
-
-        if (this.flipY) {
-            var size = profile.getTileCount(key[2]);
-            y = (size[1] - 1) - key[1];
-        }
-
-        var imageURL = this.url + "/" + (key[2] + this.baseLevel) + "/" + key[0] + "/" + y + "." + this.extension;
-        if (this.args !== undefined && this.args != null) {
-          imageURL += "?" + this.args;
-        }
-
-        return osgearth.getURL( imageURL );		
-    },
-
-    createTexture: function(key, profile) {
-        var imageURL = this.getURL(key, profile);
-        return osg.Texture.create(imageURL);
-    }
-});
-
-//...................................................................
-
-ReadyMap.ArcGISImageLayer = function(settings) {
-    osgearth.ImageLayer.call(this, settings.name);
-    this.url = settings.url;
-    this.extension = settings.imageType !== undefined ? settings.imageType : "jpg";
-};
-
-ReadyMap.ArcGISImageLayer.prototype = osg.objectInehrit(osgearth.ImageLayer.prototype, {
-
-    getURL: function(key, profile) {
-        var imageURL = this.url + "/tile/" + key[2] + "/" + key[1] + "/" + key[0] + "." + this.extension;
-        if (this.args !== undefined && this.args != null) {
-          imageURL += "?" + this.args;
-        }
-
-        return osgearth.getURL( imageURL );		
-    },
-
-    createTexture: function(key, profile) {
-        var imageURL = this.getURL(key, profile);
-        return osg.Texture.create(imageURL);
-    }
-});
-
-//...................................................................
-
-ReadyMap.WMSImageLayer = function(settings) {
-    osgearth.ImageLayer.call(this, settings.name);
-    this.url = settings.url;    
-    this.format = settings.format !== undefined ? settings.format : "image/jpeg";
-    this.profile = settings.profile !== undefined ? settings.profile : new osgearth.GeodeticProfile();
-    this.args = settings.args !== undefined ? settings.args : null;	
-	this.layers = settings.layers !== undefined ? settings.layers: "default";
-	this.width = settings.width !== undefined ? settings.width  : 256;
-	this.height = settings.height !== undefined ? settings.height : 256;
-	this.srs = settings.srs !== undefined ? settings.srs : "EPSG:4326";
-	this.styles = settings.styles !== undefined ? settings.styles : "";
-};
-
-ReadyMap.WMSImageLayer.prototype = osg.objectInehrit(osgearth.ImageLayer.prototype, {
-
-    getURL: function(key, profile) {	    	
-	    var size = this.profile.getTileSize(key[2]);
-        var xmin = this.profile.extent.xmin + (size[0] * key[0]);
-        var ymax = this.profile.extent.ymax - (size[1] * key[1]);
-		var xmax = xmin + size[0];
-		var ymin = ymax - size[1];        
-		
-		xmin = Math.rad2deg( xmin );
-		ymin = Math.rad2deg( ymin );
-		xmax = Math.rad2deg( xmax );
-		ymax = Math.rad2deg( ymax );
-		
-		var sep = this.url.indexOf( "?" ) >= 0 ? "&" : "?";
-
-        var imageURL = [
-		               this.url,
-					   sep,
-		               "SERVICE=WMS",
-					   "&VERSION=" + this.version,
-					   "&REQUEST=GetMap",
-					   "&LAYERS=" + this.layers,
-					   "&FORMAT=" + this.format,
-					   "&STYLES=" + this.styles,
-					   "&SRS=" + this.srs,
-					   "&WIDTH=" + this.width,
-					   "&HEIGHT=" + this.height,					   
-                       "&BBOX=" + xmin + "," + ymin + "," + xmax + "," + ymax					   					   
-					   ].join("");
-	                   
-        if (this.args !== undefined && this.args != null) {		  
-          imageURL += "&" + this.args;
-        }
-		
-		return osgearth.getURL( imageURL );
-    },
-
-    createTexture: function(key, profile) {
-        var imageURL = this.getURL(key, profile);
-        return osg.Texture.create(imageURL);
-    }
-});
-
-//...................................................................
-
-ReadyMap.GeoRSSReader = function(url, rate, updateCallback) {
-    this.url = url;
-	
-	this.callbacks = new Array;
-	if (updateCallback != undefined)
-	  this.callbacks.push(updateCallback);
-	
-	this.updateFeed();
-	this.setRate(rate);
-};
-
-ReadyMap.GeoRSSReader.prototype = {
-    updateFeed: function() {
-	    this.items = new Array;
-		
-		if (this.url != undefined)
-		{
-		    var items = this.items;
-			var callbacks = this.callbacks;
-			
-			$.ajax(
-			{
-			  url:this.url,
-			  type: "GET",
-			  dataType: "xml",
-			  
-			  success: function(data)
-			  {
-			    var selector = $(data).find('item').length > 0 ? 'item' : 'entry';
-			    $(data).find(selector).each(function(i){
-					var lat = undefined;
-					var lon = undefined;
-					
-				    var point = $(this).find('georss\\:point').text();
-					if (point == "")
-					    point = $(this).find('point').text();
-						
-					if (point != "")
-					{
-					    lat = point.split(" ")[0];
-					    lon = point.split(" ")[1];
-					}
-					else
-					{
-					    lat = $(this).find('geo\\:lat').text();
-					    lon = $(this).find('geo\\:long').text();
-						
-						if (lat == "" || lon == "")
-						{
-							lat = $(this).find('lat').text();
-							lon = $(this).find('long').text();
-						}
-					}
-					
-					var description = undefined;
-					try
-					{
-					    description = $(this).find('description').get(0).innerHTML;
-					}
-					catch(e) {}
-					
-					if (description == undefined || description == "")
-						description = $(this).find('description').text()
-						
-					items.push({ guid: $(this).find('guid').text(),
-					             title: $(this).find('title').text(),
-								 author: $(this).find('author').text(),
-								 pubDate: $(this).find('pubDate').text(),
-								 description: description,
-								 link: $(this).find('link').text(),
-								 latitude: lat,
-								 longitude: lon,
-								 src: $(this).get() });
-				});
-				
-				for (var i in callbacks)
-				{
-				  var callback = callbacks[i];
-				  callback(items);
-				}
-			  },
-			  
-			  error: function(jqXHR, status, error)
-			  {
-				//alert("Eror reading RSS feed: " + status);
-				for (var i in callbacks)
-				{
-				  var callback = callbacks[i];
-				  callback(items);
-				}
-			  }
-			});
-		}
-	},
-	
-	setRate: function(newRate) {
-	    if (this.interval != undefined)
-	        window.clearInterval(this.interval);
-			
-		this.rate = newRate;
-		if (this.rate > 0)
-	        this.interval = window.setInterval(function(layer) { layer.updateFeed(); }, this.rate * 1000, this);
-	},
-	
-	addCallback: function(updateCallback) {
-	    if (updateCallback != undefined)
-		{
-		  this.callbacks.push(updateCallback);
-		  updateCallback(this.items);
-		}
-	}
-};
-
-//...................................................................
-
-ReadyMap.GeoRSSLayer = function(mapView, url, rate, iconOptions) {
-    this.mapView = mapView;
-    this.url = url;
-	
-	var defaults = {
-	  url: "http://google-maps-icons.googlecode.com/files/redblank.png",
-      width: 32,
-      height: 32,
-      cssClass: ""
-    };
-    this.options = jQuery.extend({}, defaults, iconOptions);
-	
-	this.positionEngine = new ReadyMap.PositionEngine(mapView);
-	
-	var thisObj = this;
-	this.reader = new ReadyMap.GeoRSSReader(url, rate, function(items) { thisObj.createIcons(items); });
-};
-
-
-function showDialog(content, title) {                  
-    //Create a new div on the fly
-    return $('<div/>').html(content).dialog({
-      bgiframe : true,
-      resizable: false,
-      modal: false,
-      draggable: false,
-      title: title,
-      overlay: {
-        backgroundColor: '#000',
-        opacity: 0.5
-      }
-    });
-}
-
-ReadyMap.GeoRSSLayer.prototype = {
-    setRate: function(newRate) {
-        this.reader.setRate(newRate);	
-	},
-	
-	createIcons: function(items) {
-        //this.positionEngine.elements = [];
-	    this.positionEngine.clear();
-		
-		for (var i in items)
-		{
-		    var icon = new ReadyMap.Icon("icon" + i + "_" + items[i].guid, Math.deg2rad(items[i].longitude), Math.deg2rad(items[i].latitude), 0, this.options.url, {
-              width: this.options.width,
-              height: this.options.height,
-			  cssClass: this.options.cssClass,
-			  title: items[i].title
-            });
-			
-			icon.offset = [this.options.width / -2, this.options.height * -1];
-            icon.element.bind("click", {url: items[i].link,
-			                            title: items[i].title,
-			                            engine: this.positionEngine,
-			                            lat: items[i].latitude,
-			                            lon: items[i].longitude,
-			                            description: items[i].description			                            			                            
-			                            }, function(e) {					  
-  			      var html = "<div><h3>" + e.data.title + "</h3>" + 
-  			                 "   <p> " + e.data.description + "</p>";
-  			      if (e.data.url !== undefined && e.data.url != null) {
-  			        html += '<a href="' + e.data.url + '" target="_blank">Link</a>';
-  			      }
-  			      html += "</div>";
-  			      var dlg = showDialog(html, e.data.title);
-  			      dlg = dlg.parent();
-  			      e.data.engine.addElement(new ReadyMap.PositionedElement("dlg", Math.deg2rad(e.data.lon), Math.deg2rad(e.data.lat), 0, {element: dlg, vAlign: "bottom"}));
-			    });			
-            this.positionEngine.addElement( icon );
-		}
-	}
-};
-/**
-* ReadyMap/WebGL
-* (c) Copyright 2011 Pelican Mapping
-* License: LGPL
-* http://ReadyMap.org
-*/
-
-/**
- * PlaceSearch
- * Geolocator based on Yahoo geocoding
- */
-
-//........................................................................
-
-// Creates style-able input element. Mostly provided as a convenience.
-ReadyMap.PlaceSearch = function(parentId, inputId, callback)
-{
-  if (inputId == undefined)
-    inputId = "inputPlaceSearch";
-  
-  document.getElementById(parentId).innerHTML = 'Search: <input id="' + inputId + '" size="20em" type="text" onkeydown="if(event.keyCode==13) ReadyMap.PlaceSearch.doSearch(value, ' + callback + ');" />';
-};
-
-ReadyMap.PlaceSearch.doSearch = function(place, callback)
-{
-  var pelicanProxyURI = "http://demo.pelicanmapping.com/rmweb/proxy.php";
-  var yahooGeocodeURI = "http://local.yahooapis.com/MapsService/V1/geocode";
-  var yahooPlaceURI   = "http://wherein.yahooapis.com/v1/document";
-  var yahooAppId = "n51Mo.jV34EwZuxIhJ0GqHLzPXoZyjSG6jhLJsQ1v1q975Lf9g7iC4gRYKecVQ--";
-  
-  if (place != undefined && typeof callback == "function")
-  {
-    var yahooURI = encodeURI(yahooPlaceURI);
-	$.ajax(
-	{
-	  url:pelicanProxyURI,
-	  async: "false",
-	  type: "POST",
-	  headers: { "Connection": "close" },
-	  data:
-	  {
-	    url: yahooURI, mimeType: "text/xml",
-        documentContent: encodeURI(place),
-        documentType: "text/plain",
-        appid: yahooAppId
-	  },
-
-      success: function(data)
-	  {
-		var xml = data.documentElement;
-
-		try
-		{
-			var lat = xml.getElementsByTagName("latitude")[0].firstChild.nodeValue;
-			var lon = xml.getElementsByTagName("longitude")[0].firstChild.nodeValue;
-
-			var southWest = xml.getElementsByTagName("southWest")[0];
-			var swlat = southWest.getElementsByTagName("latitude")[0].firstChild.nodeValue;
-			var swlon = southWest.getElementsByTagName("longitude")[0].firstChild.nodeValue;
-
-			var northEast = xml.getElementsByTagName("northEast")[0];
-			var nelat = northEast.getElementsByTagName("latitude")[0].firstChild.nodeValue;
-			var nelon = northEast.getElementsByTagName("longitude")[0].firstChild.nodeValue;
-			  
-			callback(lat, lon, swlat, swlon, nelat, nelon, data);
-		}
-		catch (e)
-		{
-			callback(0,0,0,0,0,0,"Cannot find location: " + place);
-		}
-      },
-	  
-	  error: function(jqXHR, status, error)
-	  {
-		callback(0,0,0,0,0,0,status);
-      }
-	});
-  }
-};
-
-//........................................................................
-
 ReadyMap.PositionedElement = function(id, lon, lat, alt, options) {
   this.hAlign = "left";
   this.vAlign = "top";
@@ -10602,8 +9578,71 @@ ReadyMap.PositionedElement.prototype = {
       
       this.lastWindow = [x,y];                       
   }
+}/**
+* ReadyMap/WebGL
+* (c) Copyright 2011 Pelican Mapping
+* License: LGPL
+* http://ReadyMap.org
+*/
+
+ReadyMap.PositionEngine = function(mapView) {
+  this.mapView = mapView;
+  var me = this;
+  this.mapView.addFrameEndCallback( function() {
+    me.frameEnd();
+  } );
+  this.elements = [];
 }
 
+ReadyMap.PositionEngine.prototype = {
+  addElement: function(element) {
+    this.elements.push( element );
+  },
+  
+  removeElement: function(element) {  
+    var index = this.elements.indexOf( element );
+    if (index >= 0) {
+      element.destroy();
+      this.elements.splice( index, 1 );
+    }       
+  },
+  
+  clear: function() {
+    for (var i = 0; i < this.elements.length; i++) {
+      this.elements[i].destroy();
+    }
+    this.elements = [];
+  },
+  
+  frameEnd: function() {
+  
+    //Cull elements on the other side of the earth.
+    var viewMatrix = mapView.viewer.view.getViewMatrix();
+      
+	var viewChanged = true;
+    if (this._lastViewMatrix !== undefined) {
+      viewChanged = !osg.Matrix.equals(viewMatrix, this._lastViewMatrix);
+    }
+	else {
+	  this._lastViewMatrix = [];
+	}
+      
+      //Save the last view matrix
+	osg.Matrix.copy(viewMatrix, this._lastViewMatrix);
+	mapView._inverseViewMatrix = osg.Matrix.inverse( viewMatrix );                        
+
+	for (var i = 0; i < this.elements.length; i++) {
+	  if (viewChanged || this.elements[i]._dirty || this.elements[i].sizeChanged()) {
+		this.elements[i].update(this.mapView);
+	  }
+	}
+  }
+}/**
+* ReadyMap/WebGL
+* (c) Copyright 2011 Pelican Mapping
+* License: LGPL
+* http://ReadyMap.org
+*/
 
 ReadyMap.Icon = function(id, lon, lat, alt, url, options) {  
   ReadyMap.PositionedElement.call(this, id, lon, lat, alt);    
@@ -10661,7 +9700,12 @@ ReadyMap.Icon.prototype = osg.objectInehrit(ReadyMap.PositionedElement.prototype
  }
  
  
-});
+});/**
+* ReadyMap/WebGL
+* (c) Copyright 2011 Pelican Mapping
+* License: LGPL
+* http://ReadyMap.org
+*/
 
 ReadyMap.Label = function(id, lon, lat, alt, text, options) {  
   ReadyMap.PositionedElement.call(this, id, lon, lat, alt);    
@@ -10688,62 +9732,990 @@ ReadyMap.Label = function(id, lon, lat, alt, text, options) {
 ReadyMap.Label.prototype = osg.objectInehrit(ReadyMap.PositionedElement.prototype, {
  
 });
+/**
+* ReadyMap/WebGL
+* (c) Copyright 2011 Pelican Mapping
+* License: LGPL
+* http://ReadyMap.org
+*/
 
-ReadyMap.PositionEngine = function(mapView) {
-  this.mapView = mapView;
-  var me = this;
-  this.mapView.addFrameEndCallback( function() {
-    me.frameEnd();
-  } );
-  this.elements = [];
+
+
+ReadyMap.Manipulator = function(map) {
+    this.map = map;
+    this.center = [0, 0, 0];
+    this.minDistance = 0.001;
+    this.maxDistance = 1e10;
+    this.buttonup = true;
+    this.rotation = osg.Quat.makeIdentity();
+    this.localAzim = 0;
+    this.localPitch = Math.deg2rad(-90);
+    this.settingVP = false;
+
+};
+
+ReadyMap.Manipulator.prototype = {
+
+    init: function() {
+    },
+
+    reset: function() {
+        this.init();
+    },
+
+    setNode: function(node) {
+        this.node = node;
+    },
+
+    mouseup: function(ev) {
+        this.dragging = false;
+        this.panning = false;
+        this.releaseButton(ev);
+    },
+
+    mousedown: function(ev) {
+        this.panning = true;
+        this.dragging = true;
+        var pos = this.convertEventToCanvas(ev);
+        this.clientX = pos[0];
+        this.clientY = pos[1];
+        this.pushButton(ev);
+    },
+
+    pushButton: function() {
+        this.dx = this.dy = 0;
+        this.buttonup = false;
+    },
+
+    releaseButton: function() {
+        this.buttonup = true;
+    },
+
+    setDistance: function(d) {
+        this.distance = d;
+        if (this.distance < this.minDistance)
+            this.distance = this.minDistance;
+        else if (this.distance > this.maxDistance)
+            this.distance = this.maxDistance;
+    },
+
+    getViewpoint: function() {
+        var vp = {};
+        vp.center = osg.Vec3.copy(this.center, []);
+        vp.heading = Math.rad2deg(this.localAzim);
+        vp.pitch = Math.rad2deg(this.localPitch);
+        vp.range = this.distance;
+        return vp;
+    },
+
+    startViewpointTransition: function(lat, lon, alt, heading, pitch, range, seconds) {
+
+        var newCenter = this.map.lla2world([Math.deg2rad(lon), Math.deg2rad(lat), alt]);
+
+        this.startVP = this.getViewpoint();
+        this.deltaHeading = heading - this.startVP.heading;
+        this.deltaPitch = pitch - this.startVP.pitch;
+        this.deltaRange = range - this.startVP.range;
+        this.deltaCenter = osg.Vec3.sub(newCenter, this.startVP.center, []);
+
+        while (this.deltaHeading > 180) this.deltaHeading -= 360;
+        while (this.deltaHeading < -180) this.deltaHeading += 360;
+
+        var h0 = this.startVP.range * Math.sin(Math.deg2rad(-this.startVP.pitch));
+        var h1 = range * Math.sin(Math.deg2rad(-pitch));
+        var dh = h1 - h0;
+
+        var de;
+        if (this.map.geocentric) {
+            var startFP = this.startVP.center;
+            var xyz0 = [this.startVP.center[0], this.startVP.center[1], 0];
+            var xyz1 = this.map.lla2world([Math.deg2rad(lon), Math.deg2rad(lat), 0]);
+            de = osg.Vec3.length(osg.Vec3.sub(xyz0, xyz1, []));
+        }
+        else {
+            de = osg.Vec3.length(this.deltaCenter);
+        }
+
+        this.arcHeight = Math.max(de - Math.abs(dh), 0);
+        if (this.arcHeight > 0) {
+            var h_apex = 2 * (h0 + h1) + this.arcHeight;
+            var dh2_up = Math.abs(h_apex - h0) / 100000.0;
+            this.setVPaccel = Math.log10(dh2_up);
+            var dh2_down = Math.abs(h_apex - h1) / 100000.0;
+            this.setVPaccel2 = -Math.log10(dh2_down);
+        }
+        else {
+            var dh2 = (h1 - h0) / 100000.0;
+            this.setVPaccel = Math.abs(dh2) <= 1.0 ? 0.0 : dh2 > 0.0 ? Math.log10(dh2) : -Math.log10(-dh2);
+            if (Math.abs(this.setVPaccel) < 1.0)
+                this.setVPaccel = 0.0;
+        }
+
+        this.setVPstartTime_ms = new Date().getTime();
+
+        //TODO: auto viewpoint duration code (from osgEarth)
+        // auto time:
+        if (this.map.geocentric) {
+            var maxDistance = this.map.profile.ellipsoid.radiusEquator;
+            var ratio = Math.clamp(de / maxDistance, 0, 1);
+            ratio = Math.accelerationInterp(ratio, -4.5);
+            var minDur = 2.0;
+            var maxDur = Math.max(seconds, minDur);
+            this.setVPduration_ms = (minDur + ratio * (maxDur - minDur)) * 1000.0;
+        }
+        else {
+            this.setVPduration_ms = seconds * 1000.0;
+        }
+
+        this.settingVP = true;
+    },
+
+    updateSetViewpoint: function() {
+        var now = new Date().getTime();
+        var t = (now - this.setVPstartTime_ms) / this.setVPduration_ms;
+        var tp = t;
+
+        if (t >= 1.0) {
+            t = 1.0;
+            tp = 1.0;
+            this.settingVP = false;
+        }
+        else if (this.arcHeight > 0.0) {
+            if (tp <= 0.5) {
+                var t2 = 2.0 * tp;
+                t2 = Math.accelerationInterp(t2, this.setVPaccel);
+                tp = 0.5 * t2;
+            }
+            else {
+                var t2 = 2.0 * (tp - 0.5);
+                t2 = Math.accelerationInterp(t2, this.setVPaccel2);
+                tp = 0.5 + (0.5 * t2);
+            }
+            tp = Math.smoothStepInterp(tp);
+            //tp = Math.smoothStepInterp( tp );
+        }
+        else if (t > 0.0) {
+            tp = Math.accelerationInterp(tp, this.setVPaccel);
+            tp = Math.smoothStepInterp(tp);
+        }
+
+        var lla = this.map.world2lla(osg.Vec3.add(this.startVP.center, osg.Vec3.mult(this.deltaCenter, tp, []), []));
+
+        this.setViewpoint(
+            Math.rad2deg(lla[1]),
+            Math.rad2deg(lla[0]),
+            lla[2],
+            this.startVP.heading + this.deltaHeading * tp,
+            this.startVP.pitch + this.deltaPitch * tp,
+            this.startVP.range + this.deltaRange * tp + (Math.sin(Math.PI * tp) * this.arcHeight));
+    }
+};
+/**
+* ReadyMap/WebGL
+* (c) Copyright 2011 Pelican Mapping
+* License: LGPL
+* http://ReadyMap.org
+*/
+
+ReadyMap.EarthManipulator = function(map) {
+    ReadyMap.Manipulator.call(this, map);
+    this.minPitch = Math.deg2rad(-89.9);
+    this.maxPitch = Math.deg2rad(-10.0);
+    this.buttonup = true;
+    this.centerRotation = osg.Quat.makeIdentity();
+    this.lockAzimWhilePanning = true;
+    this.settingVP = false;
+    this.computeHomePosition();
 }
 
-ReadyMap.PositionEngine.prototype = {
-  addElement: function(element) {
-    this.elements.push( element );
-  },
-  
-  removeElement: function(element) {  
-    var index = this.elements.indexOf( element );
-    if (index >= 0) {
-      element.destroy();
-      this.elements.splice( index, 1 );
-    }       
-  },
-  
-  clear: function() {
-    for (var i = 0; i < this.elements.length; i++) {
-      this.elements[i].destroy();
-    }
-    this.elements = [];
-  },
-  
-  frameEnd: function() {
-  
-    //Cull elements on the other side of the earth.
-    var viewMatrix = mapView.viewer.view.getViewMatrix();
-      
-	var viewChanged = true;
-    if (this._lastViewMatrix !== undefined) {
-      viewChanged = !osg.Matrix.equals(viewMatrix, this._lastViewMatrix);
-    }
-	else {
-	  this._lastViewMatrix = [];
-	}
-      
-      //Save the last view matrix
-	osg.Matrix.copy(viewMatrix, this._lastViewMatrix);
-	mapView._inverseViewMatrix = osg.Matrix.inverse( viewMatrix );                        
+ReadyMap.EarthManipulator.prototype = osg.objectInehrit(ReadyMap.Manipulator.prototype, {
 
-	for (var i = 0; i < this.elements.length; i++) {
-	  if (viewChanged || this.elements[i]._dirty || this.elements[i].sizeChanged()) {
-		this.elements[i].update(this.mapView);
-	  }
-	}
-  }
+    computeHomePosition: function() {
+        this.setViewpoint(0, -90, 0, 0, -90, 1e7);
+    },
+
+    keydown: function(ev) {
+        if (ev.keyCode === 32) {
+            this.computeHomePosition();
+        } else if (ev.keyCode === 33) { // pageup
+            this.distanceIncrease();
+            return false;
+        } else if (ev.keyCode === 34) { //pagedown
+            this.distanceDecrease();
+            return false;
+        }
+        else if (ev.keyCode === 13) { // mode
+            this.mode = 1 - this.mode;
+            return false;
+        }
+    },
+
+    mousemove: function(ev) {
+        if (this.buttonup === true) {
+            return;
+        }
+        var scaleFactor;
+        var curX;
+        var curY;
+        var deltaX;
+        var deltaY;
+        var pos = this.convertEventToCanvas(ev);
+        curX = pos[0];
+        curY = pos[1];
+
+        scaleFactor = 100.0;
+        deltaX = (this.clientX - curX) / scaleFactor;
+        deltaY = (this.clientY - curY) / scaleFactor;
+        this.clientX = curX;
+        this.clientY = curY;
+
+        if (ev.shiftKey)
+            this.rotateModel(-deltaX, -deltaY);
+        else if (ev.ctrlKey)
+            this.zoomModel(0, -deltaY);
+        else
+            this.panModel(-deltaX, -deltaY);
+
+        return false;
+    },
+
+    mousewheel: function(ev, intDelta, deltaX, deltaY) {
+        this.zoomModel(0, intDelta * 0.1);
+    },
+
+    dblclick: function(ev) {
+    },
+
+    touchDown: function(ev) {
+    },
+
+    touchUp: function(ev) {
+    },
+
+    touchMove: function(ev) {
+    },
+
+    getCoordFrame: function(point) {
+        var l2w = this.map.profile.ellipsoid.local2worldFromECEF(point);
+        var trans = osg.Matrix.getTrans(l2w);
+        var x = osg.Matrix.transform3x3(l2w, [1, 0, 0]);
+        var y = osg.Matrix.transform3x3(l2w, [0, 1, 0]);
+        var z = osg.Matrix.transform3x3(l2w, [0, 0, 1]);
+        var scale = osg.Matrix.makeScale(1.0 / osg.Vec3.length(x), 1.0 / osg.Vec3.length(y), 1.0 / osg.Vec3.length(z));
+        osg.Matrix.postMult(scale, l2w);
+        osg.Matrix.setTrans(l2w, trans[0], trans[1], trans[2]);
+        return l2w;
+    },
+
+    normalizeAzimRad: function(azim) {
+        if (Math.abs(azim) > 2 * Math.PI)
+            azim = azim % (2 * Math.PI);
+        while (azim < -Math.PI)
+            azim += 2 * Math.PI;
+        while (azim > Math.PI)
+            azim -= 2 * Math.PI;
+        return azim;
+    },
+
+    getSideVector: function(m) {
+        return [osg.Matrix.get(m, 0, 0), osg.Matrix.get(m, 0, 1), osg.Matrix.get(m, 0, 2)];
+    },
+
+    getFrontVector: function(m) {
+        return [osg.Matrix.get(m, 1, 0), osg.Matrix.get(m, 1, 1), osg.Matrix.get(m, 1, 2)];
+    },
+
+    getUpVector: function(m) {
+        return [osg.Matrix.get(m, 2, 0), osg.Matrix.get(m, 2, 1), osg.Matrix.get(m, 2, 2)];
+    },
+
+    getAzimuth: function(frame) {
+        return this.localAzim;
+
+        //        var m = this.getMatrix();
+        //        var frameInv = osg.Matrix.inverse(frame);
+        //        osg.Matrix.postMult(frameInv, m);
+
+        //        var look = osg.Vec3.normalize(osg.Vec3.neg(this.getUpVector(m),[]), []);
+        //        var up = osg.Vec3.normalize(this.getFrontVector(m), []);
+
+        //        var azim;
+        //        if (look[2] < -0.9)
+        //            azim = Math.atan2(up[0], up[1]);
+        //        else if (look[2] > 0.9)
+        //            azim = Math.atan2(-up[0], -up[1]);
+        //        else
+        //            azim = Math.atan2(look[0], look[1]);
+
+        //        return this.normalizeAzimRad(azim);
+    },
+
+    recalcLocalPitchAndAzim: function() {
+        var rot = osg.Matrix.makeRotateFromQuat(this.rotation);
+        this.localPitch = Math.asin(osg.Matrix.get(rot, 1, 2));
+        if (Math.abs(this.localPitch - Math.PI / 2) < 0.000001)
+            this.localAzim = Math.atan2(osg.Matrix.get(rot, 0, 1), osg.Matrix.get(rot, 0, 0));
+        else
+            this.localAzim = Math.atan2(osg.Matrix.get(rot, 1, 0), osg.Matrix.get(rot, 1, 1));
+        this.localPitch -= Math.PI / 2.0;
+    },
+
+    recalculateCenter: function(localFrame) {
+        var lla = this.map.profile.ellipsoid.ecef2lla(osg.Matrix.getTrans(localFrame));
+        lla[2] = 0.0;
+        this.center = this.map.profile.ellipsoid.lla2ecef(lla);
+    },
+
+    panModel: function(dx, dy) {
+        var scale = -0.3 * this.distance;
+        var oldFrame = this.getCoordFrame(this.center);
+
+        var oldAzim = this.getAzimuth(oldFrame);
+
+        var rotMatrix = osg.Matrix.makeRotateFromQuat(osg.Quat.multiply(this.rotation, this.centerRotation));
+
+        var side = this.getSideVector(rotMatrix);
+        var previousUp = this.getUpVector(oldFrame);
+
+        var forward = osg.Vec3.cross(previousUp, side, []);
+        side = osg.Vec3.cross(forward, previousUp, []);
+
+        osg.Vec3.normalize(forward, forward);
+        osg.Vec3.normalize(side, side);
+
+        var dv = osg.Vec3.add(osg.Vec3.mult(forward, (dy * scale), []), osg.Vec3.mult(side, (dx * scale), []), [])
+
+        this.center = osg.Vec3.add(this.center, dv, []);
+
+        var newFrame = this.getCoordFrame(this.center);
+
+        if (this.lockAzimWhilePanning) {
+            this.centerRotation = osg.Matrix.getRotate(newFrame);
+        }
+        else {
+            var newUp = this.getUpVector(newFrame);
+            var panRot = osg.Quat.rotateVecOnToVec(previousUp, newUp);
+            if (!osg.Quat.zeroRotation(panRot)) {
+                osg.Quat.multiply(this.centerRotation, panRot, this.centerRotation);
+            }
+        }
+
+        this.recalculateCenter(newFrame);
+        this.recalcLocalPitchAndAzim();
+    },
+
+    rotateModel: function(dx, dy) {
+
+        if (dy + this.localPitch > this.maxPitch || dy + this.localPitch < this.minPitch)
+            dy = 0;
+
+        var rotMat = osg.Matrix.makeRotateFromQuat(this.rotation);
+
+        var side = this.getSideVector(rotMat);
+        var front = osg.Vec3.cross([0, 0, 1], side, []);
+        side = osg.Vec3.cross(front, [0, 0, 1], []);
+
+        osg.Vec3.normalize(front, front);
+        osg.Vec3.normalize(side, side);
+
+        this.pv = side;
+
+        var p = osg.Quat.makeRotate(dy, side[0], side[1], side[2]);
+        var a = osg.Quat.makeRotate(-dx, 0, 0, 1);
+
+        this.rotation = osg.Quat.multiply(this.rotation, osg.Quat.multiply(p, a));
+
+        this.recalcLocalPitchAndAzim();
+    },
+
+    zoomModel: function(dx, dy) {
+        var fd = 1000;
+        var scale = 1 + dy;
+        if (fd * scale > this.minDistance) {
+            this.setDistance(this.distance * scale);
+        }
+        else {
+            this.setDistance(this.minDistance);
+        }
+    },
+
+    getRotation: function(point) {
+        var cf = this.getCoordFrame(point);
+        var look = osg.Vec3.neg(this.getUpVector(cf), []);
+        var worldUp = [0, 0, 1];
+        var dot = Math.abs(osg.Vec3.dot(worldUp, look));
+        if (Math.abs(dot - 1.0) < 0.000001)
+            worldUp = [0, 1, 0];
+        var side = osg.Vec3.cross(look, worldUp, []);
+        var up = osg.Vec3.normalize(osg.Vec3.cross(side, look, []), []);
+
+        var offset = 1e-6;
+        return osg.Matrix.makeLookAt(osg.Vec3.sub(point, osg.Vec3.mult(look, offset, []), []), point, up);
+    },
+
+    setViewpoint: function(lat, lon, alt, heading, pitch, range, seconds) {
+
+        var lla = [Math.deg2rad(lon), Math.deg2rad(lat), alt];
+
+        if (seconds === undefined) {
+            this.center = this.map.lla2world(lla);
+
+            var newPitch = Math.clamp(Math.deg2rad(pitch), this.minPitch, this.maxPitch);
+            var newAzim = this.normalizeAzimRad(Math.deg2rad(heading));
+
+            this.setDistance(range);
+
+            var localFrame = this.getCoordFrame(this.center);
+            this.centerRotation = osg.Matrix.getRotate(localFrame);
+
+            var azim_q = osg.Quat.makeRotate(newAzim, 0, 0, 1);
+            var pitch_q = osg.Quat.makeRotate(-newPitch - (Math.PI / 2.0), 1, 0, 0);
+            var newRot_m = osg.Matrix.makeRotateFromQuat(osg.Quat.multiply(azim_q, pitch_q));
+            this.rotation = osg.Matrix.getRotate(osg.Matrix.inverse(newRot_m));
+
+            this.localPitch = newPitch;
+            this.localAzim = newAzim;
+
+            this.recalcLocalPitchAndAzim();
+            this.recalculateCenter(localFrame);
+        }
+        else {
+            this.startViewpointTransition(lat, lon, alt, heading, pitch, range, seconds);
+            this.recalculateCenter(this.getCoordFrame(this.center));
+        }
+    },
+
+    frame: function() {
+        if (this.settingVP) {
+            this.updateSetViewpoint();
+        }
+    },
+
+    getMatrix: function() {
+        var m = osg.Matrix.makeTranslate(0, 0, this.distance);
+        osg.Matrix.postMult(osg.Matrix.makeRotateFromQuat(this.rotation), m);
+        osg.Matrix.postMult(osg.Matrix.makeRotateFromQuat(this.centerRotation), m);
+        osg.Matrix.postMult(osg.Matrix.makeTranslate(this.center[0], this.center[1], this.center[2]), m);
+        return m;
+    },
+
+    getInverseMatrix: function() {
+        this.frame();
+        var m = osg.Matrix.makeTranslate(-this.center[0], -this.center[1], -this.center[2]);
+        osg.Matrix.postMult(osg.Matrix.makeRotateFromQuat(osg.Quat.inverse(this.centerRotation)), m);
+        osg.Matrix.postMult(osg.Matrix.makeRotateFromQuat(osg.Quat.inverse(this.rotation)), m);
+        osg.Matrix.postMult(osg.Matrix.makeTranslate(0, 0, -this.distance), m);
+        return m;
+    }
+});/**
+* ReadyMap/WebGL
+* (c) Copyright 2011 Pelican Mapping
+* License: LGPL
+* http://ReadyMap.org
+*/
+
+ReadyMap.MapManipulator = function(map) {
+    ReadyMap.Manipulator.call(this, map);
+    this.computeHomePosition();
+};
+
+ReadyMap.MapManipulator.prototype = osg.objectInehrit(ReadyMap.Manipulator.prototype, {
+
+    computeHomePosition: function() {
+        this.center = [0, 0, 0];
+        this.distance = osgearth.Extent.width(this.map.profile.extent) / 2;
+        this.maxDistance = this.distance * 1.5;
+    },
+
+    setViewpoint: function(lat, lon, alt, heading, pitch, range, seconds) {
+        if (seconds === undefined || seconds == 0) {
+            var lla = [Math.deg2rad(lon), Math.deg2rad(lat), alt];
+            this.center = this.map.lla2world(lla);
+            this.setDistance(range);
+        }
+        else {
+            this.startViewpointTransition(lat, lon, alt, heading, pitch, range, seconds);
+        }
+    },
+
+    panModel: function(dx, dy) {
+        var scale = -0.3 * this.distance;
+        this.center = osg.Vec3.add(this.center, [dx * scale, dy * scale, 0], []);
+        osgearth.Extent.clamp(this.map.profile.extent, this.center);
+    },
+
+    zoomModel: function(dx, dy) {
+        var fd = 1000;
+        var scale = 1 + dy;
+        if (fd * scale > this.minDistance)
+            this.setDistance(this.distance * scale);
+        else
+            this.setDistance(this.minDistance);
+    },
+
+    frame: function() {
+        if (this.settingVP) {
+            this.updateSetViewpoint();
+        }
+    },
+
+    getInverseMatrix: function() {
+        this.frame();
+        var eye = [];
+        osg.Vec3.copy(this.center, eye);
+        eye[2] = this.distance;
+        var m = osg.Matrix.makeLookAt(eye, this.center, [0, 1, 0]);
+        return m;
+    },
+
+    mousemove: function(ev) {
+        if (this.buttonup === true)
+            return;
+
+        var pos = this.convertEventToCanvas(ev);
+        var curX = pos[0];
+        var curY = pos[1];
+
+        var scaleFactor = 100.0;
+        var deltaX = (this.clientX - curX) / scaleFactor;
+        var deltaY = (this.clientY - curY) / scaleFactor;
+        this.clientX = curX;
+        this.clientY = curY;
+
+        this.panModel(-deltaX, -deltaY);
+        return false;
+    },
+
+    mousewheel: function(ev, intDelta, deltaX, deltaY) {
+        this.zoomModel(0, intDelta * 0.1);
+    }
+});/**
+* ReadyMap/WebGL
+* (c) Copyright 2011 Pelican Mapping
+* License: LGPL
+* http://ReadyMap.org
+*/
+
+/**
+* MapView
+* Installs a 3D WebGL viewer within an HTML5 canvas elements.
+*/
+ReadyMap.MapView = function(elementId, size, map) {
+
+    this.map = map;
+    this.viewer = null;
+    this.endFrame = undefined;
+    var canvas = document.getElementById(elementId);
+    canvas.width = size.w;
+    canvas.height = size.h;
+
+    //try {
+    this.viewer = new osgViewer.Viewer(canvas);
+
+    //If you don't do this then the mouse manipulators listen for mouse events on the whole dom
+    //so dragging other controls end up moving the canvas view.
+    this.viewer.eventNode = this.viewer.canvas;
+
+    this.viewer.init();
+    if (map.geocentric)
+        this.viewer.setupManipulator(new ReadyMap.EarthManipulator(map));
+    else
+        this.viewer.setupManipulator(new ReadyMap.MapManipulator(map));
+    this.viewer.setScene(new osgearth.MapNode(map)); //map.createNode());
+    delete this.viewer.view.light;
+    this.viewer.getManipulator().computeHomePosition();
+    //this.viewer.run();
+    this.run();
+    //}
+    //catch (er) {
+    //osg.log("exception in osgViewer " + er);
+    //}
+
+    this.frameEnd = [];
+};
+
+ReadyMap.MapView.prototype = {
+
+    home: function() {
+        this.viewer.getManipulator().computeHomePosition();
+    },
+
+    projectObjectIntoWindow: function(object) {
+        var viewMatrix = this.viewer.view.getViewMatrix();
+        var projectionMatrix = this.viewer.view.getProjectionMatrix();
+        var windowMatrix = null;
+        var vp = this.viewer.view.getViewport();
+        if (vp !== undefined) {
+            windowMatrix = vp.computeWindowMatrix();
+        }
+
+        var matrix = [];
+        osg.Matrix.copy(windowMatrix, matrix);
+        osg.Matrix.preMult(matrix, projectionMatrix);
+        osg.Matrix.preMult(matrix, viewMatrix);
+
+        var result = osg.Matrix.transformVec3(matrix, object);
+        var height = this.viewer.canvas.height;
+        result[1] = height - result[1] - 1;
+        return result;
+    },
+
+    run: function() {
+        var that = this;
+        var render = function() {
+            window.requestAnimationFrame(render, this.canvas);
+            that.viewer.frame();
+            if (that.frameEnd !== undefined && that.frameEnd != null) {
+                //Fire off any frame end callbacks
+                for (var i = 0; i < that.frameEnd.length; i++) {
+                    that.frameEnd[i]();
+                }
+            }
+            that.map.frame();
+        };
+        render();
+    },
+
+    addFrameEndCallback: function(callback) {
+        this.frameEnd.push(callback);
+    }
+};
+/**
+* ReadyMap/WebGL
+* (c) Copyright 2011 Pelican Mapping
+* License: LGPL
+* http://ReadyMap.org
+*/
+
+ReadyMap.ArcGISImageLayer = function(settings) {
+    osgearth.ImageLayer.call(this, settings.name);
+    this.url = settings.url;
+    this.extension = settings.imageType !== undefined ? settings.imageType : "jpg";
+};
+
+ReadyMap.ArcGISImageLayer.prototype = osg.objectInehrit(osgearth.ImageLayer.prototype, {
+
+    getURL: function(key, profile) {
+        var imageURL = this.url + "/tile/" + key[2] + "/" + key[1] + "/" + key[0] + "." + this.extension;
+        if (this.args !== undefined && this.args != null) {
+          imageURL += "?" + this.args;
+        }
+
+        return osgearth.getURL( imageURL );		
+    },
+
+    createTexture: function(key, profile) {
+        var imageURL = this.getURL(key, profile);
+        return osg.Texture.create(imageURL);
+    }
+});/**
+* ReadyMap/WebGL
+* (c) Copyright 2011 Pelican Mapping
+* License: LGPL
+* http://ReadyMap.org
+*/
+
+ReadyMap.GeoRSSLayer = function(mapView, url, rate, iconOptions) {
+    this.mapView = mapView;
+    this.url = url;
+
+    var defaults = {
+        url: "http://google-maps-icons.googlecode.com/files/redblank.png",
+        width: 32,
+        height: 32,
+        cssClass: ""
+    };
+    this.options = jQuery.extend({}, defaults, iconOptions);
+
+    this.positionEngine = new ReadyMap.PositionEngine(mapView);
+
+    var thisObj = this;
+    this.reader = new ReadyMap.GeoRSSReader(url, rate, function(items) { thisObj.createIcons(items); });
+};
+
+
+function showDialog(content, title) {
+    //Create a new div on the fly
+    return $('<div/>').html(content).dialog({
+        bgiframe: true,
+        resizable: false,
+        modal: false,
+        draggable: false,
+        title: title,
+        overlay: {
+            backgroundColor: '#000',
+            opacity: 0.5
+        }
+    });
 }
 
-//........................................................................
+ReadyMap.GeoRSSLayer.prototype = {
+    setRate: function(newRate) {
+        this.reader.setRate(newRate);
+    },
+
+    createIcons: function(items) {
+        //this.positionEngine.elements = [];
+        this.positionEngine.clear();
+
+        for (var i in items) {
+            var icon = new ReadyMap.Icon("icon" + i + "_" + items[i].guid, Math.deg2rad(items[i].longitude), Math.deg2rad(items[i].latitude), 0, this.options.url, {
+                width: this.options.width,
+                height: this.options.height,
+                cssClass: this.options.cssClass,
+                title: items[i].title
+            });
+
+            icon.offset = [this.options.width / -2, this.options.height * -1];
+            icon.element.bind("click", { url: items[i].link,
+                title: items[i].title,
+                engine: this.positionEngine,
+                lat: items[i].latitude,
+                lon: items[i].longitude,
+                description: items[i].description
+            }, function(e) {
+                var html = "<div><h3>" + e.data.title + "</h3>" +
+  			                 "   <p> " + e.data.description + "</p>";
+                if (e.data.url !== undefined && e.data.url != null) {
+                    html += '<a href="' + e.data.url + '" target="_blank">Link</a>';
+                }
+                html += "</div>";
+                var dlg = showDialog(html, e.data.title);
+                dlg = dlg.parent();
+                e.data.engine.addElement(new ReadyMap.PositionedElement("dlg", Math.deg2rad(e.data.lon), Math.deg2rad(e.data.lat), 0, { element: dlg, vAlign: "bottom" }));
+            });
+            this.positionEngine.addElement(icon);
+        }
+    }
+};
+/**
+* ReadyMap/WebGL
+* (c) Copyright 2011 Pelican Mapping
+* License: LGPL
+* http://ReadyMap.org
+*/
+
+ReadyMap.GeoRSSReader = function(url, rate, updateCallback) {
+    this.url = url;
+
+    this.callbacks = new Array;
+    if (updateCallback != undefined)
+        this.callbacks.push(updateCallback);
+
+    this.updateFeed();
+    this.setRate(rate);
+};
+
+ReadyMap.GeoRSSReader.prototype = {
+    updateFeed: function() {
+        this.items = new Array;
+
+        if (this.url != undefined) {
+            var items = this.items;
+            var callbacks = this.callbacks;
+
+            $.ajax(
+			{
+			    url: this.url,
+			    type: "GET",
+			    dataType: "xml",
+
+			    success: function(data) {
+			        var selector = $(data).find('item').length > 0 ? 'item' : 'entry';
+			        $(data).find(selector).each(function(i) {
+			            var lat = undefined;
+			            var lon = undefined;
+
+			            var point = $(this).find('georss\\:point').text();
+			            if (point == "")
+			                point = $(this).find('point').text();
+
+			            if (point != "") {
+			                lat = point.split(" ")[0];
+			                lon = point.split(" ")[1];
+			            }
+			            else {
+			                lat = $(this).find('geo\\:lat').text();
+			                lon = $(this).find('geo\\:long').text();
+
+			                if (lat == "" || lon == "") {
+			                    lat = $(this).find('lat').text();
+			                    lon = $(this).find('long').text();
+			                }
+			            }
+
+			            var description = undefined;
+			            try {
+			                description = $(this).find('description').get(0).innerHTML;
+			            }
+			            catch (e) { }
+
+			            if (description == undefined || description == "")
+			                description = $(this).find('description').text()
+
+			            items.push({ guid: $(this).find('guid').text(),
+			                title: $(this).find('title').text(),
+			                author: $(this).find('author').text(),
+			                pubDate: $(this).find('pubDate').text(),
+			                description: description,
+			                link: $(this).find('link').text(),
+			                latitude: lat,
+			                longitude: lon,
+			                src: $(this).get()
+			            });
+			        });
+
+			        for (var i in callbacks) {
+			            var callback = callbacks[i];
+			            callback(items);
+			        }
+			    },
+
+			    error: function(jqXHR, status, error) {
+			        //alert("Eror reading RSS feed: " + status);
+			        for (var i in callbacks) {
+			            var callback = callbacks[i];
+			            callback(items);
+			        }
+			    }
+			});
+        }
+    },
+
+    setRate: function(newRate) {
+        if (this.interval != undefined)
+            window.clearInterval(this.interval);
+
+        this.rate = newRate;
+        if (this.rate > 0)
+            this.interval = window.setInterval(function(layer) { layer.updateFeed(); }, this.rate * 1000, this);
+    },
+
+    addCallback: function(updateCallback) {
+        if (updateCallback != undefined) {
+            this.callbacks.push(updateCallback);
+            updateCallback(this.items);
+        }
+    }
+};/**
+* ReadyMap/WebGL
+* (c) Copyright 2011 Pelican Mapping
+* License: LGPL
+* http://ReadyMap.org
+*/
+
+ReadyMap.Map = function(args) {
+    osgearth.Map.call(this, args);
+};
+
+ReadyMap.Map.prototype = osg.objectInehrit(osgearth.Map.prototype, {
+});/**
+* ReadyMap/WebGL
+* (c) Copyright 2011 Pelican Mapping
+* License: LGPL
+* http://ReadyMap.org
+*/
+
+ReadyMap.TMSImageLayer = function(settings) {
+    osgearth.ImageLayer.call(this, settings.name);
+    this.url = settings.url;
+    this.flipY = settings.tmsType === "google";
+    this.extension = settings.imageType !== undefined ? settings.imageType : "jpg";
+    this.baseLevel = settings.baseLevel !== undefined ? settings.baseLevel : 0;
+    this.args = settings.args !== undefined ? settings.args : null;
+};
+
+ReadyMap.TMSImageLayer.prototype = osg.objectInehrit(osgearth.ImageLayer.prototype, {
+
+    getURL: function(key, profile) {
+        var y = key[1];
+
+        if (this.flipY) {
+            var size = profile.getTileCount(key[2]);
+            y = (size[1] - 1) - key[1];
+        }
+
+        var imageURL = this.url + "/" + (key[2] + this.baseLevel) + "/" + key[0] + "/" + y + "." + this.extension;
+        if (this.args !== undefined && this.args != null) {
+            imageURL += "?" + this.args;
+        }
+
+        return osgearth.getURL(imageURL);
+    },
+
+    createTexture: function(key, profile) {
+        var imageURL = this.getURL(key, profile);
+        return osg.Texture.create(imageURL);
+    }
+});/**
+* ReadyMap/WebGL
+* (c) Copyright 2011 Pelican Mapping
+* License: LGPL
+* http://ReadyMap.org
+*/
+
+ReadyMap.WMSImageLayer = function(settings) {
+    osgearth.ImageLayer.call(this, settings.name);
+    this.url = settings.url;
+    this.format = settings.format !== undefined ? settings.format : "image/jpeg";
+    this.profile = settings.profile !== undefined ? settings.profile : new osgearth.GeodeticProfile();
+    this.args = settings.args !== undefined ? settings.args : null;
+    this.layers = settings.layers !== undefined ? settings.layers : "default";
+    this.width = settings.width !== undefined ? settings.width : 256;
+    this.height = settings.height !== undefined ? settings.height : 256;
+    this.srs = settings.srs !== undefined ? settings.srs : "EPSG:4326";
+    this.styles = settings.styles !== undefined ? settings.styles : "";
+};
+
+ReadyMap.WMSImageLayer.prototype = osg.objectInehrit(osgearth.ImageLayer.prototype, {
+
+    getURL: function(key, profile) {
+        var size = this.profile.getTileSize(key[2]);
+        var xmin = this.profile.extent.xmin + (size[0] * key[0]);
+        var ymax = this.profile.extent.ymax - (size[1] * key[1]);
+        var xmax = xmin + size[0];
+        var ymin = ymax - size[1];
+
+        xmin = Math.rad2deg(xmin);
+        ymin = Math.rad2deg(ymin);
+        xmax = Math.rad2deg(xmax);
+        ymax = Math.rad2deg(ymax);
+
+        var sep = this.url.indexOf("?") >= 0 ? "&" : "?";
+
+        var imageURL = [
+		               this.url,
+					   sep,
+		               "SERVICE=WMS",
+					   "&VERSION=" + this.version,
+					   "&REQUEST=GetMap",
+					   "&LAYERS=" + this.layers,
+					   "&FORMAT=" + this.format,
+					   "&STYLES=" + this.styles,
+					   "&SRS=" + this.srs,
+					   "&WIDTH=" + this.width,
+					   "&HEIGHT=" + this.height,
+                       "&BBOX=" + xmin + "," + ymin + "," + xmax + "," + ymax
+					   ].join("");
+
+        if (this.args !== undefined && this.args != null) {
+            imageURL += "&" + this.args;
+        }
+
+        return osgearth.getURL(imageURL);
+    },
+
+    createTexture: function(key, profile) {
+        var imageURL = this.getURL(key, profile);
+        return osg.Texture.create(imageURL);
+    }
+});/**
+* ReadyMap/WebGL
+* (c) Copyright 2011 Pelican Mapping
+* License: LGPL
+* http://ReadyMap.org
+*/
+
 
 ReadyMap.WOEIDWeatherLayer = function(mapView, places, rate, proxy, iconOptions) {
     this.positionEngine = new ReadyMap.PositionEngine(mapView);
@@ -10860,122 +10832,212 @@ ReadyMap.WOEIDWeatherLayer.prototype = {
 		this.positionEngine.addElement(popup);
 	}
 };
-ReadyMap.controls = {}
+/**
+* ReadyMap/WebGL
+* (c) Copyright 2011 Pelican Mapping
+* License: LGPL
+* http://ReadyMap.org
+*/
 
-//...................................................................
+ReadyMap.Controls = {}/**
+* ReadyMap/WebGL
+* (c) Copyright 2011 Pelican Mapping
+* License: LGPL
+* http://ReadyMap.org
+*/
 
-ReadyMap.controls.LayerSwitcher = function(element_id, map) {
+ReadyMap.Controls.GeoRSSList = function(element_id, mapView, classid) {
+    this.id = element_id;
+    this.element = $("#" + element_id);
+    this.mapView = mapView;
+    this.classid = classid
+    this.items = undefined;
+    this.init();
+};
+
+ReadyMap.Controls.GeoRSSList.prototype = {
+    init: function() {
+        this.element.append('...');
+    },
+
+    setItems: function(items) {
+        this.items = items;
+        this.renderList();
+    },
+
+    renderList: function() {
+        this.element.empty();
+
+        var mapView = this.mapView;
+        var element = this.element;
+        var classid = this.classid;
+
+        $.each(this.items, function(i, value) {
+            var itemDiv;
+            if (classid == undefined) {
+                itemDiv = $('<div style="padding: 4px;' + (i == 0 ? '' : ' border-top: 1px dotted #999;') + '">' + value.title + (value.link == undefined || value.link.length < 0 ? '' : '...<a href="' + value.link + '" target="_blank">Details</a>') + '</div>');
+                $(itemDiv).hover(
+		  function() {
+		      $(this).css("color", "#09f");
+		  },
+		  function() {
+		      $(this).css("color", "");
+		  });
+            }
+            else {
+                itemDiv = $('<div class="' + classid + '">' + value.title + (value.link == undefined || value.link.length < 0 ? '' : '...<a href="' + value.link + '">Details</a>') + '</div>');
+            }
+
+            $(itemDiv).click(function() {
+                mapView.viewer.manipulator.setViewpoint(value.latitude, value.longitude, 0.0, 0, -90, 2000000, 1);
+            });
+
+            element.append(itemDiv);
+        });
+    }
+};/**
+* ReadyMap/WebGL
+* (c) Copyright 2011 Pelican Mapping
+* License: LGPL
+* http://ReadyMap.org
+*/
+
+ReadyMap.Controls.LayerSwitcher = function(element_id, map) {
     this.id = element_id;
     this.element = jQuery("#" + element_id);
     this.map = map;
     this.init();
 };
 
-ReadyMap.controls.LayerSwitcher.prototype = {
-  init : function() {
-    //Remove all existing children
-    jQuery(this.element).children().remove();   
-    
-    jQuery(this.element).append('<div class="ui-widget-header"><span id="layer-header-toggle" style="float:left" class="ui-icon ui-icon-triangle-1-s"></span>Layers</div>');	       
-    
-    var layerContainer = jQuery('<div id="layer_container"/>');
-    jQuery(this.element).append(layerContainer);
-        
-        
-    
-    jQuery("#layer-header-toggle").bind("click", function() {
-        jQuery("#layer_container").slideToggle();    
-	    var l = jQuery(this);
-	    if (l.hasClass("ui-icon-triangle-1-s")) {
-  		  l.removeClass("ui-icon-triangle-1-s");
-		  l.addClass("ui-icon-triangle-1-e");
-	    }
-	    else if (l.hasClass('ui-icon-triangle-1-e')) {
-		  l.addClass("ui-icon-triangle-1-s");
-		  l.removeClass("ui-icon-triangle-1-e");
-	    }
-    });
-        
-    for (var i = 0; i < this.map.imageLayers.length; i++) {
-        var layer = this.map.imageLayers[i];
-        var div = jQuery('<div id="layer_"' + i + '>')
+ReadyMap.Controls.LayerSwitcher.prototype = {
+    init: function() {
+        //Remove all existing children
+        jQuery(this.element).children().remove();
+
+        jQuery(this.element).append('<div class="ui-widget-header"><span id="layer-header-toggle" style="float:left" class="ui-icon ui-icon-triangle-1-s"></span>Layers</div>');
+
+        var layerContainer = jQuery('<div id="layer_container"/>');
+        jQuery(this.element).append(layerContainer);
+
+
+
+        jQuery("#layer-header-toggle").bind("click", function() {
+            jQuery("#layer_container").slideToggle();
+            var l = jQuery(this);
+            if (l.hasClass("ui-icon-triangle-1-s")) {
+                l.removeClass("ui-icon-triangle-1-s");
+                l.addClass("ui-icon-triangle-1-e");
+            }
+            else if (l.hasClass('ui-icon-triangle-1-e')) {
+                l.addClass("ui-icon-triangle-1-s");
+                l.removeClass("ui-icon-triangle-1-e");
+            }
+        });
+
+        for (var i = 0; i < this.map.imageLayers.length; i++) {
+            var layer = this.map.imageLayers[i];
+            var div = jQuery('<div id="layer_"' + i + '>')
                         .addClass('ui-widget-content ui-state-default ui-corner-all ui-helper-clearfix');
-        jQuery(div).append('<input id="layercheck_' + i + '" type="checkbox" checked="checked"/><span>' + layer.name + '</span>');
-        jQuery(div).append('<div id="layeropacity_' + i + '" class="opacity-slider"></div>');        
-                
-        jQuery(layerContainer).append(div);                        
-        
-        jQuery("#layercheck_" + i).bind("click", {layer: layer}, function(event) {        
-          var checked = jQuery(this).attr("checked");
-          event.data.layer.setVisible( checked );
-        });    
-        
-        jQuery('#layeropacity_' + i).slider({
-               min: 0,
-               max: 100,
-               value: layer.getOpacity() * 100.0,
-			   range: "min",
-			   layer: layer,
-               slide: function(event, ui){
-			     var opacity = ui.value / 100.0;
-			     var lyr = jQuery(this).data('slider').options.layer;
-			     lyr.setOpacity(opacity);
-               }
-         });
-    }    
-  }
+            jQuery(div).append('<input id="layercheck_' + i + '" type="checkbox" checked="checked"/><span>' + layer.name + '</span>');
+            jQuery(div).append('<div id="layeropacity_' + i + '" class="opacity-slider"></div>');
+
+            jQuery(layerContainer).append(div);
+
+            jQuery("#layercheck_" + i).bind("click", { layer: layer }, function(event) {
+                var checked = jQuery(this).attr("checked");
+                event.data.layer.setVisible(checked);
+            });
+
+            jQuery('#layeropacity_' + i).slider({
+                min: 0,
+                max: 100,
+                value: layer.getOpacity() * 100.0,
+                range: "min",
+                layer: layer,
+                slide: function(event, ui) {
+                    var opacity = ui.value / 100.0;
+                    var lyr = jQuery(this).data('slider').options.layer;
+                    lyr.setOpacity(opacity);
+                }
+            });
+        }
+    }
+};/**
+* ReadyMap/WebGL
+* (c) Copyright 2011 Pelican Mapping
+* License: LGPL
+* http://ReadyMap.org
+*/
+
+/**
+ * PlaceSearch
+ * Geolocator based on Yahoo geocoding
+ */
+
+//........................................................................
+
+// Creates style-able input element. Mostly provided as a convenience.
+ReadyMap.PlaceSearch = function(parentId, inputId, callback)
+{
+  if (inputId == undefined)
+    inputId = "inputPlaceSearch";
+  
+  document.getElementById(parentId).innerHTML = 'Search: <input id="' + inputId + '" size="20em" type="text" onkeydown="if(event.keyCode==13) ReadyMap.PlaceSearch.doSearch(value, ' + callback + ');" />';
 };
 
-//...................................................................
+ReadyMap.PlaceSearch.doSearch = function(place, callback)
+{
+  var pelicanProxyURI = "http://demo.pelicanmapping.com/rmweb/proxy.php";
+  var yahooGeocodeURI = "http://local.yahooapis.com/MapsService/V1/geocode";
+  var yahooPlaceURI   = "http://wherein.yahooapis.com/v1/document";
+  var yahooAppId = "n51Mo.jV34EwZuxIhJ0GqHLzPXoZyjSG6jhLJsQ1v1q975Lf9g7iC4gRYKecVQ--";
+  
+  if (place != undefined && typeof callback == "function")
+  {
+    var yahooURI = encodeURI(yahooPlaceURI);
+	$.ajax(
+	{
+	  url:pelicanProxyURI,
+	  async: "false",
+	  type: "POST",
+	  headers: { "Connection": "close" },
+	  data:
+	  {
+	    url: yahooURI, mimeType: "text/xml",
+        documentContent: encodeURI(place),
+        documentType: "text/plain",
+        appid: yahooAppId
+	  },
 
-ReadyMap.controls.GeoRSSList = function(element_id, mapView, classid) {
-    this.id = element_id;
-    this.element = $("#" + element_id);
-    this.mapView = mapView;
-	this.classid = classid
-	this.items = undefined;
-    this.init();
-};
-ReadyMap.controls.GeoRSSList.prototype = {
-  init : function() {
-    this.element.append('...');
-  },
-  
-  setItems: function(items) {
-    this.items = items;
-	this.renderList();
-  },
-  
-  renderList: function() {
-    this.element.empty();
-	
-	var mapView = this.mapView;
-	var element = this.element;
-	var classid = this.classid;
-    
-	$.each(this.items, function(i, value) {
-	  var itemDiv;
-	  if (classid == undefined)
+      success: function(data)
 	  {
-	    itemDiv = $('<div style="padding: 4px;' + (i == 0 ? '' : ' border-top: 1px dotted #999;') + '">' + value.title + (value.link == undefined || value.link.length < 0 ? '' : '...<a href="' + value.link + '" target="_blank">Details</a>') + '</div>');
-		$(itemDiv).hover(
-		  function() {
-		    $(this).css("color", "#09f");
-		  },
-		  function() {
-		    $(this).css("color", "");
-		  });
-	  }
-	  else
-	  {
-		itemDiv = $('<div class="' + classid + '">' + value.title + (value.link == undefined || value.link.length < 0 ? '' : '...<a href="' + value.link + '">Details</a>') + '</div>');
-	  }
-		
-	  $(itemDiv).click(function(){
-	      mapView.viewer.manipulator.setViewpoint(value.latitude, value.longitude, 0.0, 0, -90, 2000000, 1);
-	  });
+		var xml = data.documentElement;
+
+		try
+		{
+			var lat = xml.getElementsByTagName("latitude")[0].firstChild.nodeValue;
+			var lon = xml.getElementsByTagName("longitude")[0].firstChild.nodeValue;
+
+			var southWest = xml.getElementsByTagName("southWest")[0];
+			var swlat = southWest.getElementsByTagName("latitude")[0].firstChild.nodeValue;
+			var swlon = southWest.getElementsByTagName("longitude")[0].firstChild.nodeValue;
+
+			var northEast = xml.getElementsByTagName("northEast")[0];
+			var nelat = northEast.getElementsByTagName("latitude")[0].firstChild.nodeValue;
+			var nelon = northEast.getElementsByTagName("longitude")[0].firstChild.nodeValue;
+			  
+			callback(lat, lon, swlat, swlon, nelat, nelon, data);
+		}
+		catch (e)
+		{
+			callback(0,0,0,0,0,0,"Cannot find location: " + place);
+		}
+      },
 	  
-	  element.append(itemDiv);
+	  error: function(jqXHR, status, error)
+	  {
+		callback(0,0,0,0,0,0,status);
+      }
 	});
   }
 };
