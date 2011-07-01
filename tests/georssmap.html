@@ -55,7 +55,7 @@
 		var rssLayer = new ReadyMap.GeoRSSLayer(mapView, proxy + feedUrl, 60, { url: "../images/earthquake.png" });
 		
 		//Add GeoRSSList
-		var rssPanel = new ReadyMap.controls.GeoRSSList("RSSPanel", mapView);
+		var rssPanel = new ReadyMap.Controls.GeoRSSList("RSSPanel", mapView);
 		rssLayer.reader.addCallback(function(items) { rssPanel.setItems(items); });
     });
 
