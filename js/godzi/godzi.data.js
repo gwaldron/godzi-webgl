@@ -256,7 +256,7 @@ godzi.GeoRSSLayer = function(mapView, url, rate, iconOptions) {
 	  url: "http://google-maps-icons.googlecode.com/files/redblank.png",
       width: 32,
       height: 32,
-      class: ""
+      cssClass: ""
     };
     this.options = jQuery.extend({}, defaults, iconOptions);
 	
@@ -296,7 +296,7 @@ godzi.GeoRSSLayer.prototype = {
 		    var icon = new godzi.Icon("icon" + i + "_" + items[i].guid, Math.deg2rad(items[i].longitude), Math.deg2rad(items[i].latitude), 0, this.options.url, {
               width: this.options.width,
               height: this.options.height,
-			  class: this.options.class,
+			  cssClass: this.options.cssClass,
 			  title: items[i].title
             });
 			

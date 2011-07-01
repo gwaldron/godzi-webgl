@@ -92,39 +92,22 @@ jQuery.extend({
 
 if (!Array.prototype.indexOf)
 {
-  Array.prototype.indexOf = function(searchElement /*, fromIndex */)
+  Array.prototype.indexOf = function(elt /*, from*/)
   {
-    "use strict";
+    var len = this.length;
 
-    if (this === void 0 || this === null)
-      throw new TypeError();
+    var from = Number(arguments[1]) || 0;
+    from = (from < 0)
+         ? Math.ceil(from)
+         : Math.floor(from);
+    if (from < 0)
+      from += len;
 
-    var t = Object(this);
-    var len = t.length >>> 0;
-    if (len === 0)
-      return -1;
-
-    var n = 0;
-    if (arguments.length > 0)
+    for (; from < len; from++)
     {
-      n = Number(arguments[1]);
-      if (n !== n) // shortcut for verifying if it's NaN
-        n = 0;
-      else if (n !== 0 && n !== (1 / 0) && n !== -(1 / 0))
-        n = (n > 0 || -1) * Math.floor(Math.abs(n));
-    }
-
-    if (n >= len)
-      return -1;
-
-    var k = n >= 0
-          ? n
-          : Math.max(len - Math.abs(n), 0);
-
-    for (; k < len; k++)
-    {
-      if (k in t && t[k] === searchElement)
-        return k;
+      if (from in this &&
+          this[from] === elt)
+        return from;
     }
     return -1;
   };
@@ -139,8 +122,11 @@ if (!Array.prototype.indexOf)
 
 var godzi = {};
 
-godzi.init = function(scriptDir, onload) {
+godzi.version = '0.0.1';
 
+godzi.init = function(onload) {
+
+/*
     var libs = [
         "jquery/jquery.mousewheel.js",
         "osgjs/osg-debug-0.0.4.js",
@@ -157,6 +143,7 @@ godzi.init = function(scriptDir, onload) {
     }
 
     $.includeInOrder(libsWithDir);
+	*/
 
     window.addEventListener("load", onload, true);
 };

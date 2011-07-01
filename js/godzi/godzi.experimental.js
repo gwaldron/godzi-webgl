@@ -217,7 +217,7 @@ godzi.Icon = function(id, lon, lat, alt, url, options) {
   var defaults = {
     width: 64,
     height: 64,
-    class: ""
+    cssClass: ""
   };
  
   
@@ -225,9 +225,9 @@ godzi.Icon = function(id, lon, lat, alt, url, options) {
   
   this.width = options.width;
   this.height = options.height;
-  this.class = options.class;
+  this.cssClass = options.cssClass;
   
-  this.element = jQuery('<img id="' + this.id + '" class="' + options.class + '" src="' + url +
+  this.element = jQuery('<img id="' + this.id + '" class="' + options.cssClass + '" src="' + url +
                         '" width="' + this.width + '" height="' + this.height +
 						(options.title != undefined ? '" title="' + options.title : '') + '"/>');
 						
@@ -273,15 +273,15 @@ godzi.Label = function(id, lon, lat, alt, text, options) {
   this.ownsElement = true;
     
   var defaults = {
-    class: ""
+    cssClass: ""
   };
  
   
   var options = jQuery.extend({}, defaults, options);
   
-  this.class = options.class;
+  this.cssClass = options.cssClass;
   
-  this.element = jQuery('<span id="' + this.id + '" class="' + options.class + '">' + this.text + '</span>');
+  this.element = jQuery('<span id="' + this.id + '" class="' + options.cssClass + '">' + this.text + '</span>');
   //Disable selection
   this.element[0].onselectstart = function() { return false;} //id;
   this.element[0].onmousedown   = function() { return false;} //id;
@@ -359,7 +359,7 @@ godzi.WOEIDWeatherLayer = function(mapView, places, rate, proxy, iconOptions) {
 	  url: "http://google-maps-icons.googlecode.com/files/cloudsun.png",
       width: 32,
       height: 32,
-      class: "",
+      cssClass: "",
 	  renderer: undefined
     };
     this.options = jQuery.extend({}, defaults, iconOptions);
@@ -412,7 +412,7 @@ godzi.WOEIDWeatherLayer.prototype = {
 	    var icon = new godzi.Icon("icon" + id, Math.deg2rad(item.longitude), Math.deg2rad(item.latitude), 0, this.options.url, {
 		  width: this.options.width,
 		  height: this.options.height,
-		  class: this.options.class,
+		  cssClass: this.options.cssClass,
 		  title: item.title
 		});
 		

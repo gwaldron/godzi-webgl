@@ -565,7 +565,7 @@ godzi.MapManipulator.prototype = osg.objectInehrit(godzi.Manipulator.prototype, 
 
     mousewheel: function(ev, intDelta, deltaX, deltaY) {
         this.zoomModel(0, intDelta * 0.1);
-    },
+    }
 } );
 
 //........................................................................
