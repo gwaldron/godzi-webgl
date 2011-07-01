@@ -1,12 +1,12 @@
 <html>
 <head>
-<title>Godzi WebGL</title>
+<title>ReadyMap WebGL</title>
 
 <meta http-equiv="content-type" content="text/html; charset=ISO-8859-1">
 
 <script type="text/javascript" src="../js/jquery/jquery-1.4.2.js"></script>
 <script type="text/javascript" src="../js/jquery/jquery-ui-1.8.2.custom.min.js"></script>
-<script type="text/javascript" src="../build/godzi.js"></script>
+<script type="text/javascript" src="../build/readymap.js"></script>
 <script type="text/javascript" src="../js/data/country_data.js"></script>
 
 <link href="demo.css" rel="Stylesheet" type="text/css"></link>
@@ -22,27 +22,27 @@ var positionEngine;
 
 
 
-    godzi.init(function() {
+    ReadyMap.init(function() {
         // create a map model:
-        map = new godzi.Map();
+        map = new ReadyMap.Map();
 
-        map.addImageLayer(new godzi.TMSImageLayer({
+        map.addImageLayer(new ReadyMap.TMSImageLayer({
             name: "Landsat",
             url: "http://readymap.org/readymap/tiles/1.0.0/22/",
             tmsType: "google"
         }));
 
-        map.addImageLayer(new godzi.TMSImageLayer({
+        map.addImageLayer(new ReadyMap.TMSImageLayer({
             name: "OSM",
             url: "http://readymap.org/readymap/tiles/1.0.0/35/",
             tmsType: "google"
         }));
 
         // create a view tied to a page element:
-        var size = godzi.getWindowSize();
+        var size = ReadyMap.getWindowSize();
         var headerHeight = jQuery('#header').height();
         size.h -= headerHeight;
-        mapView = new godzi.MapView("3DView", size, map);
+        mapView = new ReadyMap.MapView("3DView", size, map);
 
         // display the Lat/Long:
         mapView.addFrameEndCallback( function() {
@@ -59,7 +59,7 @@ var positionEngine;
                 "  Pitch:" + Math.rad2deg(mapView.viewer.manipulator.localPitch).toFixed(1) + "\u00B0");            
         });
         
-        positionEngine = new godzi.PositionEngine( mapView );
+        positionEngine = new ReadyMap.PositionEngine( mapView );
         
         var addedLabels = [];
         
@@ -79,7 +79,7 @@ var positionEngine;
               class = "high-population";
               icon_url = "http://google-maps-icons.googlecode.com/files/bigcity.png";
             }
-            var label = new godzi.Label("label" + i, Math.deg2rad(lon), Math.deg2rad(lat), 0, name, {
+            var label = new ReadyMap.Label("label" + i, Math.deg2rad(lon), Math.deg2rad(lat), 0, name, {
               class: class
             });
             //Offset the label so you can see the icon
@@ -87,7 +87,7 @@ var positionEngine;
             positionEngine.elements.push( label );     
            
             
-            var icon = new godzi.Icon("icon" + i, Math.deg2rad(lon), Math.deg2rad(lat), 0, icon_url, {
+            var icon = new ReadyMap.Icon("icon" + i, Math.deg2rad(lon), Math.deg2rad(lat), 0, icon_url, {
               width: 32,
               height: 32
             });
@@ -105,9 +105,9 @@ var positionEngine;
   <div id="header">
     <a href="http://pelicanmapping.com" border="0"><img id="logo" align="right" height="50" src="http://pelicanmapping.com/wp-content/uploads/2011/02/pelican-logo-262x93-light.png" /></a>
     <p>
-        Godzi / WebGL :: 
-        <a href="http://godzi.org">wiki</a> :: 
-        <a href="http://github.com/gwaldron/godzi-webgl">github</a> ::
+        ReadyMap / WebGL :: 
+        <a href="http://ReadyMap.org">wiki</a> :: 
+        <a href="http://github.com/gwaldron/ReadyMap-webgl">github</a> ::
         <a href="http://twitter.com/#!/pelicanmapping">twitter</a>
     </p>
     <div id="toolbar">

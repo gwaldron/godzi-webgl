@@ -1,15 +1,15 @@
-godzi.controls = {}
+ReadyMap.controls = {}
 
 //...................................................................
 
-godzi.controls.LayerSwitcher = function(element_id, map) {
+ReadyMap.controls.LayerSwitcher = function(element_id, map) {
     this.id = element_id;
     this.element = jQuery("#" + element_id);
     this.map = map;
     this.init();
 };
 
-godzi.controls.LayerSwitcher.prototype = {
+ReadyMap.controls.LayerSwitcher.prototype = {
   init : function() {
     //Remove all existing children
     jQuery(this.element).children().remove();   
@@ -66,7 +66,7 @@ godzi.controls.LayerSwitcher.prototype = {
 
 //...................................................................
 
-godzi.controls.GeoRSSList = function(element_id, mapView, classid) {
+ReadyMap.controls.GeoRSSList = function(element_id, mapView, classid) {
     this.id = element_id;
     this.element = $("#" + element_id);
     this.mapView = mapView;
@@ -74,7 +74,7 @@ godzi.controls.GeoRSSList = function(element_id, mapView, classid) {
 	this.items = undefined;
     this.init();
 };
-godzi.controls.GeoRSSList.prototype = {
+ReadyMap.controls.GeoRSSList.prototype = {
   init : function() {
     this.element.append('...');
   },

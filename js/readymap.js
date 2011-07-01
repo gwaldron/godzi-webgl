@@ -1,8 +1,8 @@
 /**
-* Godzi/WebGL
+* ReadyMap/WebGL
 * (c) Copyright 2011 Pelican Mapping
 * License: LGPL
-* http://godzi.org
+* http://ReadyMap.org
 */
 
 /**
@@ -120,35 +120,15 @@ if (!Array.prototype.indexOf)
 
 
 
-var godzi = {};
+var ReadyMap = {};
 
-godzi.version = '0.0.1';
+ReadyMap.version = '0.0.1';
 
-godzi.init = function(onload) {
-
-/*
-    var libs = [
-        "jquery/jquery.mousewheel.js",
-        "osgjs/osg-debug-0.0.4.js",
-        "osgearth/osgearth.js",
-        "godzi/godzi.ui.js",
-        "godzi/godzi.data.js",
-		"godzi/godzi.experimental.js",
-		"godzi/godzi.controls.js"
-    ];
-
-    var libsWithDir = [];
-    for (var i in libs) {
-        libsWithDir.push(scriptDir + libs[i]);
-    }
-
-    $.includeInOrder(libsWithDir);
-	*/
-
+ReadyMap.init = function(onload) {
     window.addEventListener("load", onload, true);
 };
 
-godzi.getWindowSize = function() {
+ReadyMap.getWindowSize = function() {
 
     var myWidth = 0, myHeight = 0;
 

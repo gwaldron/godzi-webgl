@@ -14,19 +14,15 @@ import re
 import commands
 import shutil
 
-OSGEARTH = [
-"osgearth/osgearth.js"
-]
-
-GODZI = [
-        "godzi.js",
+READYMAP = [
+        "readymap.js",
 		"jquery/jquery.mousewheel.js",
 		"osgjs/osg-debug-0.0.4.js",
 		"osgearth/osgearth.js",
-		"godzi/godzi.ui.js",
-		"godzi/godzi.data.js",
-		"godzi/godzi.experimental.js",
-		"godzi/godzi.controls.js",
+		"readymap/readymap.ui.js",
+		"readymap/readymap.data.js",
+		"readymap/readymap.experimental.js",
+		"readymap/readymap.controls.js",
 ]
 
 version = '0.0.0'
@@ -146,9 +142,9 @@ def parse_args():
 
 def getVersion():
         p = re.compile('[0-9]+.[0-9]+.[0-9]+')
-        lines = open("../js/godzi.js", 'r').readlines()
+        lines = open("../js/readymap.js", 'r').readlines()
         for l in lines:
-                if l.find("godzi.version") != -1:
+                if l.find("ReadyMap.version") != -1:
                         res = p.search(l)
                         if res is not None:
                                 version = res.group(0)
@@ -165,7 +161,7 @@ def main(argv=None):
 	unminified = args.unminified
 
 	config = [
-                ['godzi', 'includes', GODZI, args],
+                ['readymap', 'includes', READYMAP, args],
                 ]
 
         global version

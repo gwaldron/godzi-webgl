@@ -1,20 +1,20 @@
 /**
-* Godzi/WebGL
+* ReadyMap/WebGL
 * (c) Copyright 2011 Pelican Mapping
 * License: LGPL
-* http://godzi.org
+* http://ReadyMap.org
 */
  
-godzi.Map = function(args) {
+ReadyMap.Map = function(args) {
     osgearth.Map.call(this, args);
 };
 
-godzi.Map.prototype = osg.objectInehrit(osgearth.Map.prototype, {
+ReadyMap.Map.prototype = osg.objectInehrit(osgearth.Map.prototype, {
 });
 
 //...................................................................
 
-godzi.TMSImageLayer = function(settings) {
+ReadyMap.TMSImageLayer = function(settings) {
     osgearth.ImageLayer.call(this, settings.name);
     this.url = settings.url;
     this.flipY = settings.tmsType === "google";
@@ -23,7 +23,7 @@ godzi.TMSImageLayer = function(settings) {
     this.args = settings.args !== undefined ? settings.args : null;
 };
 
-godzi.TMSImageLayer.prototype = osg.objectInehrit(osgearth.ImageLayer.prototype, {
+ReadyMap.TMSImageLayer.prototype = osg.objectInehrit(osgearth.ImageLayer.prototype, {
 
     getURL: function(key, profile) {
         var y = key[1];
@@ -49,13 +49,13 @@ godzi.TMSImageLayer.prototype = osg.objectInehrit(osgearth.ImageLayer.prototype,
 
 //...................................................................
 
-godzi.ArcGISImageLayer = function(settings) {
+ReadyMap.ArcGISImageLayer = function(settings) {
     osgearth.ImageLayer.call(this, settings.name);
     this.url = settings.url;
     this.extension = settings.imageType !== undefined ? settings.imageType : "jpg";
 };
 
-godzi.ArcGISImageLayer.prototype = osg.objectInehrit(osgearth.ImageLayer.prototype, {
+ReadyMap.ArcGISImageLayer.prototype = osg.objectInehrit(osgearth.ImageLayer.prototype, {
 
     getURL: function(key, profile) {
         var imageURL = this.url + "/tile/" + key[2] + "/" + key[1] + "/" + key[0] + "." + this.extension;
@@ -74,7 +74,7 @@ godzi.ArcGISImageLayer.prototype = osg.objectInehrit(osgearth.ImageLayer.prototy
 
 //...................................................................
 
-godzi.WMSImageLayer = function(settings) {
+ReadyMap.WMSImageLayer = function(settings) {
     osgearth.ImageLayer.call(this, settings.name);
     this.url = settings.url;    
     this.format = settings.format !== undefined ? settings.format : "image/jpeg";
@@ -87,7 +87,7 @@ godzi.WMSImageLayer = function(settings) {
 	this.styles = settings.styles !== undefined ? settings.styles : "";
 };
 
-godzi.WMSImageLayer.prototype = osg.objectInehrit(osgearth.ImageLayer.prototype, {
+ReadyMap.WMSImageLayer.prototype = osg.objectInehrit(osgearth.ImageLayer.prototype, {
 
     getURL: function(key, profile) {	    	
 	    var size = this.profile.getTileSize(key[2]);
@@ -133,7 +133,7 @@ godzi.WMSImageLayer.prototype = osg.objectInehrit(osgearth.ImageLayer.prototype,
 
 //...................................................................
 
-godzi.GeoRSSReader = function(url, rate, updateCallback) {
+ReadyMap.GeoRSSReader = function(url, rate, updateCallback) {
     this.url = url;
 	
 	this.callbacks = new Array;
@@ -144,7 +144,7 @@ godzi.GeoRSSReader = function(url, rate, updateCallback) {
 	this.setRate(rate);
 };
 
-godzi.GeoRSSReader.prototype = {
+ReadyMap.GeoRSSReader.prototype = {
     updateFeed: function() {
 	    this.items = new Array;
 		
@@ -248,7 +248,7 @@ godzi.GeoRSSReader.prototype = {
 
 //...................................................................
 
-godzi.GeoRSSLayer = function(mapView, url, rate, iconOptions) {
+ReadyMap.GeoRSSLayer = function(mapView, url, rate, iconOptions) {
     this.mapView = mapView;
     this.url = url;
 	
@@ -260,10 +260,10 @@ godzi.GeoRSSLayer = function(mapView, url, rate, iconOptions) {
     };
     this.options = jQuery.extend({}, defaults, iconOptions);
 	
-	this.positionEngine = new godzi.PositionEngine(mapView);
+	this.positionEngine = new ReadyMap.PositionEngine(mapView);
 	
 	var thisObj = this;
-	this.reader = new godzi.GeoRSSReader(url, rate, function(items) { thisObj.createIcons(items); });
+	this.reader = new ReadyMap.GeoRSSReader(url, rate, function(items) { thisObj.createIcons(items); });
 };
 
 
@@ -282,7 +282,7 @@ function showDialog(content, title) {
     });
 }
 
-godzi.GeoRSSLayer.prototype = {
+ReadyMap.GeoRSSLayer.prototype = {
     setRate: function(newRate) {
         this.reader.setRate(newRate);	
 	},
@@ -293,7 +293,7 @@ godzi.GeoRSSLayer.prototype = {
 		
 		for (var i in items)
 		{
-		    var icon = new godzi.Icon("icon" + i + "_" + items[i].guid, Math.deg2rad(items[i].longitude), Math.deg2rad(items[i].latitude), 0, this.options.url, {
+		    var icon = new ReadyMap.Icon("icon" + i + "_" + items[i].guid, Math.deg2rad(items[i].longitude), Math.deg2rad(items[i].latitude), 0, this.options.url, {
               width: this.options.width,
               height: this.options.height,
 			  cssClass: this.options.cssClass,
@@ -316,7 +316,7 @@ godzi.GeoRSSLayer.prototype = {
   			      html += "</div>";
   			      var dlg = showDialog(html, e.data.title);
   			      dlg = dlg.parent();
-  			      e.data.engine.addElement(new godzi.PositionedElement("dlg", Math.deg2rad(e.data.lon), Math.deg2rad(e.data.lat), 0, {element: dlg, vAlign: "bottom"}));
+  			      e.data.engine.addElement(new ReadyMap.PositionedElement("dlg", Math.deg2rad(e.data.lon), Math.deg2rad(e.data.lat), 0, {element: dlg, vAlign: "bottom"}));
 			    });			
             this.positionEngine.addElement( icon );
 		}

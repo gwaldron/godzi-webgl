@@ -1,8 +1,8 @@
 /**
-* Godzi/WebGL
+* ReadyMap/WebGL
 * (c) Copyright 2011 Pelican Mapping
 * License: LGPL
-* http://godzi.org
+* http://ReadyMap.org
 */
 
 /**
@@ -120,35 +120,15 @@ if (!Array.prototype.indexOf)
 
 
 
-var godzi = {};
+var ReadyMap = {};
 
-godzi.version = '0.0.1';
+ReadyMap.version = '0.0.1';
 
-godzi.init = function(onload) {
-
-/*
-    var libs = [
-        "jquery/jquery.mousewheel.js",
-        "osgjs/osg-debug-0.0.4.js",
-        "osgearth/osgearth.js",
-        "godzi/godzi.ui.js",
-        "godzi/godzi.data.js",
-		"godzi/godzi.experimental.js",
-		"godzi/godzi.controls.js"
-    ];
-
-    var libsWithDir = [];
-    for (var i in libs) {
-        libsWithDir.push(scriptDir + libs[i]);
-    }
-
-    $.includeInOrder(libsWithDir);
-	*/
-
+ReadyMap.init = function(onload) {
     window.addEventListener("load", onload, true);
 };
 
-godzi.getWindowSize = function() {
+ReadyMap.getWindowSize = function() {
 
     var myWidth = 0, myHeight = 0;
 
@@ -9435,10 +9415,10 @@ osg.CullVisitor.prototype[osgearth.Tile.prototype.objectType] = function(node) {
         this.popStateSet();
 };
 /**
-* Godzi/WebGL
+* ReadyMap/WebGL
 * (c) Copyright 2011 Pelican Mapping
 * License: LGPL
-* http://godzi.org
+* http://ReadyMap.org
 */
 
 /**
@@ -9461,7 +9441,7 @@ osg.Matrix.equals = function(a,b) {
 
 //........................................................................
 
-godzi.Manipulator = function(map) {
+ReadyMap.Manipulator = function(map) {
     this.map = map;
     this.center = [0, 0, 0];
     this.minDistance = 0.001;
@@ -9474,7 +9454,7 @@ godzi.Manipulator = function(map) {
     
 };
 
-godzi.Manipulator.prototype = {
+ReadyMap.Manipulator.prototype = {
 
     init: function() {
     },
@@ -9633,8 +9613,8 @@ godzi.Manipulator.prototype = {
 
 //........................................................................
 
-godzi.EarthManipulator = function(map) {
-    godzi.Manipulator.call(this, map);
+ReadyMap.EarthManipulator = function(map) {
+    ReadyMap.Manipulator.call(this, map);
     this.minPitch = Math.deg2rad(-89.9);
     this.maxPitch = Math.deg2rad(-10.0);
     this.buttonup = true;
@@ -9644,7 +9624,7 @@ godzi.EarthManipulator = function(map) {
     this.computeHomePosition();
 }
 
-godzi.EarthManipulator.prototype = osg.objectInehrit( godzi.Manipulator.prototype, {
+ReadyMap.EarthManipulator.prototype = osg.objectInehrit( ReadyMap.Manipulator.prototype, {
 
     computeHomePosition: function() {
         this.setViewpoint(0, -90, 0, 0, -90, 1e7);
@@ -9927,12 +9907,12 @@ godzi.EarthManipulator.prototype = osg.objectInehrit( godzi.Manipulator.prototyp
 
 //........................................................................
 
-godzi.MapManipulator = function(map) {
-    godzi.Manipulator.call(this, map);
+ReadyMap.MapManipulator = function(map) {
+    ReadyMap.Manipulator.call(this, map);
     this.computeHomePosition();
 };
 
-godzi.MapManipulator.prototype = osg.objectInehrit(godzi.Manipulator.prototype, {
+ReadyMap.MapManipulator.prototype = osg.objectInehrit(ReadyMap.Manipulator.prototype, {
 
     computeHomePosition: function() {
         this.center = [0,0,0];
@@ -10010,7 +9990,7 @@ godzi.MapManipulator.prototype = osg.objectInehrit(godzi.Manipulator.prototype, 
 * MapView
 * Installs a 3D WebGL viewer within an HTML5 canvas elements.
 */
-godzi.MapView = function(elementId, size, map) {
+ReadyMap.MapView = function(elementId, size, map) {
 
     this.map = map;
     this.viewer = null;
@@ -10028,9 +10008,9 @@ godzi.MapView = function(elementId, size, map) {
  
     this.viewer.init();
     if ( map.geocentric )
-        this.viewer.setupManipulator(new godzi.EarthManipulator(map));
+        this.viewer.setupManipulator(new ReadyMap.EarthManipulator(map));
     else
-        this.viewer.setupManipulator(new godzi.MapManipulator(map));
+        this.viewer.setupManipulator(new ReadyMap.MapManipulator(map));
     this.viewer.setScene( new osgearth.MapNode(map) ); //map.createNode());
     delete this.viewer.view.light;
     this.viewer.getManipulator().computeHomePosition();
@@ -10044,7 +10024,7 @@ godzi.MapView = function(elementId, size, map) {
     this.frameEnd=[];
 };
 
-godzi.MapView.prototype = {
+ReadyMap.MapView.prototype = {
 
     home: function() {
         this.viewer.getManipulator().computeHomePosition();
@@ -10091,22 +10071,22 @@ godzi.MapView.prototype = {
     }
 };
 /**
-* Godzi/WebGL
+* ReadyMap/WebGL
 * (c) Copyright 2011 Pelican Mapping
 * License: LGPL
-* http://godzi.org
+* http://ReadyMap.org
 */
  
-godzi.Map = function(args) {
+ReadyMap.Map = function(args) {
     osgearth.Map.call(this, args);
 };
 
-godzi.Map.prototype = osg.objectInehrit(osgearth.Map.prototype, {
+ReadyMap.Map.prototype = osg.objectInehrit(osgearth.Map.prototype, {
 });
 
 //...................................................................
 
-godzi.TMSImageLayer = function(settings) {
+ReadyMap.TMSImageLayer = function(settings) {
     osgearth.ImageLayer.call(this, settings.name);
     this.url = settings.url;
     this.flipY = settings.tmsType === "google";
@@ -10115,7 +10095,7 @@ godzi.TMSImageLayer = function(settings) {
     this.args = settings.args !== undefined ? settings.args : null;
 };
 
-godzi.TMSImageLayer.prototype = osg.objectInehrit(osgearth.ImageLayer.prototype, {
+ReadyMap.TMSImageLayer.prototype = osg.objectInehrit(osgearth.ImageLayer.prototype, {
 
     getURL: function(key, profile) {
         var y = key[1];
@@ -10141,13 +10121,13 @@ godzi.TMSImageLayer.prototype = osg.objectInehrit(osgearth.ImageLayer.prototype,
 
 //...................................................................
 
-godzi.ArcGISImageLayer = function(settings) {
+ReadyMap.ArcGISImageLayer = function(settings) {
     osgearth.ImageLayer.call(this, settings.name);
     this.url = settings.url;
     this.extension = settings.imageType !== undefined ? settings.imageType : "jpg";
 };
 
-godzi.ArcGISImageLayer.prototype = osg.objectInehrit(osgearth.ImageLayer.prototype, {
+ReadyMap.ArcGISImageLayer.prototype = osg.objectInehrit(osgearth.ImageLayer.prototype, {
 
     getURL: function(key, profile) {
         var imageURL = this.url + "/tile/" + key[2] + "/" + key[1] + "/" + key[0] + "." + this.extension;
@@ -10166,7 +10146,7 @@ godzi.ArcGISImageLayer.prototype = osg.objectInehrit(osgearth.ImageLayer.prototy
 
 //...................................................................
 
-godzi.WMSImageLayer = function(settings) {
+ReadyMap.WMSImageLayer = function(settings) {
     osgearth.ImageLayer.call(this, settings.name);
     this.url = settings.url;    
     this.format = settings.format !== undefined ? settings.format : "image/jpeg";
@@ -10179,7 +10159,7 @@ godzi.WMSImageLayer = function(settings) {
 	this.styles = settings.styles !== undefined ? settings.styles : "";
 };
 
-godzi.WMSImageLayer.prototype = osg.objectInehrit(osgearth.ImageLayer.prototype, {
+ReadyMap.WMSImageLayer.prototype = osg.objectInehrit(osgearth.ImageLayer.prototype, {
 
     getURL: function(key, profile) {	    	
 	    var size = this.profile.getTileSize(key[2]);
@@ -10225,7 +10205,7 @@ godzi.WMSImageLayer.prototype = osg.objectInehrit(osgearth.ImageLayer.prototype,
 
 //...................................................................
 
-godzi.GeoRSSReader = function(url, rate, updateCallback) {
+ReadyMap.GeoRSSReader = function(url, rate, updateCallback) {
     this.url = url;
 	
 	this.callbacks = new Array;
@@ -10236,7 +10216,7 @@ godzi.GeoRSSReader = function(url, rate, updateCallback) {
 	this.setRate(rate);
 };
 
-godzi.GeoRSSReader.prototype = {
+ReadyMap.GeoRSSReader.prototype = {
     updateFeed: function() {
 	    this.items = new Array;
 		
@@ -10340,7 +10320,7 @@ godzi.GeoRSSReader.prototype = {
 
 //...................................................................
 
-godzi.GeoRSSLayer = function(mapView, url, rate, iconOptions) {
+ReadyMap.GeoRSSLayer = function(mapView, url, rate, iconOptions) {
     this.mapView = mapView;
     this.url = url;
 	
@@ -10352,10 +10332,10 @@ godzi.GeoRSSLayer = function(mapView, url, rate, iconOptions) {
     };
     this.options = jQuery.extend({}, defaults, iconOptions);
 	
-	this.positionEngine = new godzi.PositionEngine(mapView);
+	this.positionEngine = new ReadyMap.PositionEngine(mapView);
 	
 	var thisObj = this;
-	this.reader = new godzi.GeoRSSReader(url, rate, function(items) { thisObj.createIcons(items); });
+	this.reader = new ReadyMap.GeoRSSReader(url, rate, function(items) { thisObj.createIcons(items); });
 };
 
 
@@ -10374,7 +10354,7 @@ function showDialog(content, title) {
     });
 }
 
-godzi.GeoRSSLayer.prototype = {
+ReadyMap.GeoRSSLayer.prototype = {
     setRate: function(newRate) {
         this.reader.setRate(newRate);	
 	},
@@ -10385,7 +10365,7 @@ godzi.GeoRSSLayer.prototype = {
 		
 		for (var i in items)
 		{
-		    var icon = new godzi.Icon("icon" + i + "_" + items[i].guid, Math.deg2rad(items[i].longitude), Math.deg2rad(items[i].latitude), 0, this.options.url, {
+		    var icon = new ReadyMap.Icon("icon" + i + "_" + items[i].guid, Math.deg2rad(items[i].longitude), Math.deg2rad(items[i].latitude), 0, this.options.url, {
               width: this.options.width,
               height: this.options.height,
 			  cssClass: this.options.cssClass,
@@ -10408,17 +10388,17 @@ godzi.GeoRSSLayer.prototype = {
   			      html += "</div>";
   			      var dlg = showDialog(html, e.data.title);
   			      dlg = dlg.parent();
-  			      e.data.engine.addElement(new godzi.PositionedElement("dlg", Math.deg2rad(e.data.lon), Math.deg2rad(e.data.lat), 0, {element: dlg, vAlign: "bottom"}));
+  			      e.data.engine.addElement(new ReadyMap.PositionedElement("dlg", Math.deg2rad(e.data.lon), Math.deg2rad(e.data.lat), 0, {element: dlg, vAlign: "bottom"}));
 			    });			
             this.positionEngine.addElement( icon );
 		}
 	}
 };
 /**
-* Godzi/WebGL
+* ReadyMap/WebGL
 * (c) Copyright 2011 Pelican Mapping
 * License: LGPL
-* http://godzi.org
+* http://ReadyMap.org
 */
 
 /**
@@ -10429,15 +10409,15 @@ godzi.GeoRSSLayer.prototype = {
 //........................................................................
 
 // Creates style-able input element. Mostly provided as a convenience.
-godzi.PlaceSearch = function(parentId, inputId, callback)
+ReadyMap.PlaceSearch = function(parentId, inputId, callback)
 {
   if (inputId == undefined)
     inputId = "inputPlaceSearch";
   
-  document.getElementById(parentId).innerHTML = 'Search: <input id="' + inputId + '" size="20em" type="text" onkeydown="if(event.keyCode==13) godzi.PlaceSearch.doSearch(value, ' + callback + ');" />';
+  document.getElementById(parentId).innerHTML = 'Search: <input id="' + inputId + '" size="20em" type="text" onkeydown="if(event.keyCode==13) ReadyMap.PlaceSearch.doSearch(value, ' + callback + ');" />';
 };
 
-godzi.PlaceSearch.doSearch = function(place, callback)
+ReadyMap.PlaceSearch.doSearch = function(place, callback)
 {
   var pelicanProxyURI = "http://demo.pelicanmapping.com/rmweb/proxy.php";
   var yahooGeocodeURI = "http://local.yahooapis.com/MapsService/V1/geocode";
@@ -10496,7 +10476,7 @@ godzi.PlaceSearch.doSearch = function(place, callback)
 
 //........................................................................
 
-godzi.PositionedElement = function(id, lon, lat, alt, options) {
+ReadyMap.PositionedElement = function(id, lon, lat, alt, options) {
   this.hAlign = "left";
   this.vAlign = "top";
   this.lat = lat;
@@ -10532,7 +10512,7 @@ godzi.PositionedElement = function(id, lon, lat, alt, options) {
   } 
 }
 
-godzi.PositionedElement.prototype = {  
+ReadyMap.PositionedElement.prototype = {  
 
   destroy : function() {
     if (this.ownsElement) {
@@ -10625,8 +10605,8 @@ godzi.PositionedElement.prototype = {
 }
 
 
-godzi.Icon = function(id, lon, lat, alt, url, options) {  
-  godzi.PositionedElement.call(this, id, lon, lat, alt);    
+ReadyMap.Icon = function(id, lon, lat, alt, url, options) {  
+  ReadyMap.PositionedElement.call(this, id, lon, lat, alt);    
   this.url = url;
   this.ownsElement = true;
     
@@ -10654,7 +10634,7 @@ godzi.Icon = function(id, lon, lat, alt, url, options) {
   jQuery("body").append(this.element);                         
 }
 
-godzi.Icon.prototype = osg.objectInehrit(godzi.PositionedElement.prototype, {
+ReadyMap.Icon.prototype = osg.objectInehrit(ReadyMap.PositionedElement.prototype, {
  getWidth : function() {
    return this.width;
  },
@@ -10683,8 +10663,8 @@ godzi.Icon.prototype = osg.objectInehrit(godzi.PositionedElement.prototype, {
  
 });
 
-godzi.Label = function(id, lon, lat, alt, text, options) {  
-  godzi.PositionedElement.call(this, id, lon, lat, alt);    
+ReadyMap.Label = function(id, lon, lat, alt, text, options) {  
+  ReadyMap.PositionedElement.call(this, id, lon, lat, alt);    
   this.text = text;
   this.ownsElement = true;
     
@@ -10705,11 +10685,11 @@ godzi.Label = function(id, lon, lat, alt, text, options) {
   jQuery("body").append(this.element);                         
 }
 
-godzi.Label.prototype = osg.objectInehrit(godzi.PositionedElement.prototype, {
+ReadyMap.Label.prototype = osg.objectInehrit(ReadyMap.PositionedElement.prototype, {
  
 });
 
-godzi.PositionEngine = function(mapView) {
+ReadyMap.PositionEngine = function(mapView) {
   this.mapView = mapView;
   var me = this;
   this.mapView.addFrameEndCallback( function() {
@@ -10718,7 +10698,7 @@ godzi.PositionEngine = function(mapView) {
   this.elements = [];
 }
 
-godzi.PositionEngine.prototype = {
+ReadyMap.PositionEngine.prototype = {
   addElement: function(element) {
     this.elements.push( element );
   },
@@ -10765,8 +10745,8 @@ godzi.PositionEngine.prototype = {
 
 //........................................................................
 
-godzi.WOEIDWeatherLayer = function(mapView, places, rate, proxy, iconOptions) {
-    this.positionEngine = new godzi.PositionEngine(mapView);
+ReadyMap.WOEIDWeatherLayer = function(mapView, places, rate, proxy, iconOptions) {
+    this.positionEngine = new ReadyMap.PositionEngine(mapView);
 	this.places = places;
 	this.rate = rate;
 	this.proxy = proxy;
@@ -10785,13 +10765,13 @@ godzi.WOEIDWeatherLayer = function(mapView, places, rate, proxy, iconOptions) {
 	this.init();
 };
 
-godzi.WOEIDWeatherLayer.prototype = {
+ReadyMap.WOEIDWeatherLayer.prototype = {
     init: function() {
 		for (var i in this.places)
 		{
 		    var place = this.places[i];
 			var thisObj = this;
-			godzi.PlaceSearch.doSearch(place, function(lat, lon, swlat, swlon, nelat, nelon, data) {
+			ReadyMap.PlaceSearch.doSearch(place, function(lat, lon, swlat, swlon, nelat, nelon, data) {
 			    var woeid = $(data).find('woeId').eq(0).text();
 				if (woeid != undefined && woeid != '')
 				  thisObj.createReader(woeid);
@@ -10803,7 +10783,7 @@ godzi.WOEIDWeatherLayer.prototype = {
 	    var url = this.proxy + 'http://weather.yahooapis.com/forecastrss?w=' + id;
 		var thisObj = this;
 		var renderer = this.options.renderer;
-		this.readers[id] = new godzi.GeoRSSReader(url, this.rate, function(items) {
+		this.readers[id] = new ReadyMap.GeoRSSReader(url, this.rate, function(items) {
 		    if (renderer != undefined)
 			    renderer(items[0], id);
 			else
@@ -10825,7 +10805,7 @@ godzi.WOEIDWeatherLayer.prototype = {
 			this.icons[id] = undefined;
 		}
 		
-	    var icon = new godzi.Icon("icon" + id, Math.deg2rad(item.longitude), Math.deg2rad(item.latitude), 0, this.options.url, {
+	    var icon = new ReadyMap.Icon("icon" + id, Math.deg2rad(item.longitude), Math.deg2rad(item.latitude), 0, this.options.url, {
 		  width: this.options.width,
 		  height: this.options.height,
 		  cssClass: this.options.cssClass,
@@ -10875,23 +10855,23 @@ godzi.WOEIDWeatherLayer.prototype = {
 			$(e.data.icon.element).click();
 		});
 		
-		var popup = new godzi.PositionedElement("popup_" + id, Math.deg2rad(lon), Math.deg2rad(lat), 0, {element: htmlElem, vAlign: "bottom"});
+		var popup = new ReadyMap.PositionedElement("popup_" + id, Math.deg2rad(lon), Math.deg2rad(lat), 0, {element: htmlElem, vAlign: "bottom"});
 		icon.popup = popup;
 		this.positionEngine.addElement(popup);
 	}
 };
-godzi.controls = {}
+ReadyMap.controls = {}
 
 //...................................................................
 
-godzi.controls.LayerSwitcher = function(element_id, map) {
+ReadyMap.controls.LayerSwitcher = function(element_id, map) {
     this.id = element_id;
     this.element = jQuery("#" + element_id);
     this.map = map;
     this.init();
 };
 
-godzi.controls.LayerSwitcher.prototype = {
+ReadyMap.controls.LayerSwitcher.prototype = {
   init : function() {
     //Remove all existing children
     jQuery(this.element).children().remove();   
@@ -10948,7 +10928,7 @@ godzi.controls.LayerSwitcher.prototype = {
 
 //...................................................................
 
-godzi.controls.GeoRSSList = function(element_id, mapView, classid) {
+ReadyMap.controls.GeoRSSList = function(element_id, mapView, classid) {
     this.id = element_id;
     this.element = $("#" + element_id);
     this.mapView = mapView;
@@ -10956,7 +10936,7 @@ godzi.controls.GeoRSSList = function(element_id, mapView, classid) {
 	this.items = undefined;
     this.init();
 };
-godzi.controls.GeoRSSList.prototype = {
+ReadyMap.controls.GeoRSSList.prototype = {
   init : function() {
     this.element.append('...');
   },

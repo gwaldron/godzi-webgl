@@ -1,8 +1,8 @@
 /**
-* Godzi/WebGL
+* ReadyMap/WebGL
 * (c) Copyright 2011 Pelican Mapping
 * License: LGPL
-* http://godzi.org
+* http://ReadyMap.org
 */
 
 /**
@@ -13,15 +13,15 @@
 //........................................................................
 
 // Creates style-able input element. Mostly provided as a convenience.
-godzi.PlaceSearch = function(parentId, inputId, callback)
+ReadyMap.PlaceSearch = function(parentId, inputId, callback)
 {
   if (inputId == undefined)
     inputId = "inputPlaceSearch";
   
-  document.getElementById(parentId).innerHTML = 'Search: <input id="' + inputId + '" size="20em" type="text" onkeydown="if(event.keyCode==13) godzi.PlaceSearch.doSearch(value, ' + callback + ');" />';
+  document.getElementById(parentId).innerHTML = 'Search: <input id="' + inputId + '" size="20em" type="text" onkeydown="if(event.keyCode==13) ReadyMap.PlaceSearch.doSearch(value, ' + callback + ');" />';
 };
 
-godzi.PlaceSearch.doSearch = function(place, callback)
+ReadyMap.PlaceSearch.doSearch = function(place, callback)
 {
   var pelicanProxyURI = "http://demo.pelicanmapping.com/rmweb/proxy.php";
   var yahooGeocodeURI = "http://local.yahooapis.com/MapsService/V1/geocode";
@@ -80,7 +80,7 @@ godzi.PlaceSearch.doSearch = function(place, callback)
 
 //........................................................................
 
-godzi.PositionedElement = function(id, lon, lat, alt, options) {
+ReadyMap.PositionedElement = function(id, lon, lat, alt, options) {
   this.hAlign = "left";
   this.vAlign = "top";
   this.lat = lat;
@@ -116,7 +116,7 @@ godzi.PositionedElement = function(id, lon, lat, alt, options) {
   } 
 }
 
-godzi.PositionedElement.prototype = {  
+ReadyMap.PositionedElement.prototype = {  
 
   destroy : function() {
     if (this.ownsElement) {
@@ -209,8 +209,8 @@ godzi.PositionedElement.prototype = {
 }
 
 
-godzi.Icon = function(id, lon, lat, alt, url, options) {  
-  godzi.PositionedElement.call(this, id, lon, lat, alt);    
+ReadyMap.Icon = function(id, lon, lat, alt, url, options) {  
+  ReadyMap.PositionedElement.call(this, id, lon, lat, alt);    
   this.url = url;
   this.ownsElement = true;
     
@@ -238,7 +238,7 @@ godzi.Icon = function(id, lon, lat, alt, url, options) {
   jQuery("body").append(this.element);                         
 }
 
-godzi.Icon.prototype = osg.objectInehrit(godzi.PositionedElement.prototype, {
+ReadyMap.Icon.prototype = osg.objectInehrit(ReadyMap.PositionedElement.prototype, {
  getWidth : function() {
    return this.width;
  },
@@ -267,8 +267,8 @@ godzi.Icon.prototype = osg.objectInehrit(godzi.PositionedElement.prototype, {
  
 });
 
-godzi.Label = function(id, lon, lat, alt, text, options) {  
-  godzi.PositionedElement.call(this, id, lon, lat, alt);    
+ReadyMap.Label = function(id, lon, lat, alt, text, options) {  
+  ReadyMap.PositionedElement.call(this, id, lon, lat, alt);    
   this.text = text;
   this.ownsElement = true;
     
@@ -289,11 +289,11 @@ godzi.Label = function(id, lon, lat, alt, text, options) {
   jQuery("body").append(this.element);                         
 }
 
-godzi.Label.prototype = osg.objectInehrit(godzi.PositionedElement.prototype, {
+ReadyMap.Label.prototype = osg.objectInehrit(ReadyMap.PositionedElement.prototype, {
  
 });
 
-godzi.PositionEngine = function(mapView) {
+ReadyMap.PositionEngine = function(mapView) {
   this.mapView = mapView;
   var me = this;
   this.mapView.addFrameEndCallback( function() {
@@ -302,7 +302,7 @@ godzi.PositionEngine = function(mapView) {
   this.elements = [];
 }
 
-godzi.PositionEngine.prototype = {
+ReadyMap.PositionEngine.prototype = {
   addElement: function(element) {
     this.elements.push( element );
   },
@@ -349,8 +349,8 @@ godzi.PositionEngine.prototype = {
 
 //........................................................................
 
-godzi.WOEIDWeatherLayer = function(mapView, places, rate, proxy, iconOptions) {
-    this.positionEngine = new godzi.PositionEngine(mapView);
+ReadyMap.WOEIDWeatherLayer = function(mapView, places, rate, proxy, iconOptions) {
+    this.positionEngine = new ReadyMap.PositionEngine(mapView);
 	this.places = places;
 	this.rate = rate;
 	this.proxy = proxy;
@@ -369,13 +369,13 @@ godzi.WOEIDWeatherLayer = function(mapView, places, rate, proxy, iconOptions) {
 	this.init();
 };
 
-godzi.WOEIDWeatherLayer.prototype = {
+ReadyMap.WOEIDWeatherLayer.prototype = {
     init: function() {
 		for (var i in this.places)
 		{
 		    var place = this.places[i];
 			var thisObj = this;
-			godzi.PlaceSearch.doSearch(place, function(lat, lon, swlat, swlon, nelat, nelon, data) {
+			ReadyMap.PlaceSearch.doSearch(place, function(lat, lon, swlat, swlon, nelat, nelon, data) {
 			    var woeid = $(data).find('woeId').eq(0).text();
 				if (woeid != undefined && woeid != '')
 				  thisObj.createReader(woeid);
@@ -387,7 +387,7 @@ godzi.WOEIDWeatherLayer.prototype = {
 	    var url = this.proxy + 'http://weather.yahooapis.com/forecastrss?w=' + id;
 		var thisObj = this;
 		var renderer = this.options.renderer;
-		this.readers[id] = new godzi.GeoRSSReader(url, this.rate, function(items) {
+		this.readers[id] = new ReadyMap.GeoRSSReader(url, this.rate, function(items) {
 		    if (renderer != undefined)
 			    renderer(items[0], id);
 			else
@@ -409,7 +409,7 @@ godzi.WOEIDWeatherLayer.prototype = {
 			this.icons[id] = undefined;
 		}
 		
-	    var icon = new godzi.Icon("icon" + id, Math.deg2rad(item.longitude), Math.deg2rad(item.latitude), 0, this.options.url, {
+	    var icon = new ReadyMap.Icon("icon" + id, Math.deg2rad(item.longitude), Math.deg2rad(item.latitude), 0, this.options.url, {
 		  width: this.options.width,
 		  height: this.options.height,
 		  cssClass: this.options.cssClass,
@@ -459,7 +459,7 @@ godzi.WOEIDWeatherLayer.prototype = {
 			$(e.data.icon.element).click();
 		});
 		
-		var popup = new godzi.PositionedElement("popup_" + id, Math.deg2rad(lon), Math.deg2rad(lat), 0, {element: htmlElem, vAlign: "bottom"});
+		var popup = new ReadyMap.PositionedElement("popup_" + id, Math.deg2rad(lon), Math.deg2rad(lat), 0, {element: htmlElem, vAlign: "bottom"});
 		icon.popup = popup;
 		this.positionEngine.addElement(popup);
 	}

@@ -1,8 +1,8 @@
 /**
-* Godzi/WebGL
+* ReadyMap/WebGL
 * (c) Copyright 2011 Pelican Mapping
 * License: LGPL
-* http://godzi.org
+* http://ReadyMap.org
 */
 
 /**
@@ -25,7 +25,7 @@ osg.Matrix.equals = function(a,b) {
 
 //........................................................................
 
-godzi.Manipulator = function(map) {
+ReadyMap.Manipulator = function(map) {
     this.map = map;
     this.center = [0, 0, 0];
     this.minDistance = 0.001;
@@ -38,7 +38,7 @@ godzi.Manipulator = function(map) {
     
 };
 
-godzi.Manipulator.prototype = {
+ReadyMap.Manipulator.prototype = {
 
     init: function() {
     },
@@ -197,8 +197,8 @@ godzi.Manipulator.prototype = {
 
 //........................................................................
 
-godzi.EarthManipulator = function(map) {
-    godzi.Manipulator.call(this, map);
+ReadyMap.EarthManipulator = function(map) {
+    ReadyMap.Manipulator.call(this, map);
     this.minPitch = Math.deg2rad(-89.9);
     this.maxPitch = Math.deg2rad(-10.0);
     this.buttonup = true;
@@ -208,7 +208,7 @@ godzi.EarthManipulator = function(map) {
     this.computeHomePosition();
 }
 
-godzi.EarthManipulator.prototype = osg.objectInehrit( godzi.Manipulator.prototype, {
+ReadyMap.EarthManipulator.prototype = osg.objectInehrit( ReadyMap.Manipulator.prototype, {
 
     computeHomePosition: function() {
         this.setViewpoint(0, -90, 0, 0, -90, 1e7);
@@ -491,12 +491,12 @@ godzi.EarthManipulator.prototype = osg.objectInehrit( godzi.Manipulator.prototyp
 
 //........................................................................
 
-godzi.MapManipulator = function(map) {
-    godzi.Manipulator.call(this, map);
+ReadyMap.MapManipulator = function(map) {
+    ReadyMap.Manipulator.call(this, map);
     this.computeHomePosition();
 };
 
-godzi.MapManipulator.prototype = osg.objectInehrit(godzi.Manipulator.prototype, {
+ReadyMap.MapManipulator.prototype = osg.objectInehrit(ReadyMap.Manipulator.prototype, {
 
     computeHomePosition: function() {
         this.center = [0,0,0];
@@ -574,7 +574,7 @@ godzi.MapManipulator.prototype = osg.objectInehrit(godzi.Manipulator.prototype, 
 * MapView
 * Installs a 3D WebGL viewer within an HTML5 canvas elements.
 */
-godzi.MapView = function(elementId, size, map) {
+ReadyMap.MapView = function(elementId, size, map) {
 
     this.map = map;
     this.viewer = null;
@@ -592,9 +592,9 @@ godzi.MapView = function(elementId, size, map) {
  
     this.viewer.init();
     if ( map.geocentric )
-        this.viewer.setupManipulator(new godzi.EarthManipulator(map));
+        this.viewer.setupManipulator(new ReadyMap.EarthManipulator(map));
     else
-        this.viewer.setupManipulator(new godzi.MapManipulator(map));
+        this.viewer.setupManipulator(new ReadyMap.MapManipulator(map));
     this.viewer.setScene( new osgearth.MapNode(map) ); //map.createNode());
     delete this.viewer.view.light;
     this.viewer.getManipulator().computeHomePosition();
@@ -608,7 +608,7 @@ godzi.MapView = function(elementId, size, map) {
     this.frameEnd=[];
 };
 
-godzi.MapView.prototype = {
+ReadyMap.MapView.prototype = {
 
     home: function() {
         this.viewer.getManipulator().computeHomePosition();
