@@ -18,20 +18,20 @@ READYMAP = [
         "jquery/jquery.mousewheel.js",
 		"array.js",
         "readymap.js",		
-		"osgjs/osg-debug-0.0.4.js",
+		"osgjs/osg-debug-0.0.5.js",
 		"osgjs/osg-extras.js",
-		"osgearth/osgearth.js",		
-        "readymap/PositionedElement.js",
-        "readymap/PositionEngine.js",       
-		"readymap/Icon.js",       
-		"readymap/Label.js",       
+		"osgearth/osgearth.js"  
 ]
 
 READYMAP_UI = [
         "readymap/ui/Manipulator.js",
         "readymap/ui/EarthManipulator.js",		
 		"readymap/ui/MapManipulator.js",
-		"readymap/ui/MapView.js"
+		"readymap/ui/MapView.js",		
+        "readymap/ui/PositionedElement.js",
+        "readymap/ui/PositionEngine.js",       
+		"readymap/ui/Icon.js",       
+		"readymap/ui/Label.js"
 ]
 
 READYMAP_DATA = [
@@ -80,7 +80,7 @@ def compress(text):
 
 	out_tuple = tempfile.mkstemp()
 	# os.system("java -jar yuicompressor-2.4.2.jar %s --type js -o %s --charset utf-8 -v" % (in_tuple[1], out_tuple[1]))
-	os.system("java -jar compiler.jar --language_in=ECMASCRIPT5 --js %s --js_output_file %s" % (in_tuple[1], out_tuple[1]))
+	os.system("java -jar compiler.jar --compilation_level WHITESPACE_ONLY --language_in=ECMASCRIPT5 --js %s --js_output_file %s" % (in_tuple[1], out_tuple[1]))
 
 	with os.fdopen(out_tuple[0], 'r') as handle:
 		compressed = handle.read()
@@ -92,7 +92,7 @@ def compress(text):
 
 
 #def addHeader(text, endFilename):
-#	return ("// %s commit %s - http://github.com/cedricpinson/osgjs\n" % (endFilename, commit )) + text
+#	return ("// %s commit %s - http://github.com/gwaldron/godzi-webgl\n" % (endFilename, commit )) + text
 
 
 def makeDebug(text):

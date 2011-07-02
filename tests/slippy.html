@@ -10,6 +10,8 @@
 
 <script type="text/javascript">
 
+    var mapView;
+
     ReadyMap.init(function() {        
         // create a map model:
         var map = new ReadyMap.Map({
@@ -69,6 +71,7 @@
     <ul>
       <li>drag to pan</li>
       <li>wheel to zoom</li>
+      <li><a href="#" onclick="mapView.home();">reset view</a></li>
     </ul>
   </div>
   <div id="Coords">

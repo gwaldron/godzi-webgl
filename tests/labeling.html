@@ -14,13 +14,10 @@
 
 <script type="text/javascript">
 
-var map;
-var layerSwitcher;
-var mapView;
-var positionEngine;
-
-
-
+    var map;
+    var layerSwitcher;
+    var mapView;
+    var positionEngine;
 
     ReadyMap.init(function() {
         // create a map model:
@@ -29,12 +26,6 @@ var positionEngine;
         map.addImageLayer(new ReadyMap.TMSImageLayer({
             name: "Landsat",
             url: "http://readymap.org/readymap/tiles/1.0.0/22/",
-            tmsType: "google"
-        }));
-
-        map.addImageLayer(new ReadyMap.TMSImageLayer({
-            name: "OSM",
-            url: "http://readymap.org/readymap/tiles/1.0.0/35/",
             tmsType: "google"
         }));
 
@@ -110,9 +101,6 @@ var positionEngine;
         <a href="http://github.com/gwaldron/ReadyMap-webgl">github</a> ::
         <a href="http://twitter.com/#!/pelicanmapping">twitter</a>
     </p>
-    <div id="toolbar">
-      <image src="../images/globe.gif" onclick="mapView.home();"/>
-    </div>
   </div>
   <div id="ViewContainer">
     <canvas id="3DView"></canvas>
@@ -122,7 +110,7 @@ var positionEngine;
       <li>drag to pan</li>
       <li>wheel to zoom</li>
       <li>shift-drag to rotate</li>
-      <li>space to reset</li>
+      <li><a href="#" onclick="mapView.home();">reset view</a></li>
     </ul>      
     
    

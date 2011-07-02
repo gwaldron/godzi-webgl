@@ -236,10 +236,11 @@ ReadyMap.getWindowSize = function() {
     }
     return { 'w': myWidth, 'h': myHeight };
 };
-// osg-debug-0.0.4.js commit 0 - http://github.com/cedricpinson/osgjs
+// osg-debug-0.0.5.js commit 0 - http://github.com/cedricpinson/osgjs
+/** -*- compile-command: "jslint-cli osg.js" -*- */
 var osg = {};
 
-osg.version = '0.0.4';
+osg.version = '0.0.5';
 osg.copyright = 'Cedric Pinson - cedric.pinson@plopbyte.com';
 osg.instance = 0;
 osg.version = 0;
@@ -274,6 +275,10 @@ osg.checkError = function(error) {
 
 // from jquery
 osg.extend = function() {
+    // Save a reference to some core methods
+    var toString = Object.prototype.toString,
+    hasOwnProperty = Object.prototype.hasOwnProperty;
+
     var isFunction = function(obj) {
         return toString.call(obj) === "[object Function]";
     };
@@ -289,9 +294,9 @@ osg.extend = function() {
 	}
 	
 	// Not own constructor property must be Object
-	if ( obj.constructor
-	     && !hasOwnProperty.call(obj, "constructor")
-	     && !hasOwnProperty.call(obj.constructor.prototype, "isPrototypeOf") ) {
+	if ( obj.constructor && 
+             !hasOwnProperty.call(obj, "constructor") && 
+             !hasOwnProperty.call(obj.constructor.prototype, "isPrototypeOf") ) {
 	    return false;
 	}
 	
@@ -1655,7 +1660,16 @@ osg.ShaderGeneratorType = {
     FragmentMain: 5
 };
 
-osg.Shader = function() {};
+/** 
+ * Shader manage shader for vertex and fragment, you need both to create a glsl program.
+ * @class Shader
+ */
+osg.Shader = function(type, text) {
+    this.type = type;
+    this.text = text;
+};
+
+/** @lends osg.Shader.prototype */
 osg.Shader.prototype = {
     compile: function() {
         this.shader = gl.createShader(this.type);
@@ -1674,12 +1688,11 @@ osg.Shader.prototype = {
         }
     }
 };
+
 osg.Shader.create = function( type, text )
 {
-    var shader = new osg.Shader(type);
-    shader.type = type;
-    shader.text = text;
-    return shader;
+    osg.log("osg.Shader.create is deprecated, use new osg.Shader with the same arguments instead");
+    return new osg.Shader(type, text);
 };
 /** 
  * StateAttribute base class
@@ -1692,7 +1705,8 @@ osg.StateAttribute = function() {
 /** @lends osg.StateAttribute.prototype */
 osg.StateAttribute.prototype = {
     isDirty: function() { return this._dirty; },
-    dirty: function() { this._dirty = true; }
+    dirty: function() { this._dirty = true; },
+    setDirty: function(dirty) { this._dirty = dirty; }
 };
 
 osg.StateAttribute.OFF = 0;
@@ -1700,12 +1714,25 @@ osg.StateAttribute.ON = 1;
 osg.StateAttribute.OVERRIDE = 2;
 osg.StateAttribute.PROTECTED = 4;
 osg.StateAttribute.INHERIT = 8;
+/** -*- compile-command: "jslint-cli Uniform.js" -*- */
+
+/** 
+ * Uniform manage variable used in glsl shader.
+ * @class Uniform
+ */
 osg.Uniform = function () { this.transpose = false; this._dirty = true; };
+
+/** @lends osg.Uniform.prototype */
 osg.Uniform.prototype = {
+
+    get: function() { // call dirty if you update this array outside
+        return this.data;
+    },
     set: function(array) {
         this.data = array;
-        this._dirty = true;
+        this.dirty();
     },
+    dirty: function() { this._dirty = true; },
     apply: function(location) {
         if (this._dirty) {
             this.update.call(this.glData, this.data);
@@ -1725,25 +1752,26 @@ osg.Uniform.prototype = {
             this[i] = array[i];
         }
     },
-    setFloat1: function(f) {
+
+    _updateFloat1: function(f) {
         this[0] = f[0];
     },
-    setFloat2: function(f) {
+    _updateFloat2: function(f) {
         this[0] = f[0];
         this[1] = f[1];
     },
-    setFloat3: function(f) {
+    _updateFloat3: function(f) {
         this[0] = f[0];
         this[1] = f[1];
         this[2] = f[2];
     },
-    setFloat4: function(f) {
+    _updateFloat4: function(f) {
         this[0] = f[0];
         this[1] = f[1];
         this[2] = f[2];
         this[3] = f[3];
     },
-    setFloat9: function(f) {
+    _updateFloat9: function(f) {
         this[0] = f[0];
         this[1] = f[1];
         this[2] = f[2];
@@ -1754,7 +1782,7 @@ osg.Uniform.prototype = {
         this[7] = f[7];
         this[8] = f[8];
     },
-    setFloat16: function(f) {
+    _updateFloat16: function(f) {
         this[0] = f[0];
         this[1] = f[1];
         this[2] = f[2];
@@ -1781,7 +1809,7 @@ osg.Uniform.createFloat1 = function(value, name) {
         gl.uniform1fv(location, glData);
     };
     uniform.glData = new osg.Float32Array(uniform.data);
-    uniform.update = osg.Uniform.prototype.setFloat1;
+    uniform.update = osg.Uniform.prototype._updateFloat1;
     uniform.name = name;
     return uniform;
 };
@@ -1792,7 +1820,7 @@ osg.Uniform.createFloat2 = function(vec2, name) {
         gl.uniform2fv(location, glData);
     };
     uniform.glData = new osg.Float32Array(uniform.data);
-    uniform.update = osg.Uniform.prototype.setFloat2;
+    uniform.update = osg.Uniform.prototype._updateFloat2;
     uniform.name = name;
     return uniform;
 };
@@ -1803,7 +1831,7 @@ osg.Uniform.createFloat3 = function(vec3, name) {
         gl.uniform3fv(location, glData);
     };
     uniform.glData = new osg.Float32Array(uniform.data);
-    uniform.update = osg.Uniform.prototype.setFloat3;
+    uniform.update = osg.Uniform.prototype._updateFloat3;
     uniform.name = name;
     return uniform;
 };
@@ -1814,7 +1842,7 @@ osg.Uniform.createFloat4 = function(vec4, name) {
         gl.uniform4fv(location, glData);
     };
     uniform.glData = new osg.Float32Array(uniform.data);
-    uniform.update = osg.Uniform.prototype.setFloat4;
+    uniform.update = osg.Uniform.prototype._updateFloat4;
     uniform.name = name;
     return uniform;
 };
@@ -1867,7 +1895,7 @@ osg.Uniform.createMatrix2 = function(mat2, name) {
     uniform.apply = uniform.applyMatrix;
     uniform.transpose = false;
     uniform.glData = new osg.Float32Array(uniform.data);
-    uniform.update = osg.Uniform.prototype.setFloat4;
+    uniform.update = osg.Uniform.prototype._updateFloat4;
     uniform.name = name;
     return uniform;
 };
@@ -1880,7 +1908,7 @@ osg.Uniform.createMatrix3 = function(mat3, name) {
     uniform.apply = uniform.applyMatrix;
     uniform.transpose = false;
     uniform.glData = new osg.Float32Array(uniform.data);
-    uniform.update = osg.Uniform.prototype.setFloat9;
+    uniform.update = osg.Uniform.prototype._updateFloat9;
     uniform.name = name;
     return uniform;
 };
@@ -1893,13 +1921,15 @@ osg.Uniform.createMatrix4 = function(mat4, name) {
     uniform.apply = uniform.applyMatrix;
     uniform.transpose = false;
     uniform.glData = new osg.Float32Array(uniform.data);
-    uniform.update = osg.Uniform.prototype.setFloat16;
+    uniform.update = osg.Uniform.prototype._updateFloat16;
     uniform.name = name;
     return uniform;
 };
+/** -*- compile-command: "jslint-cli Node.js" -*- */
+
 /** 
  *  Node that can contains child node
- *  @class
+ *  @class Node
  */
 osg.Node = function () {
     this.children = [];
@@ -2144,12 +2174,21 @@ osg.NodeVisitor.prototype = {
         osg.NodeVisitor._traversalFunctions[this.traversalMode].call(this, node);
     }
 };
+/** -*- compile-command: "jslint-cli Transform.js" -*- */
+
+/** 
+ * Transform - base class for Transform type node ( Camera, MatrixTransform )
+ * @class Transform
+ * @inherits osg.Node
+ */
 osg.Transform = function() {
     osg.Node.call(this);
     this.referenceFrame = osg.Transform.RELATIVE_RF;
 };
 osg.Transform.RELATIVE_RF = 0;
 osg.Transform.ABSOLUTE_RF = 1;
+
+/** @lends osg.Transform.prototype */
 osg.Transform.prototype = osg.objectInehrit(osg.Node.prototype, {
     setReferenceFrame: function(value) { this.referenceFrame = value; },
     getReferenceFrame: function() { return this.referenceFrame; },
@@ -2230,7 +2269,7 @@ osg.computeLocalToWorld = function (nodePath, ignoreCameras) {
 };
 /** 
  *  Manage Blending mode
- *  @class
+ *  @class BlendFunc
  */
 osg.BlendFunc = function (source, destination) {
     osg.StateAttribute.call(this);
@@ -2252,10 +2291,8 @@ osg.BlendFunc.prototype = osg.objectInehrit(osg.StateAttribute.prototype, {
     attributeType: "BlendFunc",
     /** 
         Create an instance of this StateAttribute
-        @returns an instance of osg.BlendFunc object
-        @type osg.BlendFunc
     */ 
-    cloneType: function() {return new osg.BlendFunc(); },
+    cloneType: function() /**osg.BlendFunc*/ {return new osg.BlendFunc(); },
     /** 
         @type String
     */ 
@@ -2531,14 +2568,28 @@ osg.BoundingSphere.prototype = {
 	    (lc <= (this.radius() + bs.radius())*(this.radius() + bs.radius()));
     }
 };
-osg.BufferArray = function () {
+/** 
+ * BufferArray manage vertex / normal / ... array used by webgl.
+ * @class BufferArray
+ */
+osg.BufferArray = function (type, elements, itemSize) {
     if (osg.BufferArray.instanceID === undefined) {
         osg.BufferArray.instanceID = 0;
     }
     this.instanceID = osg.BufferArray.instanceID;
     osg.BufferArray.instanceID += 1;
-    this._dirty = true;
+    this.dirty();
+
+    this.itemSize = itemSize;
+    this.type = type;
+    if (this.type === gl.ELEMENT_ARRAY_BUFFER) {
+        this.elements = new osg.Uint16Array(elements);
+    } else {
+        this.elements = new osg.Float32Array(elements);
+    }
 };
+
+/** @lends osg.BufferArray.prototype */
 osg.BufferArray.prototype = {
     init: function() {
         if (!this.buffer && this.elements.length > 0 ) {
@@ -2559,15 +2610,8 @@ osg.BufferArray.prototype = {
 };
 
 osg.BufferArray.create = function(type, elements, itemSize) {
-    var a = new osg.BufferArray();
-    a.itemSize = itemSize;
-    a.type = type;
-    if (a.type === gl.ELEMENT_ARRAY_BUFFER) {
-        a.elements = new osg.Uint16Array(elements);
-    } else {
-        a.elements = new osg.Float32Array(elements);
-    }
-    return a;
+    osg.log("osg.BufferArray.create is deprecated, use new osg.BufferArray with same arguments instead");
+    return new osg.BufferArray(type, elements, itemSize);
 };
 osg.CullFace = function (mode) {
     osg.StateAttribute.call(this);
@@ -2609,6 +2653,11 @@ osg.CullSettings.prototype = {
     setComputeNearFar: function(value) { this.computeNearFar = value; },
     getComputeNearFar: function() { return this.computeNearFar; }
 };
+/** 
+ * Camera - is a subclass of Transform which represents encapsulates the settings of a Camera.
+ * @class Camera
+ * @inherits osg.Transform osg.CullSettings
+ */
 osg.Camera = function () {
     osg.Transform.call(this);
     osg.CullSettings.call(this);
@@ -2626,75 +2675,93 @@ osg.Camera.PRE_RENDER = 0;
 osg.Camera.NESTED_RENDER = 1;
 osg.Camera.POST_RENDER = 2;
 
-osg.Camera.prototype = osg.objectInehrit(osg.CullSettings.prototype, 
-                                         osg.objectInehrit(osg.Transform.prototype, {
+/** @lends osg.Camera.prototype */
+osg.Camera.prototype = osg.objectInehrit(
+    osg.CullSettings.prototype, 
+    osg.objectInehrit(osg.Transform.prototype, {
 
-    setClearDepth: function(depth) { this.clearDepth = depth;}, 
-    getClearDepth: function() { return this.clearDepth;},
+        setClearDepth: function(depth) { this.clearDepth = depth;}, 
+        getClearDepth: function() { return this.clearDepth;},
 
-    setClearMask: function(mask) { this.clearMask = mask;}, 
-    getClearMask: function() { return this.clearMask;},
+        setClearMask: function(mask) { this.clearMask = mask;}, 
+        getClearMask: function() { return this.clearMask;},
 
-    setClearColor: function(color) { this.clearColor = color;},
-    getClearColor: function() { return this.clearColor;},
+        setClearColor: function(color) { this.clearColor = color;},
+        getClearColor: function() { return this.clearColor;},
 
-    setViewport: function(vp) { 
-        this.viewport = vp;
-        this.getOrCreateStateSet().setAttributeAndMode(vp);
-    },
-    getViewport: function() { return this.viewport; },
+        setViewport: function(vp) { 
+            this.viewport = vp;
+            this.getOrCreateStateSet().setAttributeAndMode(vp);
+        },
+        getViewport: function() { return this.viewport; },
 
 
-    setViewMatrix: function(matrix) {
-        this.modelviewMatrix = matrix;
-    },
+        setViewMatrix: function(matrix) {
+            this.modelviewMatrix = matrix;
+        },
 
-    setProjectionMatrix: function(matrix) {
-        this.projectionMatrix = matrix;
-    },
+        setProjectionMatrix: function(matrix) {
+            this.projectionMatrix = matrix;
+        },
 
-    getViewMatrix: function() { return this.modelviewMatrix; },
-    getProjectionMatrix: function() { return this.projectionMatrix; },
-    getRenderOrder: function() { return this.renderOrder; },
-    setRenderOrder: function(order, orderNum) {
-        this.renderOrder = order;
-        this.renderOrderNum = orderNum; 
-    },
+        /** Set to an orthographic projection. See OpenGL glOrtho for documentation further details.*/
+        setProjectionMatrixAsOrtho: function(left, right,
+                                             bottom, top,
+                                             zNear, zFar) {
+            osg.Matrix.makeOrtho(left, right, bottom, top, zNear, zFar, this.getProjectionMatrix());
+        },
 
-    attachTexture: function(bufferComponent, texture, level) {
-        if (this.attachments === undefined) {
-            this.attachments = {};
+        getViewMatrix: function() { return this.modelviewMatrix; },
+        getProjectionMatrix: function() { return this.projectionMatrix; },
+        getRenderOrder: function() { return this.renderOrder; },
+        setRenderOrder: function(order, orderNum) {
+            this.renderOrder = order;
+            this.renderOrderNum = orderNum; 
+        },
+
+        attachTexture: function(bufferComponent, texture, level) {
+            if (this.frameBufferObject) {
+                this.frameBufferObject.dirty();
+            }
+            if (level === undefined) {
+                level = 0;
+            }
+            if (this.attachments === undefined) {
+                this.attachments = {};
+            }
+            this.attachments[bufferComponent] = { 'texture' : texture , 'level' : level };
+        },
+
+        attachRenderBuffer: function(bufferComponent, internalFormat) {
+            if (this.frameBufferObject) {
+                this.frameBufferObject.dirty();
+            }
+            if (this.attachments === undefined) {
+                this.attachments = {};
+            }
+            this.attachments[bufferComponent] = { 'format' : internalFormat };
+        },
+
+        computeLocalToWorldMatrix: function(matrix,nodeVisitor) {
+            if (this.referenceFrame === osg.Transform.RELATIVE_RF) {
+                osg.Matrix.preMult(matrix, this.modelviewMatrix);
+            } else {// absolute
+                matrix = this.modelviewMatrix;
+            }
+            return true;
+        },
+
+        computeWorldToLocalMatrix: function(matrix, nodeVisitor) {
+            var inverse = osg.Matrix.inverse(this.modelviewMatrix);
+            if (this.referenceFrame === osg.Transform.RELATIVE_RF) {
+                osg.Matrix.postMult(inverse, matrix);
+            } else {
+                matrix = inverse;
+            }
+            return true;
         }
-        this.attachments[bufferComponent] = { 'texture' : texture , 'level' : level };
-    },
 
-    attachRenderBuffer: function(bufferComponent, internalFormat) {
-        if (this.attachments === undefined) {
-            this.attachments = {};
-        }
-        this.attachments[bufferComponent] = { 'format' : internalFormat };
-    },
-
-    computeLocalToWorldMatrix: function(matrix,nodeVisitor) {
-        if (this.referenceFrame === osg.Transform.RELATIVE_RF) {
-            osg.Matrix.preMult(matrix, this.modelviewMatrix);
-        } else {// absolute
-            matrix = this.modelviewMatrix;
-        }
-        return true;
-    },
-
-    computeWorldToLocalMatrix: function(matrix, nodeVisitor) {
-        var inverse = osg.Matrix.inverse(this.modelviewMatrix);
-        if (this.referenceFrame === osg.Transform.RELATIVE_RF) {
-            osg.Matrix.postMult(inverse, matrix);
-        } else {
-            matrix = inverse;
-        }
-        return true;
-    }
-
-}));
+    }));
 osg.Camera.prototype.objectType = osg.objectType.generate("Camera");
 
 osg.Depth = function (func, near, far, writeMask) {
@@ -2832,11 +2899,18 @@ osg.EllipsoidModel.prototype = {
         osg.Matrix.set(localToWorld,2,2, up[2]);
     }
 };
+/** 
+ * FrameBufferObject manage fbo / rtt 
+ * @class FrameBufferObject
+ */
 osg.FrameBufferObject = function () {
     osg.StateAttribute.call(this);
     this.fbo = undefined;
     this.attachments = [];
+    this.dirty();
 };
+
+/** @lends osg.FrameBufferObject.prototype */
 osg.FrameBufferObject.prototype = osg.objectInehrit(osg.StateAttribute.prototype, {
     attributeType: "FrameBufferObject",
     cloneType: function() {return new osg.FrameBufferObject(); },
@@ -2846,11 +2920,14 @@ osg.FrameBufferObject.prototype = osg.objectInehrit(osg.StateAttribute.prototype
     apply: function(state) {
         var status;
         if (this.attachments.length > 0) {
-            if (this.fbo === undefined) {
-                this.fbo = gl.createFramebuffer();
+            if (this.isDirty()) {
+
+                if (!this.fbo) {
+                    this.fbo = gl.createFramebuffer();
+                }
 
                 gl.bindFramebuffer(gl.FRAMEBUFFER, this.fbo);
-
+                var hasRenderBuffer = false;
                 for (var i = 0, l = this.attachments.length; i < l; ++i) {
                     
                     if (this.attachments[i].texture === undefined) { // render buffer
@@ -2858,6 +2935,7 @@ osg.FrameBufferObject.prototype = osg.objectInehrit(osg.StateAttribute.prototype
                         gl.bindRenderbuffer(gl.RENDERBUFFER, rb);
                         gl.renderbufferStorage(gl.RENDERBUFFER, this.attachments[i].format, this.attachments[i].width, this.attachments[i].height);
                         gl.framebufferRenderbuffer(gl.FRAMEBUFFER, this.attachments[i].attachment, gl.RENDERBUFFER, rb);
+                        hasRenderBuffer = true;
                     } else {
                         var texture = this.attachments[i].texture;
                         // apply on unit 0 to init it
@@ -2870,8 +2948,11 @@ osg.FrameBufferObject.prototype = osg.objectInehrit(osg.StateAttribute.prototype
                 if (status !== 0x8CD5) {
                     osg.log("framebuffer error check " + status);
                 }
-                gl.bindRenderbuffer(null);
-
+                
+                if (hasRenderBuffer) { // set it to null only if used renderbuffer
+                    gl.bindRenderbuffer(null);
+                }
+                this.setDirty(false);
             } else {
                 gl.bindFramebuffer(gl.FRAMEBUFFER, this.fbo);
                 if (osg.reportErrorGL === true) {
@@ -2898,6 +2979,10 @@ osg.FrameStamp = function() {
     this.setFrameNumber = function(n) { frame = n; };
     this.getFrameNumber = function() { return frame; };
 };
+/** 
+ * Geometry manage array and primitives to draw a geometry.
+ * @class Geometry
+ */
 osg.Geometry = function () {
     osg.Node.call(this);
     this.primitives = [];
@@ -2907,6 +2992,7 @@ osg.Geometry = function () {
     this.cacheAttributeList = {};
 };
 
+/** @lends osg.Geometry.prototype */
 osg.Geometry.prototype = osg.objectInehrit(osg.Node.prototype, {
     dirtyBound: function() {
         if (this.boundingBoxComputed === true) {
@@ -3316,13 +3402,19 @@ osg.MatrixTransform.prototype = osg.objectInehrit(osg.Transform.prototype, {
     }
 });
 osg.MatrixTransform.prototype.objectType = osg.objectType.generate("MatrixTransform");
-osg.DrawArray = function (mode, first, count) 
+/** 
+ * DrawArrays manage rendering primitives
+ * @class DrawArrays
+ */
+osg.DrawArrays = function (mode, first, count) 
 {
     this.mode = mode;
     this.first = first;
     this.count = count;
 };
-osg.DrawArray.prototype = {
+
+/** @lends osg.DrawArrays.prototype */
+osg.DrawArrays.prototype = {
     draw: function(state) {
         gl.drawArrays(this.mode, this.first, this.count);
     },
@@ -3330,14 +3422,17 @@ osg.DrawArray.prototype = {
     getCount: function() { return this.count; },
     getFirst: function() { return this.first; }
 };
-osg.DrawArray.create = function(mode, first, count) {
+osg.DrawArrays.create = function(mode, first, count) {
+    osg.log("osg.DrawArrays.create is deprecated, use new osg.DrawArrays with same arguments");
     var d = new osg.DrawArray(mode, first, count);
     return d;
 };
 
-osg.DrawArrays = osg.DrawArray;
 
-
+/** 
+ * DrawElements manage rendering of indexed primitives
+ * @class DrawElements
+ */
 osg.DrawElements = function (mode, indices) {
     this.mode = gl.POINTS;
     if (mode !== undefined) {
@@ -3352,6 +3447,7 @@ osg.DrawElements = function (mode, indices) {
     }
 };
 
+/** @lends osg.DrawElements.prototype */
 osg.DrawElements.prototype = {
     getMode: function() { return this.mode; },
     draw: function(state) {
@@ -3367,22 +3463,32 @@ osg.DrawElements.prototype = {
 };
 
 osg.DrawElements.create = function(mode, indices) {
-    var d = new osg.DrawElements(mode, indices);
-    return d;
+    osg.log("osg.DrawElements.create is deprecated, use new osg.DrawElements with same arguments");
+    return new osg.DrawElements(mode, indices);
 };
-osg.Program = function () { 
+/** 
+ * Program encapsulate an vertex and fragment shader
+ * @class Program
+ */
+osg.Program = function (vShader, fShader) { 
     if (osg.Program.instanceID === undefined) {
         osg.Program.instanceID = 0;
     }
     this.instanceID = osg.Program.instanceID;
     this._dirty = true;
     osg.Program.instanceID+= 1;
+
+    this.program = null;
+    this.vertex = vShader;
+    this.fragment = fShader;
+    this.dirty = true;
 };
 
+/** @lends osg.Program.prototype */
 osg.Program.prototype = {
     isDirty: function() { return this._dirty; },
     attributeType: "Program",
-    cloneType: function() { var p = osg.Program.create(); p.default_program = true; return p; },
+    cloneType: function() { var p = new osg.Program(); p.default_program = true; return p; },
     getType: function() { return this.attributeType;},
     getTypeMember: function() { return this.attributeType;},
     setVertexShader: function(vs) { program.vertex = vs; },
@@ -3465,11 +3571,8 @@ osg.Program.prototype = {
 };
 
 osg.Program.create = function(vShader, fShader) {
-    var program = new osg.Program();
-    program.program = null;
-    program.vertex = vShader;
-    program.fragment = fShader;
-    program.dirty = true;
+    console.log("osg.Program.create is deprecated use new osg.Program(vertex, fragment) instead");
+    var program = new osg.Program(vShader, fShader);
     return program;
 };
 osg.Projection = function () {
@@ -4003,9 +4106,13 @@ osg.RenderStage.prototype = osg.objectInehrit(osg.RenderBin.prototype, {
         }
         var viewport = this.camera.getViewport();
         var fbo = this.camera.frameBufferObject;
-        if (this.camera.frameBufferObject === undefined) {
+
+        if (!fbo) {
             fbo = new osg.FrameBufferObject();
             this.camera.frameBufferObject = fbo;
+        }
+
+        if (fbo.isDirty()) {
             if (this.camera.attachments !== undefined) {
                 for ( var key in this.camera.attachments) {
                     var a = this.camera.attachments[key];
@@ -4211,9 +4318,9 @@ osg.ShaderGenerator.prototype = {
 
         var vertexshader = this.getOrCreateVertexShader(state, attributeKeys, textureAttributeKeys);
         var fragmentshader = this.getOrCreateFragmentShader(state, attributeKeys, textureAttributeKeys);
-        var program = osg.Program.create(
-            osg.Shader.create(gl.VERTEX_SHADER, vertexshader),
-            osg.Shader.create(gl.FRAGMENT_SHADER, fragmentshader));
+        var program = new osg.Program(
+            new osg.Shader(gl.VERTEX_SHADER, vertexshader),
+            new osg.Shader(gl.FRAGMENT_SHADER, fragmentshader));
 
         program.flattenKeys = flattenKeys;
         program.activeAttributeKeys = attributeKeys;
@@ -4674,11 +4781,11 @@ osg.createTexturedBox = function(centerx, centery, centerz,
     indexes[34] = 22;
     indexes[35] = 23;
 
-    g.getAttributes().Vertex = osg.BufferArray.create(gl.ARRAY_BUFFER, vertexes, 3 );
-    g.getAttributes().Normal = osg.BufferArray.create(gl.ARRAY_BUFFER, normal, 3 );
-    g.getAttributes().TexCoord0 = osg.BufferArray.create(gl.ARRAY_BUFFER, uv, 2 );
+    g.getAttributes().Vertex = new osg.BufferArray(gl.ARRAY_BUFFER, vertexes, 3 );
+    g.getAttributes().Normal = new osg.BufferArray(gl.ARRAY_BUFFER, normal, 3 );
+    g.getAttributes().TexCoord0 = new osg.BufferArray(gl.ARRAY_BUFFER, uv, 2 );
     
-    var primitive = new osg.DrawElements(gl.TRIANGLES, osg.BufferArray.create(gl.ELEMENT_ARRAY_BUFFER, indexes, 1 ));
+    var primitive = new osg.DrawElements(gl.TRIANGLES, new osg.BufferArray(gl.ELEMENT_ARRAY_BUFFER, indexes, 1 ));
     g.getPrimitives().push(primitive);
     return g;
 };
@@ -4762,11 +4869,11 @@ osg.createTexturedQuad = function(cornerx, cornery, cornerz,
     indexes[4] = 2;
     indexes[5] = 3;
 
-    g.getAttributes().Vertex = osg.BufferArray.create(gl.ARRAY_BUFFER, vertexes, 3 );
-    g.getAttributes().Normal = osg.BufferArray.create(gl.ARRAY_BUFFER, normal, 3 );
-    g.getAttributes().TexCoord0 = osg.BufferArray.create(gl.ARRAY_BUFFER, uvs, 2 );
+    g.getAttributes().Vertex = new osg.BufferArray(gl.ARRAY_BUFFER, vertexes, 3 );
+    g.getAttributes().Normal = new osg.BufferArray(gl.ARRAY_BUFFER, normal, 3 );
+    g.getAttributes().TexCoord0 = new osg.BufferArray(gl.ARRAY_BUFFER, uvs, 2 );
     
-    var primitive = new osg.DrawElements(gl.TRIANGLES, osg.BufferArray.create(gl.ELEMENT_ARRAY_BUFFER, indexes, 1 ));
+    var primitive = new osg.DrawElements(gl.TRIANGLES, new osg.BufferArray(gl.ELEMENT_ARRAY_BUFFER, indexes, 1 ));
     g.getPrimitives().push(primitive);
     return g;
 };
@@ -5609,6 +5716,7 @@ osg.Texture.prototype = osg.objectInehrit(osg.StateAttribute.prototype, {
 
             osg.Texture.uniforms[unit] = uniforms;
         }
+        // uniform for an texture attribute should directly in osg.Texture.uniforms[unit] and not in osg.Texture.uniforms[unit][Texture0]
         return osg.Texture.uniforms[unit];
     },
     setDefaultParameters: function() {
@@ -5683,6 +5791,8 @@ osg.Texture.prototype = osg.objectInehrit(osg.StateAttribute.prototype, {
                 if (this.isImageReady()) {
                     if (!this.textureObject) {
                         this.init();
+                        this.setTextureSize(this.image.naturalWidth, this.image.naturalHeight);
+                        this._dirty = false;
                     }
                     gl.bindTexture(gl.TEXTURE_2D, this.textureObject);
                     gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, this.image);
@@ -5719,10 +5829,10 @@ osg.Texture.prototype = osg.objectInehrit(osg.StateAttribute.prototype, {
       };
       setShaderGeneratorFunction(fragmentGenerator, osg.ShaderGeneratorType.FragmentMain);
 
-      @param {function:(unit)} injectionFunction
-      @param {osg.ShaderGeneratorType} injectionType
     */
-    setShaderGeneratorFunction: function(injectionFunction, mode) {
+    setShaderGeneratorFunction: function(
+        /**Function*/ injectionFunction, 
+        /**osg.ShaderGeneratorType*/ mode) {
         this[mode] = injectionFunction;
     },
 
@@ -5753,7 +5863,8 @@ osg.Texture.prototype[osg.ShaderGeneratorType.FragmentMain] = function(unit) {
     return str;
 };
 
-osg.Texture.create = function(imageSource) {
+
+osg.Texture.createFromURL = function(imageSource) {
     var a = new osg.Texture();
     if (imageSource !== undefined) {
         var img = new Image();
@@ -5771,6 +5882,11 @@ osg.Texture.createFromCanvas = function(ctx) {
     var a = new osg.Texture();
     a.setFromCanvas(ctx);
     return a;
+};
+
+osg.Texture.create = function(url) {
+    osg.log("osg.Texture.create is deprecated, use osg.Texture.createFromURL instead");
+    return osg.Texture.createFromURL(url);
 };
 osg.UpdateVisitor = function () { 
     osg.NodeVisitor.call(this);
@@ -5892,6 +6008,10 @@ osg.CullStack.prototype = {
         this.projectionMatrixStack.pop();
     }
 };
+/** 
+ * CullVisitor traverse the tree and collect Matrix/State for the rendering traverse 
+ * @class CullVisitor
+ */
 osg.CullVisitor = function () {
     osg.NodeVisitor.call(this);
     osg.CullSettings.call(this);
@@ -5920,6 +6040,7 @@ osg.CullVisitor = function () {
     this.reserveLeafStack.current = 0;
 };
 
+/** @lends osg.CullVisitor.prototype */
 osg.CullVisitor.prototype = osg.objectInehrit(osg.CullStack.prototype ,osg.objectInehrit(osg.CullSettings.prototype, osg.objectInehrit(osg.NodeVisitor.prototype, {
     distance: function(coord,matrix) {
         return -( coord[0]*matrix[2]+ coord[1]*matrix[6] + coord[2]*matrix[10] + matrix[14]);
@@ -6097,8 +6218,10 @@ osg.CullVisitor.prototype = osg.objectInehrit(osg.CullStack.prototype ,osg.objec
 })));
 
 osg.CullVisitor.prototype[osg.Camera.prototype.objectType] = function( camera ) {
-    if (camera.stateset) {
-        this.pushStateSet(camera.stateset);
+
+    var stateset = camera.getStateSet();
+    if (stateset) {
+        this.pushStateSet(stateset);
     }
 
     if (camera.light) {
@@ -6197,7 +6320,7 @@ osg.CullVisitor.prototype[osg.Camera.prototype.objectType] = function( camera ) 
     this.computedNear = previous_znear;
     this.computedFar = previous_zfar;
 
-    if (camera.stateset) {
+    if (stateset) {
         this.popStateSet();
     }
 
@@ -6212,8 +6335,9 @@ osg.CullVisitor.prototype[osg.MatrixTransform.prototype.objectType] = function (
     osg.Matrix.mult(lastMatrixStack, node.getMatrix(), matrix);
     this.pushModelviewMatrix(matrix);
 
-    if (node.stateset) {
-        this.pushStateSet(node.stateset);
+    var stateset = node.getStateSet();
+    if (stateset) {
+        this.pushStateSet(stateset);
     }
 
     if (node.light) {
@@ -6224,7 +6348,7 @@ osg.CullVisitor.prototype[osg.MatrixTransform.prototype.objectType] = function (
         this.traverse(node);
     }
 
-    if (node.stateset) {
+    if (stateset) {
         this.popStateSet();
     }
     
@@ -6238,15 +6362,17 @@ osg.CullVisitor.prototype[osg.Projection.prototype.objectType] = function (node)
     osg.Matrix.mult(lastMatrixStack, node.getProjectionMatrix(), matrix);
     this.pushProjectionMatrix(matrix);
 
-    if (node.stateset) {
-        this.pushStateSet(node.stateset);
+    var stateset = node.getStateSet();
+
+    if (stateset) {
+        this.pushStateSet(stateset);
     }
 
     if (node.traverse) {
         this.traverse(node);
     }
 
-    if (node.stateset) {
+    if (stateset) {
         this.popStateSet();
     }
 
@@ -6255,8 +6381,9 @@ osg.CullVisitor.prototype[osg.Projection.prototype.objectType] = function (node)
 
 osg.CullVisitor.prototype[osg.Node.prototype.objectType] = function (node) {
 
-    if (node.stateset) {
-        this.pushStateSet(node.stateset);
+    var stateset = node.getStateSet();
+    if (stateset) {
+        this.pushStateSet(stateset);
     }
     if (node.light) {
         this.addPositionedAttribute(node.light);
@@ -6266,7 +6393,7 @@ osg.CullVisitor.prototype[osg.Node.prototype.objectType] = function (node) {
         this.traverse(node);
     }
 
-    if (node.stateset) {
+    if (stateset) {
         this.popStateSet();
     }
 };
@@ -6279,8 +6406,9 @@ osg.CullVisitor.prototype[osg.Geometry.prototype.objectType] = function (node) {
         }
     }
 
-    if (node.stateset) {
-        this.pushStateSet(node.stateset);
+    var stateset = node.getStateSet();
+    if (stateset) {
+        this.pushStateSet(stateset);
     }
 
     var leafs = this.currentStateGraph.leafs;
@@ -6295,7 +6423,7 @@ osg.CullVisitor.prototype[osg.Geometry.prototype.objectType] = function (node) {
     leaf.geometry = node;
     leafs.push(leaf);
 
-    if (node.stateset) {
+    if (stateset) {
         this.popStateSet();
     }
 };
@@ -6748,13 +6876,13 @@ osgDB.parseSceneGraph = function (node)
             var mode = node.primitives[i].mode;
             if (node.primitives[i].indices) {
                 var array = node.primitives[i].indices;
-                array = osg.BufferArray.create(gl[array.type], array.elements, array.itemSize );
+                array = new osg.BufferArray(gl[array.type], array.elements, array.itemSize );
                 if (!mode) {
                     mode = gl.TRIANGLES;
                 } else {
                     mode = gl[mode];
                 }
-                node.primitives[i] = osg.DrawElements.create(mode, array);
+                node.primitives[i] = new osg.DrawElements(mode, array);
             } else {
                 mode = gl[mode];
                 var first = node.primitives[i].first;
@@ -6767,7 +6895,7 @@ osgDB.parseSceneGraph = function (node)
         for (var key in node.attributes) {
             if (node.attributes.hasOwnProperty(key)) {
                 var attributeArray = node.attributes[key];
-                node.attributes[key] = osg.BufferArray.create(gl[attributeArray.type], attributeArray.elements, attributeArray.itemSize );
+                node.attributes[key] = new osg.BufferArray(gl[attributeArray.type], attributeArray.elements, attributeArray.itemSize );
             }
         }
         // jQuery.each(node.attributes, function( key, element) {
@@ -6792,7 +6920,6 @@ osgDB.parseSceneGraph = function (node)
                 img.src = textures[t].file;
                 tex.setImage(img);
                 
-                //var tex = osg.Texture.create(textures[t].file);
                 newstateset.setTextureAttributeAndMode(t, tex);
                 newstateset.addUniform(osg.Uniform.createInt1(t,"Texture" + t));
             }
@@ -6944,15 +7071,12 @@ var OTHER_PROBLEM = '' +
  * Creates a webgl context. If creation fails it will
  * change the contents of the container of the <canvas>
  * tag to an error message with the correct links for WebGL.
- * @param {Element} canvas. The canvas element to create a
- *     context from.
- * @param {WebGLContextCreationAttirbutes} opt_attribs Any
- *     creation attributes you want to pass in.
- * @param {function:(msg)} opt_onError An function to call
- *     if there is an error during creation.
  * @return {WebGLRenderingContext} The created context.
  */
-var setupWebGL = function(canvas, opt_attribs, opt_onError) {
+var setupWebGL = function(
+    /** Element */ canvas, 
+    /** WebGLContextCreationAttirbutes */ opt_attribs, 
+    /** function:(msg) */ opt_onError) {
   function handleCreationError(msg) {
       var container = document.getElementsByTagName("body")[0];
     //var container = canvas.parentNode;
@@ -7235,7 +7359,7 @@ osgViewer.Viewer.prototype = {
 
         var createDomElements = function (elementToAppend) {
             var dom = [
-                "<div id='StatsDiv' style='float: left; position: relative; width: 300px; height: 150; z-index: 10;'>",
+                "<div id='StatsDiv' style='float: left; position: relative; width: 300px; height: 150px; z-index: 10;'>",
                 "<div id='StatsLegends' style='position: absolute; left: 0px; font-size: " + fontsize +"px;color: #ffffff;'>",
 
                 "<div id='frameRate' style='color: #00ff00;' > frameRate </div>",
@@ -9452,293 +9576,6 @@ osg.CullVisitor.prototype[osgearth.Tile.prototype.objectType] = function(node) {
 * http://ReadyMap.org
 */
 
-ReadyMap.PositionedElement = function(id, lon, lat, alt, options) {
-  this.hAlign = "left";
-  this.vAlign = "top";
-  this.lat = lat;
-  this.lon = lon;
-  this.alt = alt;
-  this.offset = [0,0];
-  this.ecf = null;
-  this._dirty = true;
-  
-  var defaults = {
-    hAlign: "left",
-    vAlign: "top",
-    offset: [0,0]
-  };
-  
-  var options = jQuery.extend({}, defaults, options);     
-  
-  this.vAlign = options.vAlign;
-  this.hAlign = options.hAlign;
-  
-  if (options.element !== undefined) {
-     this.element = options.element;
-  }    
-  
-  this.id = id;
-  this.ownsElement = this.element !== undefined;
-  if (this.element === undefined) {
-    this.element = jQuery("#" + id);
-    //If we found an existing element we don't own it
-    if (this.element) {
-        this.ownsElement = false;    
-    }
-  } 
-}
-
-ReadyMap.PositionedElement.prototype = {  
-
-  destroy : function() {
-    if (this.ownsElement) {
-      this.element.remove();
-    }        
-  },
-
-  setLocation: function(lon, lat, alt) {
-    if (this.lon != lon || this.lat != lat || this.alt != alt) {
-      this.lon = lon;
-      this.lat = lat;
-      this.alt = alt;
-      _dirty = true;
-    }      
-  },
-  
-  sizeChanged: function() {
-      if (this.element._lastSize !== undefined ) {
-	    var changed = (this.element._lastSize[0] != this.element.width() ||
-		               this.element._lastSize[1] != this.element.height());
-		return changed;
-		
-	  }
-	  return true;
-  },
-  
-  update : function(mapView) {
-      if (this.ecf == null || this._dirty) {      
-        var ecf = mapView.map.lla2world([this.lon, this.lat, this.alt]);
-        this._dirty = false;
-        this.ecf = ecf;
-      }
-	                    
-      //Cluster cull geocentric
-      if (mapView.map.geocentric) {
-          viewMatrix = mapView._inverseViewMatrix;
-          var eye = [];      
-          osg.Matrix.getTrans(viewMatrix, eye);
-                    
-          var lookVector = [];
-          osg.Vec3.sub( this.ecf, eye, lookVector );         
-
-          var worldUp = [];
-          osg.Vec3.copy(this.ecf, worldUp);
-          osg.Vec3.normalize( worldUp, worldUp );
-          var dot = osg.Vec3.dot(lookVector, worldUp);
-          if (dot > 0) {
-            this.element.offset({top:0, left:-10000});
-            return;
-          }                  
-      }
-           
-      var window = mapView.projectObjectIntoWindow(this.ecf);      
-      
-      var x = (window[0] + this.offset[0]).toFixed();
-      var y = (window[1] + this.offset[1]).toFixed();
-     
-      
-      //Don't reposition this element if it hasn't changed
-      if (this.lastWindow !== undefined) {
-        var dx = this.lastWindow[0] - x;
-        var dy = this.lastWindow[1] - y;
-        if (dx == 0 && dy == 0) {
-            return;
-        } 
-      }
-      
-	  var width = this.element.width();
-      if (this.hAlign == "right") {
-        x = x - width;
-      }
-      
-	  var height = this.element.height();
-      if (this.vAlign == "bottom") {	  
-        y = y - height;
-      }      
-	  
-	  this.element._lastSize = [width, height];
-          
-      this.element.position( {        
-        my: "left top",
-        at: "left top",
-        of: mapView.viewer.canvas,
-        offset: x + " " + y,
-        collision: "none none"
-      });      
-      
-      this.lastWindow = [x,y];                       
-  }
-}/**
-* ReadyMap/WebGL
-* (c) Copyright 2011 Pelican Mapping
-* License: LGPL
-* http://ReadyMap.org
-*/
-
-ReadyMap.PositionEngine = function(mapView) {
-  this.mapView = mapView;
-  var me = this;
-  this.mapView.addFrameEndCallback( function() {
-    me.frameEnd();
-  } );
-  this.elements = [];
-}
-
-ReadyMap.PositionEngine.prototype = {
-  addElement: function(element) {
-    this.elements.push( element );
-  },
-  
-  removeElement: function(element) {  
-    var index = this.elements.indexOf( element );
-    if (index >= 0) {
-      element.destroy();
-      this.elements.splice( index, 1 );
-    }       
-  },
-  
-  clear: function() {
-    for (var i = 0; i < this.elements.length; i++) {
-      this.elements[i].destroy();
-    }
-    this.elements = [];
-  },
-  
-  frameEnd: function() {
-  
-    //Cull elements on the other side of the earth.
-    var viewMatrix = mapView.viewer.view.getViewMatrix();
-      
-	var viewChanged = true;
-    if (this._lastViewMatrix !== undefined) {
-      viewChanged = !osg.Matrix.equals(viewMatrix, this._lastViewMatrix);
-    }
-	else {
-	  this._lastViewMatrix = [];
-	}
-      
-      //Save the last view matrix
-	osg.Matrix.copy(viewMatrix, this._lastViewMatrix);
-	mapView._inverseViewMatrix = osg.Matrix.inverse( viewMatrix );                        
-
-	for (var i = 0; i < this.elements.length; i++) {
-	  if (viewChanged || this.elements[i]._dirty || this.elements[i].sizeChanged()) {
-		this.elements[i].update(this.mapView);
-	  }
-	}
-  }
-}/**
-* ReadyMap/WebGL
-* (c) Copyright 2011 Pelican Mapping
-* License: LGPL
-* http://ReadyMap.org
-*/
-
-ReadyMap.Icon = function(id, lon, lat, alt, url, options) {  
-  ReadyMap.PositionedElement.call(this, id, lon, lat, alt);    
-  this.url = url;
-  this.ownsElement = true;
-    
-  var defaults = {
-    width: 64,
-    height: 64,
-    cssClass: ""
-  };
- 
-  
-  var options = jQuery.extend({}, defaults, options);
-  
-  this.width = options.width;
-  this.height = options.height;
-  this.cssClass = options.cssClass;
-  
-  this.element = jQuery('<img id="' + this.id + '" class="' + options.cssClass + '" src="' + url +
-                        '" width="' + this.width + '" height="' + this.height +
-						(options.title != undefined ? '" title="' + options.title : '') + '"/>');
-						
-  //Disable selection
-  this.element[0].onselectstart = function() { return false;} //id;
-  this.element[0].onmousedown   = function() { return false;} //id;
-						
-  jQuery("body").append(this.element);                         
-}
-
-ReadyMap.Icon.prototype = osg.objectInehrit(ReadyMap.PositionedElement.prototype, {
- getWidth : function() {
-   return this.width;
- },
- 
- setWidth: function(width) {
-   setSize(width, this.height);
- }, 
-  
- getHeight : function() {
-   return this.height;
- },
- 
-  setHeight: function(height) {
-    setSize(this.width, height);
-  },
- 
- setSize: function(width, height) {
-   if (this.height != height || this.width != width) {
-     this.width = width;
-     this.height = height;
-     this.element.attr('height', this.height);
-     this.element.attr('width', this.width);
-   }
- }
- 
- 
-});/**
-* ReadyMap/WebGL
-* (c) Copyright 2011 Pelican Mapping
-* License: LGPL
-* http://ReadyMap.org
-*/
-
-ReadyMap.Label = function(id, lon, lat, alt, text, options) {  
-  ReadyMap.PositionedElement.call(this, id, lon, lat, alt);    
-  this.text = text;
-  this.ownsElement = true;
-    
-  var defaults = {
-    cssClass: ""
-  };
- 
-  
-  var options = jQuery.extend({}, defaults, options);
-  
-  this.cssClass = options.cssClass;
-  
-  this.element = jQuery('<span id="' + this.id + '" class="' + options.cssClass + '">' + this.text + '</span>');
-  //Disable selection
-  this.element[0].onselectstart = function() { return false;} //id;
-  this.element[0].onmousedown   = function() { return false;} //id;
-
-  jQuery("body").append(this.element);                         
-}
-
-ReadyMap.Label.prototype = osg.objectInehrit(ReadyMap.PositionedElement.prototype, {
- 
-});
-/**
-* ReadyMap/WebGL
-* (c) Copyright 2011 Pelican Mapping
-* License: LGPL
-* http://ReadyMap.org
-*/
-
 
 
 ReadyMap.Manipulator = function(map) {
@@ -10380,6 +10217,293 @@ ReadyMap.MapView.prototype = {
         this.frameEnd.push(callback);
     }
 };
+/**
+* ReadyMap/WebGL
+* (c) Copyright 2011 Pelican Mapping
+* License: LGPL
+* http://ReadyMap.org
+*/
+
+ReadyMap.PositionedElement = function(id, lon, lat, alt, options) {
+  this.hAlign = "left";
+  this.vAlign = "top";
+  this.lat = lat;
+  this.lon = lon;
+  this.alt = alt;
+  this.offset = [0,0];
+  this.ecf = null;
+  this._dirty = true;
+  
+  var defaults = {
+    hAlign: "left",
+    vAlign: "top",
+    offset: [0,0]
+  };
+  
+  var options = jQuery.extend({}, defaults, options);     
+  
+  this.vAlign = options.vAlign;
+  this.hAlign = options.hAlign;
+  
+  if (options.element !== undefined) {
+     this.element = options.element;
+  }    
+  
+  this.id = id;
+  this.ownsElement = this.element !== undefined;
+  if (this.element === undefined) {
+    this.element = jQuery("#" + id);
+    //If we found an existing element we don't own it
+    if (this.element) {
+        this.ownsElement = false;    
+    }
+  } 
+}
+
+ReadyMap.PositionedElement.prototype = {  
+
+  destroy : function() {
+    if (this.ownsElement) {
+      this.element.remove();
+    }        
+  },
+
+  setLocation: function(lon, lat, alt) {
+    if (this.lon != lon || this.lat != lat || this.alt != alt) {
+      this.lon = lon;
+      this.lat = lat;
+      this.alt = alt;
+      _dirty = true;
+    }      
+  },
+  
+  sizeChanged: function() {
+      if (this.element._lastSize !== undefined ) {
+	    var changed = (this.element._lastSize[0] != this.element.width() ||
+		               this.element._lastSize[1] != this.element.height());
+		return changed;
+		
+	  }
+	  return true;
+  },
+  
+  update : function(mapView) {
+      if (this.ecf == null || this._dirty) {      
+        var ecf = mapView.map.lla2world([this.lon, this.lat, this.alt]);
+        this._dirty = false;
+        this.ecf = ecf;
+      }
+	                    
+      //Cluster cull geocentric
+      if (mapView.map.geocentric) {
+          viewMatrix = mapView._inverseViewMatrix;
+          var eye = [];      
+          osg.Matrix.getTrans(viewMatrix, eye);
+                    
+          var lookVector = [];
+          osg.Vec3.sub( this.ecf, eye, lookVector );         
+
+          var worldUp = [];
+          osg.Vec3.copy(this.ecf, worldUp);
+          osg.Vec3.normalize( worldUp, worldUp );
+          var dot = osg.Vec3.dot(lookVector, worldUp);
+          if (dot > 0) {
+            this.element.offset({top:0, left:-10000});
+            return;
+          }                  
+      }
+           
+      var window = mapView.projectObjectIntoWindow(this.ecf);      
+      
+      var x = (window[0] + this.offset[0]).toFixed();
+      var y = (window[1] + this.offset[1]).toFixed();
+     
+      
+      //Don't reposition this element if it hasn't changed
+      if (this.lastWindow !== undefined) {
+        var dx = this.lastWindow[0] - x;
+        var dy = this.lastWindow[1] - y;
+        if (dx == 0 && dy == 0) {
+            return;
+        } 
+      }
+      
+	  var width = this.element.width();
+      if (this.hAlign == "right") {
+        x = x - width;
+      }
+      
+	  var height = this.element.height();
+      if (this.vAlign == "bottom") {	  
+        y = y - height;
+      }      
+	  
+	  this.element._lastSize = [width, height];
+          
+      this.element.position( {        
+        my: "left top",
+        at: "left top",
+        of: mapView.viewer.canvas,
+        offset: x + " " + y,
+        collision: "none none"
+      });      
+      
+      this.lastWindow = [x,y];                       
+  }
+}/**
+* ReadyMap/WebGL
+* (c) Copyright 2011 Pelican Mapping
+* License: LGPL
+* http://ReadyMap.org
+*/
+
+ReadyMap.PositionEngine = function(mapView) {
+  this.mapView = mapView;
+  var me = this;
+  this.mapView.addFrameEndCallback( function() {
+    me.frameEnd();
+  } );
+  this.elements = [];
+}
+
+ReadyMap.PositionEngine.prototype = {
+  addElement: function(element) {
+    this.elements.push( element );
+  },
+  
+  removeElement: function(element) {  
+    var index = this.elements.indexOf( element );
+    if (index >= 0) {
+      element.destroy();
+      this.elements.splice( index, 1 );
+    }       
+  },
+  
+  clear: function() {
+    for (var i = 0; i < this.elements.length; i++) {
+      this.elements[i].destroy();
+    }
+    this.elements = [];
+  },
+  
+  frameEnd: function() {
+  
+    //Cull elements on the other side of the earth.
+    var viewMatrix = mapView.viewer.view.getViewMatrix();
+      
+	var viewChanged = true;
+    if (this._lastViewMatrix !== undefined) {
+      viewChanged = !osg.Matrix.equals(viewMatrix, this._lastViewMatrix);
+    }
+	else {
+	  this._lastViewMatrix = [];
+	}
+      
+      //Save the last view matrix
+	osg.Matrix.copy(viewMatrix, this._lastViewMatrix);
+	mapView._inverseViewMatrix = osg.Matrix.inverse( viewMatrix );                        
+
+	for (var i = 0; i < this.elements.length; i++) {
+	  if (viewChanged || this.elements[i]._dirty || this.elements[i].sizeChanged()) {
+		this.elements[i].update(this.mapView);
+	  }
+	}
+  }
+}/**
+* ReadyMap/WebGL
+* (c) Copyright 2011 Pelican Mapping
+* License: LGPL
+* http://ReadyMap.org
+*/
+
+ReadyMap.Icon = function(id, lon, lat, alt, url, options) {  
+  ReadyMap.PositionedElement.call(this, id, lon, lat, alt);    
+  this.url = url;
+  this.ownsElement = true;
+    
+  var defaults = {
+    width: 64,
+    height: 64,
+    cssClass: ""
+  };
+ 
+  
+  var options = jQuery.extend({}, defaults, options);
+  
+  this.width = options.width;
+  this.height = options.height;
+  this.cssClass = options.cssClass;
+  
+  this.element = jQuery('<img id="' + this.id + '" class="' + options.cssClass + '" src="' + url +
+                        '" width="' + this.width + '" height="' + this.height +
+						(options.title != undefined ? '" title="' + options.title : '') + '"/>');
+						
+  //Disable selection
+  this.element[0].onselectstart = function() { return false;} //id;
+  this.element[0].onmousedown   = function() { return false;} //id;
+						
+  jQuery("body").append(this.element);                         
+}
+
+ReadyMap.Icon.prototype = osg.objectInehrit(ReadyMap.PositionedElement.prototype, {
+ getWidth : function() {
+   return this.width;
+ },
+ 
+ setWidth: function(width) {
+   setSize(width, this.height);
+ }, 
+  
+ getHeight : function() {
+   return this.height;
+ },
+ 
+  setHeight: function(height) {
+    setSize(this.width, height);
+  },
+ 
+ setSize: function(width, height) {
+   if (this.height != height || this.width != width) {
+     this.width = width;
+     this.height = height;
+     this.element.attr('height', this.height);
+     this.element.attr('width', this.width);
+   }
+ }
+ 
+ 
+});/**
+* ReadyMap/WebGL
+* (c) Copyright 2011 Pelican Mapping
+* License: LGPL
+* http://ReadyMap.org
+*/
+
+ReadyMap.Label = function(id, lon, lat, alt, text, options) {  
+  ReadyMap.PositionedElement.call(this, id, lon, lat, alt);    
+  this.text = text;
+  this.ownsElement = true;
+    
+  var defaults = {
+    cssClass: ""
+  };
+ 
+  
+  var options = jQuery.extend({}, defaults, options);
+  
+  this.cssClass = options.cssClass;
+  
+  this.element = jQuery('<span id="' + this.id + '" class="' + options.cssClass + '">' + this.text + '</span>');
+  //Disable selection
+  this.element[0].onselectstart = function() { return false;} //id;
+  this.element[0].onmousedown   = function() { return false;} //id;
+
+  jQuery("body").append(this.element);                         
+}
+
+ReadyMap.Label.prototype = osg.objectInehrit(ReadyMap.PositionedElement.prototype, {
+ 
+});
 /**
 * ReadyMap/WebGL
 * (c) Copyright 2011 Pelican Mapping

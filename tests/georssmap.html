@@ -13,6 +13,8 @@
 
 <script type="text/javascript">
 
+    var mapView;
+
     ReadyMap.init(function() {        
 
         map = new ReadyMap.Map();
@@ -80,7 +82,7 @@
       <li>drag to pan</li>
       <li>wheel to zoom</li>
       <li>shift-drag to rotate</li>
-      <li>space to reset</li>
+      <li><a href="#" onclick="mapView.home();">reset view</a></li>
     </ul>
   </div>
   <div id="Search">

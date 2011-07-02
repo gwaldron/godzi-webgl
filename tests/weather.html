@@ -10,6 +10,8 @@
 
 <script type="text/javascript">
 
+    var mapView;
+
     ReadyMap.init(function() {        
         // create a map model:
         var map = new ReadyMap.Map({
@@ -40,7 +42,7 @@
         var size = ReadyMap.getWindowSize();
         var headerHeight = jQuery('#header').height();
         size.h -= headerHeight;
-        var mapView = new ReadyMap.MapView("3DView", size, map);
+        mapView = new ReadyMap.MapView("3DView", size, map);
 
         // display the Lat/Long:
         mapView.addFrameEndCallback(function() {
@@ -79,7 +81,7 @@
       <li>drag to pan</li>
       <li>wheel to zoom</li>
       <li>shift-drag to rotate</li>
-      <li>space to reset</li>
+      <li><a href="#" onclick="mapView.home();">reset view</a></li>
     </ul>
   </div>
   <div id="Coords">
