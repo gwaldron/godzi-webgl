@@ -10,8 +10,6 @@
 		<script type="text/javascript" src="../../js/readymap/ui/MapView.js"></script>
 		<script type="text/javascript" src="../../js/readymap/ui/PositionedElement.js"></script>
 		<script type="text/javascript" src="../../js/readymap/ui/PositionEngine.js"></script>
-		<script type="text/javascript" src="../../js/readymap/ui/Icon.js"></script>
-		<script type="text/javascript" src="../../js/readymap/ui/Label.js"></script>
 		<script type="text/javascript" src="../../js/readymap/data/ArcGISImageLayer.js"></script>
 		<script type="text/javascript" src="../../js/readymap/data/GeoRSSLayer.js"></script>
 		<script type="text/javascript" src="../../js/readymap/data/GeoRSSReader.js"></script>
@@ -21,5 +19,7 @@
 		<script type="text/javascript" src="../../js/readymap/data/WOEIDWeatherLayer.js"></script>
 		<script type="text/javascript" src="../../js/readymap/controls/Controls.js"></script>
 		<script type="text/javascript" src="../../js/readymap/controls/GeoRSSList.js"></script>
+		<script type="text/javascript" src="../../js/readymap/controls/Icon.js"></script>
+		<script type="text/javascript" src="../../js/readymap/controls/Label.js"></script>
 		<script type="text/javascript" src="../../js/readymap/controls/LayerSwitcher.js"></script>
 		<script type="text/javascript" src="../../js/readymap/controls/PlaceSearch.js"></script>
