@@ -45,20 +45,32 @@
         //Add the layer to the OpenLayers map
         olMap.addLayer(new OpenLayers.Layer.WMS(name, url, { layers: layers, format: format }, { isBaseLayer: isBaseLayer, tileSize: new OpenLayers.Size(256, 256) }));
     }
-        
+
     ReadyMap.init(function() {
 
-       // create a map model:
-       map = new ReadyMap.Map();
+        // create a map model:
+        map = new ReadyMap.Map();
 
-       //Initialze the OpenLayers map
-       var options = { numZoomLevels: 25,
-                       maxResolution: 1.40625 / 2,
-                       controls: [new OpenLayers.Control.Navigation(),
+        //Initialze the OpenLayers map
+        var options = { numZoomLevels: 25,
+            maxResolution: 1.40625 / 2,
+            controls: [new OpenLayers.Control.Navigation(),
                                   new OpenLayers.Control.ZoomPanel({ position: new OpenLayers.Pixel(10, 10) }),
                                   new OpenLayers.Control.LayerSwitcher()]
         };
         olMap = new OpenLayers.Map("OpenLayersContainer", options);
+        olMap.events.register("move", olMap, function() {
+            var locked = jQuery("#lockTo2DView").attr("checked");
+            if (locked) {
+                var bounds = olMap.getExtent();
+                var center = bounds.getCenterLonLat();
+                var width = bounds.getWidth();
+                var height = bounds.getHeight();
+                var range = ((.5 * (height)) / 0.267949849) * 111000.0;
+                if (range != 0)
+                    mapView.viewer.manipulator.setViewpoint(center.lat, center.lon, 0.0, 0, -90, range);
+            }
+        });
 
 
         addWMSLayer("Landsat", "http://readymap.org/readymap/tiles", "22", "image/jpeg", true);
@@ -71,8 +83,8 @@
         size.w = size.w / 2.0;
         size.h -= headerHeight;
         mapView = new ReadyMap.MapView("3DView", size, map);
-        
-        
+
+
         //olMap.zoomToMaxExtent();
         olMap.zoomTo(1);
 
@@ -119,7 +131,8 @@
       <li>drag to pan</li>
       <li>wheel to zoom</li>
       <li>shift-drag to rotate</li>
-      <li><a href="#" onclick="mapView.home();">reset view</a></li>
+      <li><a href="#" onclick="mapView.home();">reset view</a></li>      
+      <li><input id="lockTo2DView" type="checkbox" checked="checked"/>Lock to 2D View</li>
     </ul>
   </div>
   <div id="Coords">
