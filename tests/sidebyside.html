@@ -70,8 +70,8 @@
                 if (height < width) {
                     diameter = height;
                 }
-                diameter *= 0.5;
-                var range = ((.5 * diameter) / 0.267949849) * 111000.0;
+                radius = diameter * 0.5;
+                var range = ((.5 * radius) / 0.267949849) * 111000.0;
                 if (range != 0)
                     mapView.viewer.manipulator.setViewpoint(center.lat, center.lon, 0.0, 0, -90, range);
             }
