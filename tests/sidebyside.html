@@ -8,10 +8,12 @@
 <script type="text/javascript" src="http://www.openlayers.org/api/OpenLayers.js"></script>
 
 <link href="demo.css" rel="Stylesheet" type="text/css"></link>
+<link href="../css/readymap.css" rel="Stylesheet" type="text/css"></link>
 
 <style type="text/css">
   .map-container
   {
+  	position:relative;
   	width: 50%;    		
   	height: 100%;
   	float:left;
@@ -88,6 +90,10 @@
         size.w = size.w / 2.0;
         size.h -= headerHeight;
         mapView = new ReadyMap.MapView("3DView", size, map);
+
+        //Add some controls
+        var zoom = new ReadyMap.Controls.Zoom(mapView, "ReadyMapContainer");
+        var pan = new ReadyMap.Controls.Pan(mapView, "ReadyMapContainer");
 
 
         //olMap.zoomToMaxExtent();

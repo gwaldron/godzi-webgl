@@ -277,6 +277,14 @@ ReadyMap.EarthManipulator.prototype = osg.objectInehrit(ReadyMap.Manipulator.pro
         if (this.settingVP) {
             this.updateSetViewpoint();
         }
+
+        if (this.continuousZoom != 0) {
+            this.zoomModel(0, this.continuousZoom);
+        }
+
+        if (this.continuousPanX != 0 || this.continuousPanY != 0) {
+            this.panModel(this.continuousPanX, this.continuousPanY);
+        }
     },
 
     getMatrix: function() {

@@ -48,6 +48,14 @@ ReadyMap.MapManipulator.prototype = osg.objectInehrit(ReadyMap.Manipulator.proto
         if (this.settingVP) {
             this.updateSetViewpoint();
         }
+
+        if (this.continuousZoom != 0) {
+            this.zoomModel(0, this.continuousZoom);
+        }
+
+        if (this.continuousPanX != 0 || this.continuousPanY != 0) {
+            this.panModel(this.continuousPanX, this.continuousPanY);
+        }
     },
 
     getInverseMatrix: function() {

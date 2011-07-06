@@ -49,7 +49,9 @@ READYMAP_CONTROLS = [
 		"readymap/controls/Icon.js",       
 		"readymap/controls/Label.js"	,
         "readymap/controls/LayerSwitcher.js",
-        "readymap/controls/PlaceSearch.js"
+        "readymap/controls/PlaceSearch.js",
+		"readymap/controls/Pan.js",
+		"readymap/controls/Zoom.js"
 ]
 
 version = '0.0.0'

@@ -7,12 +7,14 @@
 <script type="text/javascript" src="../build/readymap-debug-0.0.1.js"></script>
 
 <link href="demo.css" rel="Stylesheet" type="text/css"></link>
+<link href="../css/readymap.css" rel="Stylesheet" type="text/css"></link>
+
 
 <script type="text/javascript">
 
     var mapView;
 
-    ReadyMap.init(function() {        
+    ReadyMap.init(function() {
         // create a map model:
         var map = new ReadyMap.Map();
 
@@ -27,6 +29,10 @@
         var headerHeight = jQuery('#header').height();
         size.h -= headerHeight;
         mapView = new ReadyMap.MapView("3DView", size, map);
+
+        //Add some controls
+        var zoom = new ReadyMap.Controls.Zoom(mapView, "ViewContainer");
+        var pan = new ReadyMap.Controls.Pan(mapView, "ViewContainer");
 
         // display the Lat/Long:
         mapView.addFrameEndCallback(function() {

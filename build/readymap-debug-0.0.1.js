@@ -9588,7 +9588,9 @@ ReadyMap.Manipulator = function(map) {
     this.localAzim = 0;
     this.localPitch = Math.deg2rad(-90);
     this.settingVP = false;
-
+    this.continuousZoom = 0;
+    this.continuousPanX = 0;
+    this.continuousPanY = 0;
 };
 
 ReadyMap.Manipulator.prototype = {
@@ -10026,6 +10028,14 @@ ReadyMap.EarthManipulator.prototype = osg.objectInehrit(ReadyMap.Manipulator.pro
         if (this.settingVP) {
             this.updateSetViewpoint();
         }
+
+        if (this.continuousZoom != 0) {
+            this.zoomModel(0, this.continuousZoom);
+        }
+
+        if (this.continuousPanX != 0 || this.continuousPanY != 0) {
+            this.panModel(this.continuousPanX, this.continuousPanY);
+        }
     },
 
     getMatrix: function() {
@@ -10093,6 +10103,14 @@ ReadyMap.MapManipulator.prototype = osg.objectInehrit(ReadyMap.Manipulator.proto
     frame: function() {
         if (this.settingVP) {
             this.updateSetViewpoint();
+        }
+
+        if (this.continuousZoom != 0) {
+            this.zoomModel(0, this.continuousZoom);
+        }
+
+        if (this.continuousPanX != 0 || this.continuousPanY != 0) {
+            this.panModel(this.continuousPanX, this.continuousPanY);
         }
     },
 
@@ -10171,10 +10189,14 @@ ReadyMap.MapView = function(elementId, size, map) {
     this.frameEnd = [];
 };
 
-ReadyMap.MapView.prototype = {
+ReadyMap.MapView.prototype = {    
 
     home: function() {
         this.viewer.getManipulator().computeHomePosition();
+    },
+    
+    zoom: function( delta ) {
+      this.viewer.getManipulator().zoomModel(0, delta);
     },
 
     projectObjectIntoWindow: function(object) {
@@ -11164,4 +11186,121 @@ ReadyMap.PlaceSearch.doSearch = function(place, callback)
       }
 	});
   }
+};/**
+* ReadyMap/WebGL
+* (c) Copyright 2011 Pelican Mapping
+* License: LGPL
+* http://ReadyMap.org
+*/
+
+ReadyMap.Controls.Pan = function(mapView, parent) {
+    this.mapView = mapView;
+    this._parent = parent;
+    this.init();
+};
+
+ReadyMap.Controls.Pan.prototype = {
+    init: function() {
+        var that = this;
+        //Create the new parent element
+        this._container = jQuery("<div>").addClass("readymap-control-pan");
+        var parent = "body";
+        if (this._parent !== undefined) {
+            parent = "#" + this._parent;
+        }
+        jQuery(parent).append(this._container);       
+
+        //Create the pan left button
+        this._container.append(
+          jQuery("<div>").addClass("readymap-control-pan-left readymap-control-button")
+                         .bind("mousedown", function() {
+                             that.mapView.viewer.getManipulator().continuousPanX = 0.01;
+                         })
+        );
+
+        //Create the pan right button
+        this._container.append(
+          jQuery("<div>").addClass("readymap-control-pan-right readymap-control-button")
+                         .bind("mousedown", function() {
+                             that.mapView.viewer.getManipulator().continuousPanX = -0.01;
+                         })
+        );
+
+        //Create the pan up button
+        this._container.append(
+          jQuery("<div>").addClass("readymap-control-pan-up readymap-control-button")
+                         .bind("mousedown", function() {
+                             that.mapView.viewer.getManipulator().continuousPanY = -0.01;
+                         })
+        );
+
+        //Create the pan down button
+        this._container.append(
+          jQuery("<div>").addClass("readymap-control-pan-down readymap-control-button")
+                         .bind("mousedown", function() {
+                             that.mapView.viewer.getManipulator().continuousPanY = 0.01;
+                         })
+        );
+
+        //Create the home button
+        this._container.append(
+          jQuery("<div>").addClass("readymap-control-home readymap-control-button")
+                         .bind("click", function() {
+                             that.mapView.home();
+                         })
+        );
+
+
+
+        //Listen to mouseup on the body of the document to reset the continous pan to 0
+        jQuery("body").bind("mouseup", function() {
+            that.mapView.viewer.getManipulator().continuousPanX = 0;
+            that.mapView.viewer.getManipulator().continuousPanY = 0;
+        });
+    }
+};/**
+* ReadyMap/WebGL
+* (c) Copyright 2011 Pelican Mapping
+* License: LGPL
+* http://ReadyMap.org
+*/
+
+ReadyMap.Controls.Zoom = function(mapView, parent) {
+    this.mapView = mapView;
+    this._parent = parent;
+    this.init();
+};
+
+ReadyMap.Controls.Zoom.prototype = {
+    init: function() {
+        var that = this;
+        //Create the new parent element
+        this._container = jQuery("<div>").addClass("readymap-control-zoom");
+        var parent = "body";
+        if (this._parent !== undefined) {
+            parent = "#" + this._parent;
+        }
+        jQuery(parent).append(this._container);
+
+        //Create the zoom-in button
+        this._container.append(
+          jQuery("<div>").addClass("readymap-control-zoom-in readymap-control-button")
+                         .bind("mousedown", function() {
+                             that.mapView.viewer.getManipulator().continuousZoom = -0.01;
+                         })
+        );
+
+        //Create the zoom-out button
+        this._container.append(
+          jQuery("<div>").addClass("readymap-control-zoom-out readymap-control-button")
+                         .bind("mousedown", function() {
+                             that.mapView.viewer.getManipulator().continuousZoom = 0.01;
+                         })
+        );
+
+        //Listen to mouseup on the body of the document to reset the continous zoom to 0
+        jQuery("body").bind("mouseup", function() {
+            that.mapView.viewer.getManipulator().continuousZoom = 0;
+        });
+    }
 };

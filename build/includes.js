@@ -23,3 +23,5 @@
 		<script type="text/javascript" src="../../js/readymap/controls/Label.js"></script>
 		<script type="text/javascript" src="../../js/readymap/controls/LayerSwitcher.js"></script>
 		<script type="text/javascript" src="../../js/readymap/controls/PlaceSearch.js"></script>
+		<script type="text/javascript" src="../../js/readymap/controls/Pan.js"></script>
+		<script type="text/javascript" src="../../js/readymap/controls/Zoom.js"></script>

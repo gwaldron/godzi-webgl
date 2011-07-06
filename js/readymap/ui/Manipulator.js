@@ -17,7 +17,9 @@ ReadyMap.Manipulator = function(map) {
     this.localAzim = 0;
     this.localPitch = Math.deg2rad(-90);
     this.settingVP = false;
-
+    this.continuousZoom = 0;
+    this.continuousPanX = 0;
+    this.continuousPanY = 0;
 };
 
 ReadyMap.Manipulator.prototype = {

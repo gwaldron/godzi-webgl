@@ -43,10 +43,14 @@ ReadyMap.MapView = function(elementId, size, map) {
     this.frameEnd = [];
 };
 
-ReadyMap.MapView.prototype = {
+ReadyMap.MapView.prototype = {    
 
     home: function() {
         this.viewer.getManipulator().computeHomePosition();
+    },
+    
+    zoom: function( delta ) {
+      this.viewer.getManipulator().zoomModel(0, delta);
     },
 
     projectObjectIntoWindow: function(object) {
