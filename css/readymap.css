@@ -1,7 +1,6 @@
 .readymap-control-pan
     {
         padding: 5px;
-        background: rgba(0, 0, 0, 0.25);
         -moz-border-radius: 7px;
         -webkit-border-radius: 7px;
         border-radius: 7px;
@@ -65,8 +64,7 @@
     
     .readymap-control-zoom
     {
-        padding: 5px;
-        background: rgba(0, 0, 0, 0.25);
+        padding: 5px;        
         -moz-border-radius: 7px;
         -webkit-border-radius: 7px;
         border-radius: 7px;
