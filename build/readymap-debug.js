@@ -1,242 +1,4 @@
-/*! Copyright (c) 2010 Brandon Aaron (http://brandonaaron.net)
- * Licensed under the MIT License (LICENSE.txt).
- *
- * Thanks to: http://adomas.org/javascript-mouse-wheel/ for some pointers.
- * Thanks to: Mathias Bank(http://www.mathias-bank.de) for a scope bug fix.
- * Thanks to: Seamus Leahy for adding deltaX and deltaY
- *
- * Version: 3.0.4
- * 
- * Requires: 1.2.2+
- */
-
-(function($) {
-
-var types = ['DOMMouseScroll', 'mousewheel'];
-
-$.event.special.mousewheel = {
-    setup: function() {
-        if ( this.addEventListener ) {
-            for ( var i=types.length; i; ) {
-                this.addEventListener( types[--i], handler, false );
-            }
-        } else {
-            this.onmousewheel = handler;
-        }
-    },
-    
-    teardown: function() {
-        if ( this.removeEventListener ) {
-            for ( var i=types.length; i; ) {
-                this.removeEventListener( types[--i], handler, false );
-            }
-        } else {
-            this.onmousewheel = null;
-        }
-    }
-};
-
-$.fn.extend({
-    mousewheel: function(fn) {
-        return fn ? this.bind("mousewheel", fn) : this.trigger("mousewheel");
-    },
-    
-    unmousewheel: function(fn) {
-        return this.unbind("mousewheel", fn);
-    }
-});
-
-
-function handler(event) {
-    var orgEvent = event || window.event, args = [].slice.call( arguments, 1 ), delta = 0, returnValue = true, deltaX = 0, deltaY = 0;
-    event = $.event.fix(orgEvent);
-    event.type = "mousewheel";
-    
-    // Old school scrollwheel delta
-    if ( event.wheelDelta ) { delta = event.wheelDelta/120; }
-    if ( event.detail     ) { delta = -event.detail/3; }
-    
-    // New school multidimensional scroll (touchpads) deltas
-    deltaY = delta;
-    
-    // Gecko
-    if ( orgEvent.axis !== undefined && orgEvent.axis === orgEvent.HORIZONTAL_AXIS ) {
-        deltaY = 0;
-        deltaX = -1*delta;
-    }
-    
-    // Webkit
-    if ( orgEvent.wheelDeltaY !== undefined ) { deltaY = orgEvent.wheelDeltaY/120; }
-    if ( orgEvent.wheelDeltaX !== undefined ) { deltaX = -1*orgEvent.wheelDeltaX/120; }
-    
-    // Add event and delta to the front of the arguments
-    args.unshift(event, delta, deltaX, deltaY);
-    
-    return $.event.handle.apply(this, args);
-}
-
-})(jQuery);/**
-* ReadyMap/WebGL
-* (c) Copyright 2011 Pelican Mapping
-* License: LGPL
-* http://ReadyMap.org
-*/
-
-/**
-* Array utility functions
-*/
-
-//........................................................................
-
-if (!Array.prototype.indexOf) {
-    Array.prototype.indexOf = function(elt /*, from*/) {
-        var len = this.length;
-
-        var from = Number(arguments[1]) || 0;
-        from = (from < 0)
-         ? Math.ceil(from)
-         : Math.floor(from);
-        if (from < 0)
-            from += len;
-
-        for (; from < len; from++) {
-            if (from in this &&
-          this[from] === elt)
-                return from;
-        }
-        return -1;
-    };
-}/**
-* ReadyMap/WebGL
-* (c) Copyright 2011 Pelican Mapping
-* License: LGPL
-* http://ReadyMap.org
-*/
-
-/**
-* jQuery extension to ensure ordered loading of dependencies. -GW 2011/05
-* 
-* Inspired by:
-*
-* $.include - script inclusion jQuery plugin
-* Based on idea from http://www.gnucitizen.org/projects/jquery-include/
-* @author Tobiasz Cudnik
-* @link http://meta20.net/.include_script_inclusion_jQuery_plugin
-* @license MIT
-*/
-
-// overload jquery's onDomReady
-if (jQuery.browser.mozilla || jQuery.browser.opera) {
-    document.removeEventListener("DOMContentLoaded", jQuery.ready, false);
-    document.addEventListener("DOMContentLoaded", function() { jQuery.ready(); }, false);
-}
-
-jQuery.event.remove(window, "load", jQuery.ready);
-
-jQuery.event.add(window, "load", function() { jQuery.ready(); });
-
-jQuery.extend({
-
-    includeList: [],
-    includeLoaded: {},
-    includePtr: 0,
-
-    includeInOrder: function(libs) {
-        this.includeList = libs;
-        this.includePtr = 0;
-        this.loadInclude(this.includePtr);
-    },
-
-    loadNext: function() {
-        this.includePtr++;
-        if (this.includePtr < this.includeList.length)
-            this.loadInclude(this.includePtr);
-    },
-
-    loadInclude: function(i) {
-        if (this.includePtr >= this.includeList.length)
-            return;
-        var host = this;
-        var url = this.includeList[i].replace('\n', '');
-        var script = document.createElement("script");
-        script.type = "text/javascript";
-        script.src = url;
-        
-        this.includeLoaded[script] = false;
-        
-        // set both callbacks to support different browser behaviors
-        script.onload = function() {
-            if (host.includeLoaded[this] === false) {
-                host.includeLoaded[this] = true;
-                host.loadNext();
-            }
-        };
-        script.onreadystatechange = function() {
-            if (this.readyState != 'complete' && this.readyState != 'loaded')
-                return;
-            if (host.includedLoaded[this] === false) {
-                host.includeLoaded[this] = true;
-                host.loadNext();
-            }
-        };
-        
-        document.getElementsByTagName('head')[0].appendChild(script);
-    },
-
-    readyOld: jQuery.ready,
-
-    ready: function() {
-        if (jQuery.isReady)
-            return;
-        var imReady = jQuery.includePtr >= jQuery.includeList.length;
-        if (imReady)
-            jQuery.readyOld.apply(jQuery, arguments);
-        else
-            setTimeout(arguments.callee, 10);
-    }
-});
-
-
-
-
-
-
-
-
-
-
-
-
-var ReadyMap = {};
-
-ReadyMap.version = '0.0.1';
-
-ReadyMap.init = function(onload) {
-    window.addEventListener("load", onload, true);
-};
-
-ReadyMap.getWindowSize = function() {
-
-    var myWidth = 0, myHeight = 0;
-
-    if (typeof (window.innerWidth) == 'number') {
-        //Non-IE
-        myWidth = window.innerWidth;
-        myHeight = window.innerHeight;
-    }
-    else if (document.documentElement && (document.documentElement.clientWidth || document.documentElement.clientHeight)) {
-        //IE 6+ in 'standards compliant mode'
-        myWidth = document.documentElement.clientWidth;
-        myHeight = document.documentElement.clientHeight;
-    }
-    else if (document.body && (document.body.clientWidth || document.body.clientHeight)) {
-        //IE 4 compatible
-        myWidth = document.body.clientWidth;
-        myHeight = document.body.clientHeight;
-    }
-    return { 'w': myWidth, 'h': myHeight };
-};
-// osg-debug-0.0.5.js commit 0 - http://github.com/cedricpinson/osgjs
+﻿// osg-debug-0.0.5.js commit 0 - http://github.com/cedricpinson/osgjs
 /** -*- compile-command: "jslint-cli osg.js" -*- */
 var osg = {};
 
@@ -8252,7 +8014,7 @@ osgGA.FirstPersonManipulator.prototype = {
         }
     }
 };
-/**
+﻿/**
 * ReadyMap/WebGL
 * (c) Copyright 2011 Pelican Mapping
 * License: LGPL
@@ -8273,40 +8035,7 @@ osg.Matrix.equals = function(a,b) {
     if (a[i] != b[i]) return false;
   }
   return true;
-}/**
-* Godzi/WebGL
-* (c) Copyright 2011 Pelican Mapping
-* License: LGPL
-* http://godzi.org
-*/
-
-var osgearth = {};
-
-osgearth.copyright = '(c) Copyright 2011 Pelican Mapping - http://pelicanmapping.com';
-osgearth.instance = 0;
-osgearth.version = '0.0.1';
-osgearth.log = function(str) {
-    if (window.console !== undefined) {
-        window.console.log(str);
-    } else {
-        jQuery("#debug").append(str + "<br>");
-    }
-};
-
-osgearth.ProxyHost = "proxy.php?url=";
-
-//Makes a URL prepended by the ProxyHost if it's set
-osgearth.getURL = function(url) {
-    if (osgearth.ProxyHost !== null && window.document.URL.indexOf("file:") === 0) {
-        osgearth.ProxyHost = null;
-    }
-    if (osgearth.ProxyHost !== undefined && osgearth.ProxyHost !== null) {
-        url = osgearth.ProxyHost + encodeURIComponent(url);
-    }
-    return url;
-};
-
-//........................................................................
+}
 
 // OSG extensions ...
 // eventually submit all this stuff to osgjs:
@@ -8433,9 +8162,45 @@ osg.Texture.destroy = function(tex) {
             tex.image = undefined;
         }
     }
+};﻿/**
+* ReadyMap/WebGL
+* (c) Copyright 2011 Pelican Mapping
+* License: LGPL
+* http://ReadyMap.org
+*/
+
+var osgearth = {};
+
+osgearth.copyright = '(c) Copyright 2011 Pelican Mapping - http://pelicanmapping.com';
+osgearth.instance = 0;
+osgearth.version = '0.0.1';
+osgearth.log = function(str) {
+    if (window.console !== undefined) {
+        window.console.log(str);
+    } else {
+        jQuery("#debug").append(str + "<br>");
+    }
 };
 
-//........................................................................
+osgearth.ProxyHost = "proxy.php?url=";
+
+//Makes a URL prepended by the ProxyHost if it's set
+osgearth.getURL = function(url) {
+    if (osgearth.ProxyHost !== null && window.document.URL.indexOf("file:") === 0) {
+        osgearth.ProxyHost = null;
+    }
+    if (osgearth.ProxyHost !== undefined && osgearth.ProxyHost !== null) {
+        url = osgearth.ProxyHost + encodeURIComponent(url);
+    }
+    return url;
+};
+
+/**
+* ReadyMap/WebGL
+* (c) Copyright 2011 Pelican Mapping
+* License: LGPL
+* http://ReadyMap.org
+*/
 
 osgearth.FunctionLocation = {
     VertexPreTexture: 0,
@@ -8445,6 +8210,12 @@ osgearth.FunctionLocation = {
     FragmentPreLighting: 4,
     FragmentPostLighting: 5
 };
+﻿/**
+* ReadyMap/WebGL
+* (c) Copyright 2011 Pelican Mapping
+* License: LGPL
+* http://ReadyMap.org
+*/
 
 osgearth.ShaderFactory = {};
 
@@ -8552,7 +8323,13 @@ osgearth.ShaderFactory.createFragmentApplyTexturing = function(imageLayers) {
     return buf;
 };
 
-//........................................................................
+
+/**
+* ReadyMap/WebGL
+* (c) Copyright 2011 Pelican Mapping
+* License: LGPL
+* http://ReadyMap.org
+*/
 
 osgearth.VirtualProgram = function() {
     osg.Program.call(this);
@@ -8737,57 +8514,12 @@ osgearth.VirtualProgram.prototype = osg.objectInehrit(osg.Program.prototype, {
         }
     }
 });
-
-//........................................................................
-
-Math.deg2rad = function(deg) {
-    return deg * 0.0174532925;
-};
-
-Math.rad2deg = function(rad) {
-    return rad * 57.2957795;
-};
-
-Math.clamp = function(x, min, max) {
-    if (x < min)
-        return min;
-    else if (x > max)
-        return max;
-    else
-        return x;
-};
-
-Math.log10 = function(n) {
-    return Math.log(n) / Math.LN10;
-};
-
-Math.powFast = function(x, y) {
-    return x / (x + y - y * x);
-};
-
-Math.smoothStepInterp = function(t) {
-    return (t * t) * (3.0 - 2.0 * t);
-};
-
-Math.smootherStepInterp = function(t) {
-    return t * t * t * (t * (t * 6 - 15) + 10);
-};
-
-Math.accelerationInterp = function(t, a) {
-    return a == 0 ? t : a > 0 ? Math.powFast(t, a) : 1.0 - Math.powFast(1.0 - t, -a);
-};
-
-//........................................................................
-
-osgearth.url = function(url) {
-  if (osgearth.proxy !== undefined && osgearth.proxy != null) {
-    var result = osgearth.proxy + "?url=" + escape(url);
-    return result;
-  }
-  return url;
-}
-
-//...................................................................
+/**
+* ReadyMap/WebGL
+* (c) Copyright 2011 Pelican Mapping
+* License: LGPL
+* http://ReadyMap.org
+*/
 
 osgearth.Extent = {
     width: function(extent) {
@@ -8800,12 +8532,16 @@ osgearth.Extent = {
         return [(extent.xmin + extent.xmax) / 2, (extent.ymin + extent.ymax) / 2];
     },
     clamp: function(extent, vec2) {
-        vec2[0] = Math.clamp( vec2[0], extent.xmin, extent.xmax );
-        vec2[1] = Math.clamp( vec2[1], extent.ymin, extent.ymax);
+        vec2[0] = Math.clamp(vec2[0], extent.xmin, extent.xmax);
+        vec2[1] = Math.clamp(vec2[1], extent.ymin, extent.ymax);
     }
 };
-
-//...................................................................
+/**
+* ReadyMap/WebGL
+* (c) Copyright 2011 Pelican Mapping
+* License: LGPL
+* http://ReadyMap.org
+*/
 
 osgearth.EllipsoidModel = function() {
     this.setRadii(6378137.0, 6356752.3142); // WGS84
@@ -8876,9 +8612,12 @@ osgearth.EllipsoidModel.prototype = {
         var ecef = lla2ecef(lla);
         return local2worldFromECEF(ecef);
     }
-};
-
-//...................................................................
+};﻿/**
+* ReadyMap/WebGL
+* (c) Copyright 2011 Pelican Mapping
+* License: LGPL
+* http://ReadyMap.org
+*/
 
 osgearth.Profile = function() {
     this.ellipsoid = new osgearth.EllipsoidModel();
@@ -8901,8 +8640,12 @@ osgearth.Profile.prototype = {
         return [this.baseTilesX * e, this.baseTilesY * e];
     }
 };
-
-//...................................................................
+/**
+* ReadyMap/WebGL
+* (c) Copyright 2011 Pelican Mapping
+* License: LGPL
+* http://ReadyMap.org
+*/
 
 osgearth.GeodeticProfile = function() {
     osgearth.Profile.call(this);
@@ -8915,8 +8658,12 @@ osgearth.GeodeticProfile = function() {
 
 osgearth.GeodeticProfile.prototype = osg.objectInehrit(osgearth.Profile.prototype, {
 });
-
-//...................................................................
+/**
+* ReadyMap/WebGL
+* (c) Copyright 2011 Pelican Mapping
+* License: LGPL
+* http://ReadyMap.org
+*/
 
 osgearth.MercatorProfile = function() {
     osgearth.Profile.call(this);
@@ -8968,12 +8715,16 @@ osgearth.MercatorProfile.prototype = osg.objectInehrit(osgearth.Profile.prototyp
     toLLA: function(coord) {
         return [
             coord[0] / this.ellipsoid.radiusEquator,
-            2 * Math.atan(Math.exp(coord[1]/this.ellipsoid.radiusEquator)) - Math.PI / 2,
+            2 * Math.atan(Math.exp(coord[1] / this.ellipsoid.radiusEquator)) - Math.PI / 2,
             coord[2]];
     }
 });
-
-//...................................................................
+﻿/**
+* ReadyMap/WebGL
+* (c) Copyright 2011 Pelican Mapping
+* License: LGPL
+* http://ReadyMap.org
+*/
 
 osgearth.TileKey = {
 
@@ -9026,8 +8777,12 @@ osgearth.TileKey = {
         }
     }
 };
-
-//...................................................................
+/**
+* ReadyMap/WebGL
+* (c) Copyright 2011 Pelican Mapping
+* License: LGPL
+* http://ReadyMap.org
+*/
 
 osgearth.ImageLayer = function(name) {
     this.name = name;
@@ -9070,8 +8825,12 @@ osgearth.ImageLayer.prototype = {
     }
 
 };
-
-//...................................................................
+/**
+* ReadyMap/WebGL
+* (c) Copyright 2011 Pelican Mapping
+* License: LGPL
+* http://ReadyMap.org
+*/
 
 osgearth.Map = function(args) {
 
@@ -9156,7 +8915,7 @@ osgearth.Map.prototype = {
         else
             return this.profile.toLLA(world);
     },
-    
+
     // called by Tile::traverse to tell the map that the tile is in use
     markTileDrawn: function(tile) {
         this.drawList[tile.key] = tile;
@@ -9180,8 +8939,12 @@ osgearth.Map.prototype = {
         this.drawListSize = 0;
     }
 };
-
-//...................................................................
+/**
+* ReadyMap/WebGL
+* (c) Copyright 2011 Pelican Mapping
+* License: LGPL
+* http://ReadyMap.org
+*/
 
 osgearth.MapNode = function(map) {
 
@@ -9241,7 +9004,7 @@ osgearth.MapNode.prototype = osg.objectInehrit(osg.Node.prototype, {
             var lastViewMatrix = visitor.modelviewMatrixStack[visitor.modelviewMatrixStack.length - 1];
             var mvmInv = [];
             osg.Matrix.inverse(lastViewMatrix, mvmInv);
-            if ( visitor.eyePoint === undefined )
+            if (visitor.eyePoint === undefined)
                 visitor.eyePoint = [];
             osg.Matrix.getTrans(mvmInv, visitor.eyePoint);
         }
@@ -9261,8 +9024,12 @@ osg.CullVisitor.prototype[osgearth.MapNode.prototype.objectType] = function(node
     if (node.stateset)
         this.popStateSet();
 };
-
-//...................................................................
+﻿/**
+* ReadyMap/WebGL
+* (c) Copyright 2011 Pelican Mapping
+* License: LGPL
+* http://ReadyMap.org
+*/
 
 osgearth.Tile = function(key, map, parentTextures) {
 
@@ -9568,6 +9335,287 @@ osg.CullVisitor.prototype[osgearth.Tile.prototype.objectType] = function(node) {
 
     if (node.stateset)
         this.popStateSet();
+};
+
+/*! Copyright (c) 2010 Brandon Aaron (http://brandonaaron.net)
+ * Licensed under the MIT License (LICENSE.txt).
+ *
+ * Thanks to: http://adomas.org/javascript-mouse-wheel/ for some pointers.
+ * Thanks to: Mathias Bank(http://www.mathias-bank.de) for a scope bug fix.
+ * Thanks to: Seamus Leahy for adding deltaX and deltaY
+ *
+ * Version: 3.0.4
+ * 
+ * Requires: 1.2.2+
+ */
+
+(function($) {
+
+var types = ['DOMMouseScroll', 'mousewheel'];
+
+$.event.special.mousewheel = {
+    setup: function() {
+        if ( this.addEventListener ) {
+            for ( var i=types.length; i; ) {
+                this.addEventListener( types[--i], handler, false );
+            }
+        } else {
+            this.onmousewheel = handler;
+        }
+    },
+    
+    teardown: function() {
+        if ( this.removeEventListener ) {
+            for ( var i=types.length; i; ) {
+                this.removeEventListener( types[--i], handler, false );
+            }
+        } else {
+            this.onmousewheel = null;
+        }
+    }
+};
+
+$.fn.extend({
+    mousewheel: function(fn) {
+        return fn ? this.bind("mousewheel", fn) : this.trigger("mousewheel");
+    },
+    
+    unmousewheel: function(fn) {
+        return this.unbind("mousewheel", fn);
+    }
+});
+
+
+function handler(event) {
+    var orgEvent = event || window.event, args = [].slice.call( arguments, 1 ), delta = 0, returnValue = true, deltaX = 0, deltaY = 0;
+    event = $.event.fix(orgEvent);
+    event.type = "mousewheel";
+    
+    // Old school scrollwheel delta
+    if ( event.wheelDelta ) { delta = event.wheelDelta/120; }
+    if ( event.detail     ) { delta = -event.detail/3; }
+    
+    // New school multidimensional scroll (touchpads) deltas
+    deltaY = delta;
+    
+    // Gecko
+    if ( orgEvent.axis !== undefined && orgEvent.axis === orgEvent.HORIZONTAL_AXIS ) {
+        deltaY = 0;
+        deltaX = -1*delta;
+    }
+    
+    // Webkit
+    if ( orgEvent.wheelDeltaY !== undefined ) { deltaY = orgEvent.wheelDeltaY/120; }
+    if ( orgEvent.wheelDeltaX !== undefined ) { deltaX = -1*orgEvent.wheelDeltaX/120; }
+    
+    // Add event and delta to the front of the arguments
+    args.unshift(event, delta, deltaX, deltaY);
+    
+    return $.event.handle.apply(this, args);
+}
+
+})(jQuery);﻿/**
+* ReadyMap/WebGL
+* (c) Copyright 2011 Pelican Mapping
+* License: LGPL
+* http://ReadyMap.org
+*/
+
+Math.deg2rad = function(deg) {
+    return deg * 0.0174532925;
+};
+
+Math.rad2deg = function(rad) {
+    return rad * 57.2957795;
+};
+
+Math.clamp = function(x, min, max) {
+    if (x < min)
+        return min;
+    else if (x > max)
+        return max;
+    else
+        return x;
+};
+
+Math.log10 = function(n) {
+    return Math.log(n) / Math.LN10;
+};
+
+Math.powFast = function(x, y) {
+    return x / (x + y - y * x);
+};
+
+Math.smoothStepInterp = function(t) {
+    return (t * t) * (3.0 - 2.0 * t);
+};
+
+Math.smootherStepInterp = function(t) {
+    return t * t * t * (t * (t * 6 - 15) + 10);
+};
+
+Math.accelerationInterp = function(t, a) {
+    return a == 0 ? t : a > 0 ? Math.powFast(t, a) : 1.0 - Math.powFast(1.0 - t, -a);
+};/**
+* ReadyMap/WebGL
+* (c) Copyright 2011 Pelican Mapping
+* License: LGPL
+* http://ReadyMap.org
+*/
+
+/**
+* Array utility functions
+*/
+
+//........................................................................
+
+if (!Array.prototype.indexOf) {
+    Array.prototype.indexOf = function(elt /*, from*/) {
+        var len = this.length;
+
+        var from = Number(arguments[1]) || 0;
+        from = (from < 0)
+         ? Math.ceil(from)
+         : Math.floor(from);
+        if (from < 0)
+            from += len;
+
+        for (; from < len; from++) {
+            if (from in this &&
+          this[from] === elt)
+                return from;
+        }
+        return -1;
+    };
+}/**
+* ReadyMap/WebGL
+* (c) Copyright 2011 Pelican Mapping
+* License: LGPL
+* http://ReadyMap.org
+*/
+
+/**
+* jQuery extension to ensure ordered loading of dependencies. -GW 2011/05
+* 
+* Inspired by:
+*
+* $.include - script inclusion jQuery plugin
+* Based on idea from http://www.gnucitizen.org/projects/jquery-include/
+* @author Tobiasz Cudnik
+* @link http://meta20.net/.include_script_inclusion_jQuery_plugin
+* @license MIT
+*/
+
+// overload jquery's onDomReady
+if (jQuery.browser.mozilla || jQuery.browser.opera) {
+    document.removeEventListener("DOMContentLoaded", jQuery.ready, false);
+    document.addEventListener("DOMContentLoaded", function() { jQuery.ready(); }, false);
+}
+
+jQuery.event.remove(window, "load", jQuery.ready);
+
+jQuery.event.add(window, "load", function() { jQuery.ready(); });
+
+jQuery.extend({
+
+    includeList: [],
+    includeLoaded: {},
+    includePtr: 0,
+
+    includeInOrder: function(libs) {
+        this.includeList = libs;
+        this.includePtr = 0;
+        this.loadInclude(this.includePtr);
+    },
+
+    loadNext: function() {
+        this.includePtr++;
+        if (this.includePtr < this.includeList.length)
+            this.loadInclude(this.includePtr);
+    },
+
+    loadInclude: function(i) {
+        if (this.includePtr >= this.includeList.length)
+            return;
+        var host = this;
+        var url = this.includeList[i].replace('\n', '');
+        var script = document.createElement("script");
+        script.type = "text/javascript";
+        script.src = url;
+        
+        this.includeLoaded[script] = false;
+        
+        // set both callbacks to support different browser behaviors
+        script.onload = function() {
+            if (host.includeLoaded[this] === false) {
+                host.includeLoaded[this] = true;
+                host.loadNext();
+            }
+        };
+        script.onreadystatechange = function() {
+            if (this.readyState != 'complete' && this.readyState != 'loaded')
+                return;
+            if (host.includedLoaded[this] === false) {
+                host.includeLoaded[this] = true;
+                host.loadNext();
+            }
+        };
+        
+        document.getElementsByTagName('head')[0].appendChild(script);
+    },
+
+    readyOld: jQuery.ready,
+
+    ready: function() {
+        if (jQuery.isReady)
+            return;
+        var imReady = jQuery.includePtr >= jQuery.includeList.length;
+        if (imReady)
+            jQuery.readyOld.apply(jQuery, arguments);
+        else
+            setTimeout(arguments.callee, 10);
+    }
+});
+
+
+
+
+
+
+
+
+
+
+
+
+var ReadyMap = {};
+
+ReadyMap.version = '0.0.1';
+
+ReadyMap.init = function(onload) {
+    window.addEventListener("load", onload, true);
+};
+
+ReadyMap.getWindowSize = function() {
+
+    var myWidth = 0, myHeight = 0;
+
+    if (typeof (window.innerWidth) == 'number') {
+        //Non-IE
+        myWidth = window.innerWidth;
+        myHeight = window.innerHeight;
+    }
+    else if (document.documentElement && (document.documentElement.clientWidth || document.documentElement.clientHeight)) {
+        //IE 6+ in 'standards compliant mode'
+        myWidth = document.documentElement.clientWidth;
+        myHeight = document.documentElement.clientHeight;
+    }
+    else if (document.body && (document.body.clientWidth || document.body.clientHeight)) {
+        //IE 4 compatible
+        myWidth = document.body.clientWidth;
+        myHeight = document.body.clientHeight;
+    }
+    return { 'w': myWidth, 'h': myHeight };
 };
 /**
 * ReadyMap/WebGL

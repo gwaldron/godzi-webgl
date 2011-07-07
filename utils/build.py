@@ -14,13 +14,33 @@ import re
 import commands
 import shutil
 
-READYMAP = [
-        "jquery/jquery.mousewheel.js",
-		"array.js",
-        "readymap.js",		
+OSGJS = [
 		"osgjs/osg-debug-0.0.5.js",
-		"osgjs/osg-extras.js",
-		"osgearth/osgearth.js"  
+		"osgjs/osg-extras.js"
+]
+
+OSGEARTH = [
+        "osgearth/osgearth.js",
+        "osgearth/FunctionLocation.js",
+        "osgearth/ShaderFactory.js",
+        "osgearth/VirtualProgram.js",
+        "osgearth/Extent.js",
+        "osgearth/EllipsoidModel.js",
+        "osgearth/Profile.js",
+        "osgearth/GeodeticProfile.js",
+        "osgearth/MercatorProfile.js",
+        "osgearth/TileKey.js",
+        "osgearth/ImageLayer.js",
+        "osgearth/Map.js",
+        "osgearth/MapNode.js",
+        "osgearth/Tile.js"
+]
+
+READYMAP = [
+        "jquery/jquery.mousewheel.js",		
+		"math.js",
+		"array.js",
+        "readymap.js"
 ]
 
 READYMAP_UI = [
@@ -190,7 +210,7 @@ def main(argv=None):
 	unminified = args.unminified
 
 	config = [
-                ['readymap', 'includes', READYMAP + READYMAP_UI + READYMAP_DATA + READYMAP_CONTROLS, args],
+                ['readymap', 'includes', OSGJS + OSGEARTH + READYMAP + READYMAP_UI + READYMAP_DATA + READYMAP_CONTROLS, args],
                 ]
 
         global version
