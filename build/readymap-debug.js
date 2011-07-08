@@ -8832,6 +8832,102 @@ osgearth.ImageLayer.prototype = {
 * http://ReadyMap.org
 */
 
+osgearth.HeightField = function(numColumns, numRows, data) {
+    this._numColumns = numColumns;
+    this._numRows = numRows;
+
+    //Allocate data for the underlying heights if none was provides
+    if (data === undefined) {
+        data = new Array(numColumns * numRows);
+    }
+    this._data = data;
+};
+
+osgearth.HeightField.prototype = {
+    getNumColumns: function() {
+        return this._numColumns;
+    },
+
+    getNumRows: function() {
+        return this._numRows;
+    },
+
+    getHeight: function(c, r) {
+        var index = c + r * this._numColumns;
+        if (index < 0 || index >= this._data.length) throw "Index out of bounds";
+        return this._data[index];
+    },
+
+    setHeight: function(c, r, height) {
+        var index = c + r * this._numColumns;
+        if (index < 0 || index >= this._data.length) throw "Index out of bounds";
+        this._data[index] = height;
+    }
+};
+
+osgearth.WebHeightField = function(url, loadNow) {
+    this.url = url;
+    this.complete = false;
+    this.loadNow = loadNow === undefined ? false : loadNow;
+    this.refresh();
+}
+
+osgearth.WebHeightField.prototype = osg.objectInehrit(osgearth.HeightField.prototype, {
+    refresh: function() {
+        //Mark the HeightField as not complete
+        this.complete = false;
+
+        var that = this;
+        //Request the heightfield from the URL
+        jQuery.ajax({
+            url: this.url,
+            dataType: "json",
+            async: !this.loadNow,
+            success: function(data) {
+                that._numColumns = data.width;
+                that._numRows = data.height;
+                that._data = data.data;
+                that.complete = true;
+            },
+            error: function() {
+                /*
+                that._numColumns = 8;
+                that._numRows = 8;
+                var data = [];
+                for (var i = 0; i < that._numColumns * that._numRows; i++) {
+                    data[i] = 0;
+                }
+                that._data = data;
+                that.complete = true;
+                */
+            }
+        });
+    }
+});
+/**
+* ReadyMap/WebGL
+* (c) Copyright 2011 Pelican Mapping
+* License: LGPL
+* http://ReadyMap.org
+*/
+
+osgearth.ElevationLayer = function(name) {
+    this.name = name;
+    this.profile = undefined;    
+};
+
+osgearth.ElevationLayer.prototype = {
+    name: function() {
+        return this.name;
+    }    
+};
+/**
+* ReadyMap/WebGL
+* (c) Copyright 2011 Pelican Mapping
+* License: LGPL
+* http://ReadyMap.org
+*/
+
 osgearth.Map = function(args) {
 
     this.usingDefaultProfile = false;
@@ -8883,6 +8979,9 @@ osgearth.Map = function(args) {
     // ordered list of image layers in the map
     this.imageLayers = [];
 
+    //Elevation layers
+    this.elevationLayers = [];
+
     // these handle the automatic deletion of culled tiles.
     this.drawList = {};
     this.expireList = {};
@@ -8899,6 +8998,10 @@ osgearth.Map.prototype = {
             this.profile = layer.profile;
             this.usingDefaultProfile = false;
         }
+    },
+
+    addElevationLayer: function(layer) {
+        this.elevationLayers.push(layer);
     },
 
     // converts [long,lat,alt] to world model coordinates [x,y,z]
@@ -8921,6 +9024,29 @@ osgearth.Map.prototype = {
         this.drawList[tile.key] = tile;
         this.expireList[tile.key] = null;
         this.drawListSize++;
+    },
+
+
+    createEmptyHeightField: function(numColumns, numRows) {
+        var data = [];
+        var numElements = numColumns * numRows;
+        for (var i = 0; i < numElements; i++) {
+            data[i] = 0;
+        }
+        return new osgearth.HeightField(numColumns, numRows, data);
+    },
+    
+
+    //Creates a heightfield from the elevation layers or an empty heightfield
+    createHeightField: function(key, loadNow) {
+        if (this.elevationLayers.length == 0) {
+            return null;
+            //return this.createEmptyHeightField(16, 16);
+        }
+        else {
+            //Just return the first layers heightfield            
+            return this.elevationLayers[0].createHeightField(key, this.profile, loadNow);
+        }
     },
 
     frame: function() {
@@ -9064,7 +9190,25 @@ osgearth.Tile = function(key, map, parentTextures) {
     this.textureReady = [];
     this.numTexturesReady = 0;
 
-    this.build(parentTextures);
+    this.parentTextures = parentTextures;
+
+    var loadNow = this.key[2] == this.map.minLevel;
+    //Create the heightfield
+    this.heightField = this.map.createHeightField(this.key, loadNow);
+
+    //Create the texture layers
+    for (var i = 0, n = this.map.imageLayers.length; i < n; i++) {
+        var layer = this.map.imageLayers[i];
+        var newTex = layer.createTexture(this.key, this.map.profile);
+        this.textures.push(newTex);
+        this.textureReady.push(false);
+    }
+
+    this.isBuilt = false;
+    if (loadNow) {
+        this.build(this.parentTextures);
+    }
+
 };
 
 osgearth.Tile.prototype = osg.objectInehrit(osg.Node.prototype, {
@@ -9081,6 +9225,19 @@ osgearth.Tile.prototype = osg.objectInehrit(osg.Node.prototype, {
 
     allTexturesReady: function() {
         return this.numTexturesReady === this.textures.length;
+    },
+
+    allChildrenBuilt: function() {
+        for (var i = 0; i < this.children.length; i++) {
+            if (!this.children[i].isBuilt) return false;
+        }
+        return true;
+    },
+
+    buildChildren: function() {
+        for (var i = 0; i < this.children.length; i++) {
+            this.children[i].checkBuild();
+        }
     },
 
     // checks to see whether all the images for this tile are available
@@ -9133,9 +9290,6 @@ osgearth.Tile.prototype = osg.objectInehrit(osg.Node.prototype, {
         var numCols = this.map.threeD ? 8 : 2;
 
         var extentLLA = osgearth.TileKey.getExtentLLA(this.key, this.map.profile);
-        var lonSpacing = osgearth.Extent.width(extentLLA) / (numCols - 1);
-        var latSpacing = osgearth.Extent.height(extentLLA) / (numRows - 1);
-
         // localizer matrix:
         var tile2world =
             this.map.threeD ?
@@ -9144,6 +9298,17 @@ osgearth.Tile.prototype = osg.objectInehrit(osg.Node.prototype, {
         var world2tile = [];
         osg.Matrix.inverse(tile2world, world2tile);
 
+        //Right now just create an empty heightfield
+        var heightField = this.map.threeD ? this.heightField : null;
+        if (heightField != null) {
+            numRows = heightField.getNumRows();
+            numCols = heightField.getNumColumns();
+        }
+
+        var lonSpacing = osgearth.Extent.width(extentLLA) / (numCols - 1);
+        var latSpacing = osgearth.Extent.height(extentLLA) / (numRows - 1);
+
+
         var e = 0, v = 0, tc = 0, vi = 0;
 
         for (var row = 0; row < numRows; row++) {
@@ -9151,7 +9316,8 @@ osgearth.Tile.prototype = osg.objectInehrit(osg.Node.prototype, {
 
             for (var col = 0; col < numCols; col++) {
                 var s = col / (numCols - 1);
-                var lla = [extentLLA.xmin + lonSpacing * col, extentLLA.ymin + latSpacing * row, 0.0];
+                var height = heightField != null ? heightField.getHeight(col, row) : 0;
+                var lla = [extentLLA.xmin + lonSpacing * col, extentLLA.ymin + latSpacing * row, height];
 
                 var world = this.map.lla2world(lla);
                 var vert = osg.Matrix.transformVec3(world2tile, world, []);
@@ -9204,10 +9370,11 @@ osgearth.Tile.prototype = osg.objectInehrit(osg.Node.prototype, {
         var sharedTexCoordAttr = osg.BufferArray.create(gl.ARRAY_BUFFER, texcoords0, 2);
 
         for (var i = 0, n = this.map.imageLayers.length; i < n; i++) {
-            var layer = this.map.imageLayers[i];
-            var newTex = layer.createTexture(this.key, this.map.profile);
-            this.textures.push(newTex);
-            this.textureReady.push(false);
+            //var layer = this.map.imageLayers[i];
+            //var newTex = layer.createTexture(this.key, this.map.profile);
+            //this.textures.push(newTex);
+            //this.textureReady.push(false);
+            var newTex = this.textures[i];
 
             if (parentTextures === null || this.map.waitForAllLayers) {
                 stateSet.setTextureAttributeAndMode(i, newTex);
@@ -9245,6 +9412,7 @@ osgearth.Tile.prototype = osg.objectInehrit(osg.Node.prototype, {
             }
         }
         this.deviation -= 0.2;
+        this.isBuilt = true;
     },
 
     requestSubtiles: function() {
@@ -9253,7 +9421,30 @@ osgearth.Tile.prototype = osg.objectInehrit(osg.Node.prototype, {
         this.subtilesRequested = true;
     },
 
+    checkBuild: function() {
+        if (!this.isBuilt) {
+            var hasAllData = true;
+            if (this.heightField != null && !this.heightField.complete) {
+                hasAllData = false;
+            }
+
+            /*if (!this.allTexturesReady()) {
+                hasAllData = false;
+            }*/
+
+            if (hasAllData) {
+                this.build(this.parentTextures);
+            }
+
+        }
+        return this.isBuilt;
+    },
+
+
+
     traverse: function(visitor) {
+        //Try to build the children if needed
+        this.buildChildren();
 
         if (visitor.modelviewMatrixStack !== undefined) { // i.e., in cull visitor
 
@@ -9282,6 +9473,9 @@ osgearth.Tile.prototype = osg.objectInehrit(osg.Node.prototype, {
                         traverseChildren = false;
                     }
                     else if (this.children.length < 4) {
+                        traverseChildren = false;
+                    }
+                    else if (!this.allChildrenBuilt()) {
                         traverseChildren = false;
                     }
                     else {
@@ -10745,6 +10939,44 @@ ReadyMap.TMSImageLayer.prototype = osg.objectInehrit(osgearth.ImageLayer.prototy
     createTexture: function(key, profile) {
         var imageURL = this.getURL(key, profile);
         return osg.Texture.create(imageURL);
+    }
+});/**
+* ReadyMap/WebGL
+* (c) Copyright 2011 Pelican Mapping
+* License: LGPL
+* http://ReadyMap.org
+*/
+
+ReadyMap.TMSElevationLayer = function(settings) {
+    osgearth.ElevationLayer.call(this, settings.name);
+    this.url = settings.url;
+    this.flipY = settings.tmsType === "google";
+    this.extension = "json";
+    this.baseLevel = settings.baseLevel !== undefined ? settings.baseLevel : 0;
+    this.args = settings.args !== undefined ? settings.args : null;
+};
+
+ReadyMap.TMSElevationLayer.prototype = osg.objectInehrit(osgearth.ElevationLayer.prototype, {
+
+    getURL: function(key, profile) {
+        var y = key[1];
+
+        if (this.flipY) {
+            var size = profile.getTileCount(key[2]);
+            y = (size[1] - 1) - key[1];
+        }
+
+        var url = this.url + "/" + (key[2] + this.baseLevel) + "/" + key[0] + "/" + y + "." + this.extension;
+        if (this.args !== undefined && this.args != null) {
+            url += "?" + this.args;
+        }
+
+        return osgearth.getURL(url);
+    },
+
+    createHeightField: function(key, profile, loadNow) {
+        var url = this.getURL(key, profile);
+        return new osgearth.WebHeightField(url, loadNow);
     }
 });/**
 * ReadyMap/WebGL

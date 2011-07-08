@@ -38,7 +38,25 @@ osgearth.Tile = function(key, map, parentTextures) {
     this.textureReady = [];
     this.numTexturesReady = 0;
 
-    this.build(parentTextures);
+    this.parentTextures = parentTextures;
+
+    var loadNow = this.key[2] == this.map.minLevel;
+    //Create the heightfield
+    this.heightField = this.map.createHeightField(this.key, loadNow);
+
+    //Create the texture layers
+    for (var i = 0, n = this.map.imageLayers.length; i < n; i++) {
+        var layer = this.map.imageLayers[i];
+        var newTex = layer.createTexture(this.key, this.map.profile);
+        this.textures.push(newTex);
+        this.textureReady.push(false);
+    }
+
+    this.isBuilt = false;
+    if (loadNow) {
+        this.build(this.parentTextures);
+    }
+
 };
 
 osgearth.Tile.prototype = osg.objectInehrit(osg.Node.prototype, {
@@ -55,6 +73,19 @@ osgearth.Tile.prototype = osg.objectInehrit(osg.Node.prototype, {
 
     allTexturesReady: function() {
         return this.numTexturesReady === this.textures.length;
+    },
+
+    allChildrenBuilt: function() {
+        for (var i = 0; i < this.children.length; i++) {
+            if (!this.children[i].isBuilt) return false;
+        }
+        return true;
+    },
+
+    buildChildren: function() {
+        for (var i = 0; i < this.children.length; i++) {
+            this.children[i].checkBuild();
+        }
     },
 
     // checks to see whether all the images for this tile are available
@@ -107,9 +138,6 @@ osgearth.Tile.prototype = osg.objectInehrit(osg.Node.prototype, {
         var numCols = this.map.threeD ? 8 : 2;
 
         var extentLLA = osgearth.TileKey.getExtentLLA(this.key, this.map.profile);
-        var lonSpacing = osgearth.Extent.width(extentLLA) / (numCols - 1);
-        var latSpacing = osgearth.Extent.height(extentLLA) / (numRows - 1);
-
         // localizer matrix:
         var tile2world =
             this.map.threeD ?
@@ -118,6 +146,17 @@ osgearth.Tile.prototype = osg.objectInehrit(osg.Node.prototype, {
         var world2tile = [];
         osg.Matrix.inverse(tile2world, world2tile);
 
+        //Right now just create an empty heightfield
+        var heightField = this.map.threeD ? this.heightField : null;
+        if (heightField != null) {
+            numRows = heightField.getNumRows();
+            numCols = heightField.getNumColumns();
+        }
+
+        var lonSpacing = osgearth.Extent.width(extentLLA) / (numCols - 1);
+        var latSpacing = osgearth.Extent.height(extentLLA) / (numRows - 1);
+
+
         var e = 0, v = 0, tc = 0, vi = 0;
 
         for (var row = 0; row < numRows; row++) {
@@ -125,7 +164,8 @@ osgearth.Tile.prototype = osg.objectInehrit(osg.Node.prototype, {
 
             for (var col = 0; col < numCols; col++) {
                 var s = col / (numCols - 1);
-                var lla = [extentLLA.xmin + lonSpacing * col, extentLLA.ymin + latSpacing * row, 0.0];
+                var height = heightField != null ? heightField.getHeight(col, row) : 0;
+                var lla = [extentLLA.xmin + lonSpacing * col, extentLLA.ymin + latSpacing * row, height];
 
                 var world = this.map.lla2world(lla);
                 var vert = osg.Matrix.transformVec3(world2tile, world, []);
@@ -178,10 +218,11 @@ osgearth.Tile.prototype = osg.objectInehrit(osg.Node.prototype, {
         var sharedTexCoordAttr = osg.BufferArray.create(gl.ARRAY_BUFFER, texcoords0, 2);
 
         for (var i = 0, n = this.map.imageLayers.length; i < n; i++) {
-            var layer = this.map.imageLayers[i];
-            var newTex = layer.createTexture(this.key, this.map.profile);
-            this.textures.push(newTex);
-            this.textureReady.push(false);
+            //var layer = this.map.imageLayers[i];
+            //var newTex = layer.createTexture(this.key, this.map.profile);
+            //this.textures.push(newTex);
+            //this.textureReady.push(false);
+            var newTex = this.textures[i];
 
             if (parentTextures === null || this.map.waitForAllLayers) {
                 stateSet.setTextureAttributeAndMode(i, newTex);
@@ -219,6 +260,7 @@ osgearth.Tile.prototype = osg.objectInehrit(osg.Node.prototype, {
             }
         }
         this.deviation -= 0.2;
+        this.isBuilt = true;
     },
 
     requestSubtiles: function() {
@@ -227,7 +269,30 @@ osgearth.Tile.prototype = osg.objectInehrit(osg.Node.prototype, {
         this.subtilesRequested = true;
     },
 
+    checkBuild: function() {
+        if (!this.isBuilt) {
+            var hasAllData = true;
+            if (this.heightField != null && !this.heightField.complete) {
+                hasAllData = false;
+            }
+
+            /*if (!this.allTexturesReady()) {
+                hasAllData = false;
+            }*/
+
+            if (hasAllData) {
+                this.build(this.parentTextures);
+            }
+
+        }
+        return this.isBuilt;
+    },
+
+
+
     traverse: function(visitor) {
+        //Try to build the children if needed
+        this.buildChildren();
 
         if (visitor.modelviewMatrixStack !== undefined) { // i.e., in cull visitor
 
@@ -256,6 +321,9 @@ osgearth.Tile.prototype = osg.objectInehrit(osg.Node.prototype, {
                         traverseChildren = false;
                     }
                     else if (this.children.length < 4) {
+                        traverseChildren = false;
+                    }
+                    else if (!this.allChildrenBuilt()) {
                         traverseChildren = false;
                     }
                     else {

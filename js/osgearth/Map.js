@@ -56,6 +56,9 @@ osgearth.Map = function(args) {
     // ordered list of image layers in the map
     this.imageLayers = [];
 
+    //Elevation layers
+    this.elevationLayers = [];
+
     // these handle the automatic deletion of culled tiles.
     this.drawList = {};
     this.expireList = {};
@@ -72,6 +75,10 @@ osgearth.Map.prototype = {
             this.profile = layer.profile;
             this.usingDefaultProfile = false;
         }
+    },
+
+    addElevationLayer: function(layer) {
+        this.elevationLayers.push(layer);
     },
 
     // converts [long,lat,alt] to world model coordinates [x,y,z]
@@ -94,6 +101,29 @@ osgearth.Map.prototype = {
         this.drawList[tile.key] = tile;
         this.expireList[tile.key] = null;
         this.drawListSize++;
+    },
+
+
+    createEmptyHeightField: function(numColumns, numRows) {
+        var data = [];
+        var numElements = numColumns * numRows;
+        for (var i = 0; i < numElements; i++) {
+            data[i] = 0;
+        }
+        return new osgearth.HeightField(numColumns, numRows, data);
+    },
+    
+
+    //Creates a heightfield from the elevation layers or an empty heightfield
+    createHeightField: function(key, loadNow) {
+        if (this.elevationLayers.length == 0) {
+            return null;
+            //return this.createEmptyHeightField(16, 16);
+        }
+        else {
+            //Just return the first layers heightfield            
+            return this.elevationLayers[0].createHeightField(key, this.profile, loadNow);
+        }
     },
 
     frame: function() {

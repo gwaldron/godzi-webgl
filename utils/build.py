@@ -31,6 +31,8 @@ OSGEARTH = [
         "osgearth/MercatorProfile.js",
         "osgearth/TileKey.js",
         "osgearth/ImageLayer.js",
+		"osgearth/HeightField.js",
+		"osgearth/ElevationLayer.js",	
         "osgearth/Map.js",
         "osgearth/MapNode.js",
         "osgearth/Tile.js"
@@ -58,6 +60,7 @@ READYMAP_DATA = [
 		"readymap/data/GeoRSSReader.js",
 		"readymap/data/Map.js",
 		"readymap/data/TMSImageLayer.js",
+		"readymap/data/TMSElevationLayer.js",
 		"readymap/data/WMSImageLayer.js",	
 		"readymap/data/WOEIDWeatherLayer.js"	
 ]

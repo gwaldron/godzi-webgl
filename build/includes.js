@@ -11,6 +11,8 @@
 		<script type="text/javascript" src="../../js/osgearth/MercatorProfile.js"></script>
 		<script type="text/javascript" src="../../js/osgearth/TileKey.js"></script>
 		<script type="text/javascript" src="../../js/osgearth/ImageLayer.js"></script>
+		<script type="text/javascript" src="../../js/osgearth/HeightField.js"></script>
+		<script type="text/javascript" src="../../js/osgearth/ElevationLayer.js"></script>
 		<script type="text/javascript" src="../../js/osgearth/Map.js"></script>
 		<script type="text/javascript" src="../../js/osgearth/MapNode.js"></script>
 		<script type="text/javascript" src="../../js/osgearth/Tile.js"></script>
@@ -29,6 +31,7 @@
 		<script type="text/javascript" src="../../js/readymap/data/GeoRSSReader.js"></script>
 		<script type="text/javascript" src="../../js/readymap/data/Map.js"></script>
 		<script type="text/javascript" src="../../js/readymap/data/TMSImageLayer.js"></script>
+		<script type="text/javascript" src="../../js/readymap/data/TMSElevationLayer.js"></script>
 		<script type="text/javascript" src="../../js/readymap/data/WMSImageLayer.js"></script>
 		<script type="text/javascript" src="../../js/readymap/data/WOEIDWeatherLayer.js"></script>
 		<script type="text/javascript" src="../../js/readymap/controls/Controls.js"></script>
