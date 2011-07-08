@@ -27,6 +27,15 @@ osgearth.Map = function(args) {
     // scale factor for tile paging
     this.zoomScale = 1.0;
 
+    // vertical scale for elevation data
+    this.verticalScale = 1.0;
+
+    // minimum allowable elevation value
+    this.minElevation = -1e6;
+
+    // maximum allowable elevation value
+    this.maxElevation = 1e6;
+
     if (args !== undefined) {
         if (args.profile !== undefined)
             this.profile = args.profile;
@@ -42,6 +51,12 @@ osgearth.Map = function(args) {
             this.waitForAllLayers = args.waitForAllLayers;
         if (args.zoomScale !== undefined)
             this.zoomScale = args.zoomScale;
+        if (args.verticalScale !== undefined)
+            this.verticalScale = args.verticalScale;
+        if (args.minElevation !== undefined)
+            this.minElevation = args.minElevation;
+        if (args.maxElevation !== undefined)
+            this.maxElevation = args.maxElevation;
         if (args.geocentric !== undefined)
             this.geocentric = args.geocentric;
         else if (this.threeD === false)

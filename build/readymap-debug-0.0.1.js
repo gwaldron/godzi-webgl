@@ -8913,7 +8913,7 @@ osgearth.WebHeightField.prototype = osg.objectInehrit(osgearth.HeightField.proto
 
 osgearth.ElevationLayer = function(name) {
     this.name = name;
-    this.profile = undefined;    
+    this.profile = undefined;
 };
 
 osgearth.ElevationLayer.prototype = {
@@ -8950,6 +8950,15 @@ osgearth.Map = function(args) {
     // scale factor for tile paging
     this.zoomScale = 1.0;
 
+    // vertical scale for elevation data
+    this.verticalScale = 1.0;
+
+    // minimum allowable elevation value
+    this.minElevation = -1e6;
+
+    // maximum allowable elevation value
+    this.maxElevation = 1e6;
+
     if (args !== undefined) {
         if (args.profile !== undefined)
             this.profile = args.profile;
@@ -8965,6 +8974,12 @@ osgearth.Map = function(args) {
             this.waitForAllLayers = args.waitForAllLayers;
         if (args.zoomScale !== undefined)
             this.zoomScale = args.zoomScale;
+        if (args.verticalScale !== undefined)
+            this.verticalScale = args.verticalScale;
+        if (args.minElevation !== undefined)
+            this.minElevation = args.minElevation;
+        if (args.maxElevation !== undefined)
+            this.maxElevation = args.maxElevation;
         if (args.geocentric !== undefined)
             this.geocentric = args.geocentric;
         else if (this.threeD === false)
@@ -9317,6 +9332,7 @@ osgearth.Tile.prototype = osg.objectInehrit(osg.Node.prototype, {
             for (var col = 0; col < numCols; col++) {
                 var s = col / (numCols - 1);
                 var height = heightField != null ? heightField.getHeight(col, row) : 0;
+                height = Math.clamp(height * this.map.verticalScale, this.map.minElevation, this.map.maxElevation);
                 var lla = [extentLLA.xmin + lonSpacing * col, extentLLA.ymin + latSpacing * row, height];
 
                 var world = this.map.lla2world(lla);
@@ -9429,7 +9445,7 @@ osgearth.Tile.prototype = osg.objectInehrit(osg.Node.prototype, {
             }
 
             /*if (!this.allTexturesReady()) {
-                hasAllData = false;
+            hasAllData = false;
             }*/
 
             if (hasAllData) {

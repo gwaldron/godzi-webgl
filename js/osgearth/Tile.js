@@ -165,6 +165,7 @@ osgearth.Tile.prototype = osg.objectInehrit(osg.Node.prototype, {
             for (var col = 0; col < numCols; col++) {
                 var s = col / (numCols - 1);
                 var height = heightField != null ? heightField.getHeight(col, row) : 0;
+                height = Math.clamp(height * this.map.verticalScale, this.map.minElevation, this.map.maxElevation);
                 var lla = [extentLLA.xmin + lonSpacing * col, extentLLA.ymin + latSpacing * row, height];
 
                 var world = this.map.lla2world(lla);
@@ -277,7 +278,7 @@ osgearth.Tile.prototype = osg.objectInehrit(osg.Node.prototype, {
             }
 
             /*if (!this.allTexturesReady()) {
-                hasAllData = false;
+            hasAllData = false;
             }*/
 
             if (hasAllData) {

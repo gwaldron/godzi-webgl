@@ -7,7 +7,7 @@
 
 osgearth.ElevationLayer = function(name) {
     this.name = name;
-    this.profile = undefined;    
+    this.profile = undefined;
 };
 
 osgearth.ElevationLayer.prototype = {

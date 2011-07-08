@@ -16,7 +16,10 @@
 
         ReadyMap.init(function() {
             // create a map model:
-            var map = new ReadyMap.Map();
+            var map = new ReadyMap.Map({
+                verticalScale: 3.0,
+                minElevation:  0.0
+            });
 
             map.addImageLayer(new ReadyMap.TMSImageLayer({
                 name: "Landsat",
@@ -25,38 +28,38 @@
             }));
 
             map.addElevationLayer(new ReadyMap.TMSElevationLayer({
-              name: "Elevation",              
-              url: "http://readymap.org/readymap/tiles/1.0.0/9",
-              args: "json=true",
-              tmsType: "google"
-        }));
+                name: "Elevation",
+                url: "http://readymap.org/readymap/tiles/1.0.0/9",
+                args: "json=true",
+                tmsType: "google"
+            }));
 
-        // create a view tied to a page element:
-        var size = ReadyMap.getWindowSize();
-        var headerHeight = jQuery('#header').height();
-        size.h -= headerHeight;
-        mapView = new ReadyMap.MapView("3DView", size, map);
+            // create a view tied to a page element:
+            var size = ReadyMap.getWindowSize();
+            var headerHeight = jQuery('#header').height();
+            size.h -= headerHeight;
+            mapView = new ReadyMap.MapView("3DView", size, map);
 
-        //Add some controls
-        var zoom = new ReadyMap.Controls.Zoom(mapView, "ViewContainer");
-        var pan = new ReadyMap.Controls.Pan(mapView, "ViewContainer");
+            //Add some controls
+            var zoom = new ReadyMap.Controls.Zoom(mapView, "ViewContainer");
+            var pan = new ReadyMap.Controls.Pan(mapView, "ViewContainer");
 
-        // display the Lat/Long:
-        mapView.addFrameEndCallback(function() {
-            var viewMatrix = mapView.viewer.view.getViewMatrix();
-            viewMatrix = osg.Matrix.inverse(viewMatrix);
-            var eye = [];
-            osg.Matrix.getTrans(viewMatrix, eye);
-            var lla = map.profile.ellipsoid.ecef2lla(eye);
-            lla[0] = Math.rad2deg(lla[0]);
-            lla[1] = Math.rad2deg(lla[1]);
-            jQuery("#Coords").html(
+            // display the Lat/Long:
+            mapView.addFrameEndCallback(function() {
+                var viewMatrix = mapView.viewer.view.getViewMatrix();
+                viewMatrix = osg.Matrix.inverse(viewMatrix);
+                var eye = [];
+                osg.Matrix.getTrans(viewMatrix, eye);
+                var lla = map.profile.ellipsoid.ecef2lla(eye);
+                lla[0] = Math.rad2deg(lla[0]);
+                lla[1] = Math.rad2deg(lla[1]);
+                jQuery("#Coords").html(
                 "Lat: " + lla[1].toFixed(2) + "\u00B0" + "  Long = " + lla[0].toFixed(2) + "\u00B0" + "<br/>" +
                 "Azim: " + Math.rad2deg(mapView.viewer.manipulator.localAzim).toFixed(1) + "\u00B0" +
                 "  Pitch:" + Math.rad2deg(mapView.viewer.manipulator.localPitch).toFixed(1) + "\u00B0" + "<br/>" +
                 "Tiles: " + map.drawListSize);
+            });
         });
-    });
 
 </script>
 
