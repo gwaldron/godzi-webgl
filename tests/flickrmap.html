@@ -1,34 +1,41 @@
 <html>
 <head>
-<title>Godzi WebGL</title>
+<title>ReadyMap WebGL</title>
 
 <meta http-equiv="content-type" content="text/html; charset=ISO-8859-1">
 
 <script type="text/javascript" src="../js/jquery/jquery-1.4.2.js"></script>
 <script type="text/javascript" src="../js/jquery/jquery-ui-1.8.2.custom.min.js"></script>
-<script type="text/javascript" src="../js/godzi.js"></script>
+<script type="text/javascript" src="../build/readymap.js"></script>
 
 <link href="demo.css" rel="Stylesheet" type="text/css"></link>
 <link href="../css/ui-lightness/jquery.ui.all.css" rel="stylesheet" type="text/css"></link>
+<link href="../css/readymap.css" rel="Stylesheet" type="text/css"></link>
 
 <script type="text/javascript">
 
-    godzi.init("../js/", function() {
+    var mapView;
+
+    ReadyMap.init(function() {
 
         // create a map model:
-        map = new godzi.Map();
+        map = new ReadyMap.Map();
 
-        map.addImageLayer(new godzi.TMSImageLayer({
+        map.addImageLayer(new ReadyMap.TMSImageLayer({
             name: "Landsat",
             url: "http://readymap.org/readymap/tiles/1.0.0/22/",
             tmsType: "google"
         }));
 
         // create a view tied to a page element:
-        var size = godzi.getWindowSize();
+        var size = ReadyMap.getWindowSize();
         var headerHeight = jQuery('#header').height();
         size.h -= headerHeight;
-        mapView = new godzi.MapView("3DView", size, map);
+        mapView = new ReadyMap.MapView("3DView", size, map);
+
+        //Add some controls
+        var zoom = new ReadyMap.Controls.Zoom(mapView, "ViewContainer");
+        var pan = new ReadyMap.Controls.Pan(mapView, "ViewContainer");
 
         // display the Lat/Long:
         mapView.addFrameEndCallback(function() {
@@ -45,7 +52,7 @@
                 "  Pitch:" + Math.rad2deg(mapView.viewer.manipulator.localPitch).toFixed(1) + "\u00B0");
         });
 		
-		var placeSearch = new godzi.PlaceSearch("Search", "InputSearch", function(lat, lon, swlat, swlon, nelat, nelon) {
+		var placeSearch = new ReadyMap.PlaceSearch("Search", "InputSearch", function(lat, lon, swlat, swlon, nelat, nelon) {
 		  var range = ((.5 * (nelat - swlat)) / 0.267949849) * 111000.0;
 		  mapView.viewer.manipulator.setViewpoint(lat, lon, 0.0, 0, -90, range);
 		});
@@ -53,10 +60,10 @@
 		//Add GeoRSSLayer
 		var proxy = "http://demo.pelicanmapping.com/rmweb/proxy.php?url=";
 		var feedUrl = "http://api.flickr.com/services/feeds/geo/?tags=cat&format=rss_200";
-		var rssLayer = new godzi.GeoRSSLayer(mapView, proxy + feedUrl, 60, { url: "http://google-maps-icons.googlecode.com/files/photo.png" });
+		var rssLayer = new ReadyMap.GeoRSSLayer(mapView, proxy + feedUrl, 60, { url: "http://google-maps-icons.googlecode.com/files/photo.png" });
 		
 		//Add GeoRSSList
-		var rssPanel = new godzi.controls.GeoRSSList("RSSPanel", mapView);
+		var rssPanel = new ReadyMap.Controls.GeoRSSList("RSSPanel", mapView);
 		rssLayer.reader.addCallback(function(items) { rssPanel.setItems(items); });
     });
 
@@ -67,7 +74,8 @@
   <div id="header">
     <a href="http://pelicanmapping.com" border="0"><img id="logo" align="right" height="50" src="http://pelicanmapping.com/wp-content/uploads/2011/02/pelican-logo-262x93-light.png" /></a>
     <p>
-        Godzi / WebGL :: 
+        ReadyMap / WebGL :: 
+        <a href="index.html">demos</a> ::
         <a href="http://godzi.org">wiki</a> :: 
         <a href="http://github.com/gwaldron/godzi-webgl">github</a> ::
         <a href="http://twitter.com/#!/pelicanmapping">twitter</a>
@@ -81,7 +89,7 @@
       <li>drag to pan</li>
       <li>wheel to zoom</li>
       <li>shift-drag to rotate</li>
-      <li>space to reset</li>
+      <li><a href="#" onclick="mapView.home();">reset view</a></li>
     </ul>
   </div>
   <div id="Search">

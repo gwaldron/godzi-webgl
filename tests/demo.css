@@ -105,3 +105,9 @@ a
 {
     color: #ffffff;
 }
+
+.olImageLoadError {
+ opacity: 0 !important;
+ filter: alpha(opacity=0) !important;
+ background-color: transparent !important;
+}

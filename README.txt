@@ -1,4 +1,5 @@
-Godzi / WebGL
+ReadyMap SDK
+JavaScript Toolkit for 3D Web Maps
 (c) Copyright 2011 Pelican Mapping
-http://github.com/gwaldron/godzi-webgl
-
+Repo: http://github.com/gwaldron/godzi-webgl
+Twitter: @pelicanmapping
