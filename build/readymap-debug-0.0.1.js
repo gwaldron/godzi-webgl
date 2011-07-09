@@ -8228,17 +8228,19 @@ osgearth.ShaderFactory.createVertexShaderMain = function(functions) {
         "attribute vec3 Vertex;",
         "attribute vec4 Color;",
         "attribute vec3 Normal;",
+        "attribute vec3 Elevation;",
         "uniform int ArrayColorEnabled;",
         "uniform mat4 ModelViewMatrix;",
         "uniform mat4 ProjectionMatrix;",
         "uniform mat4 NormalMatrix;",
         "uniform int osgearth_LightingEnabled;",
+        "uniform float VerticalScale;",
         "varying vec4 VertexColor;",
         "void osgearth_vert_setupTexturing(void);",
         //todo: insert all function prototypes
         "",
         "void main() {",
-        "    gl_Position = ProjectionMatrix * ModelViewMatrix * vec4(Vertex, 1.0);",
+        "    gl_Position = ProjectionMatrix * ModelViewMatrix * vec4(Vertex - VerticalScale*Elevation, 1.0);",
         "    if (ArrayColorEnabled == 1)",
         "        VertexColor = Color;",
         "    else",
@@ -8951,7 +8953,7 @@ osgearth.Map = function(args) {
     this.zoomScale = 1.0;
 
     // vertical scale for elevation data
-    this.verticalScale = 1.0;
+    //this.verticalScale = 1.0;
 
     // minimum allowable elevation value
     this.minElevation = -1e6;
@@ -8974,8 +8976,8 @@ osgearth.Map = function(args) {
             this.waitForAllLayers = args.waitForAllLayers;
         if (args.zoomScale !== undefined)
             this.zoomScale = args.zoomScale;
-        if (args.verticalScale !== undefined)
-            this.verticalScale = args.verticalScale;
+//        if (args.verticalScale !== undefined)
+//            this.verticalScale = args.verticalScale;
         if (args.minElevation !== undefined)
             this.minElevation = args.minElevation;
         if (args.maxElevation !== undefined)
@@ -9050,7 +9052,7 @@ osgearth.Map.prototype = {
         }
         return new osgearth.HeightField(numColumns, numRows, data);
     },
-    
+
 
     //Creates a heightfield from the elevation layers or an empty heightfield
     createHeightField: function(key, loadNow) {
@@ -9090,7 +9092,9 @@ osgearth.Map.prototype = {
 osgearth.MapNode = function(map) {
 
     osg.Node.call(this);
+
     this.map = map;
+    this.verticalScale = 1.0;
 
     var rootSize = map.profile.getTileCount(map.minLevel);
     for (var x = 0; x < rootSize[0]; x++) {
@@ -9136,9 +9140,16 @@ osgearth.MapNode = function(map) {
 
         stateSet.addUniform(osg.Uniform.createInt1(i, "Texture" + i));
     }
+
+    this.verticalScaleUniform = osg.Uniform.createFloat1(this.map.verticalScale, "VerticalScale");
+    stateSet.addUniform(this.verticalScaleUniform, osg.StateAttribute.ON);
 };
 
 osgearth.MapNode.prototype = osg.objectInehrit(osg.Node.prototype, {
+
+    setVerticalScale: function(value) {
+        this.verticalScaleUniform.set([value]);
+    },
 
     traverse: function(visitor) {
         if (visitor.modelviewMatrixStack !== undefined) { // i.e., in cull visitor
@@ -9300,6 +9311,7 @@ osgearth.Tile.prototype = osg.objectInehrit(osg.Node.prototype, {
         var normals = [];
         var texcoords0 = [];
         var corner = [];
+        var elevVecs = [];
 
         var numRows = this.map.threeD ? 8 : 2;
         var numCols = this.map.threeD ? 8 : 2;
@@ -9332,19 +9344,28 @@ osgearth.Tile.prototype = osg.objectInehrit(osg.Node.prototype, {
             for (var col = 0; col < numCols; col++) {
                 var s = col / (numCols - 1);
                 var height = heightField != null ? heightField.getHeight(col, row) : 0;
-                height = Math.clamp(height * this.map.verticalScale, this.map.minElevation, this.map.maxElevation);
-                var lla = [extentLLA.xmin + lonSpacing * col, extentLLA.ymin + latSpacing * row, height];
+                height = Math.clamp(height, this.map.minElevation, this.map.maxElevation);
+                //var lla = [extentLLA.xmin + lonSpacing * col, extentLLA.ymin + latSpacing * row, height];
+                var lla = [extentLLA.xmin + lonSpacing * col, extentLLA.ymin + latSpacing * row, 0]; //height];
 
                 var world = this.map.lla2world(lla);
                 var vert = osg.Matrix.transformVec3(world2tile, world, []);
                 this.insertArray(vert, verts, v);
 
-                // todo: fix for elevation.
+                // todo: fix for elevation
                 var normal =
                     this.map.geocentric ? osg.Vec3.normalize(vert, []) :
                     [0, 0, 1];
-
                 this.insertArray(normal, normals, v);
+
+                // elevation extrusion vector
+                var extrude = [];
+                osg.Vec3.normalize(world, extrude);
+                extrude = osg.Matrix.transformVec3(world2tile, extrude, []);
+                osg.Vec3.normalize(extrude, extrude);
+                osg.Vec3.mult(extrude, height, extrude);
+                this.insertArray(extrude, elevVecs, v);
+
                 v += 3;
 
                 if (col < numCols - 1 && row < numRows - 1) {
@@ -9377,6 +9398,8 @@ osgearth.Tile.prototype = osg.objectInehrit(osg.Node.prototype, {
         this.geometry.getAttributes().Normal = osg.BufferArray.create(gl.ARRAY_BUFFER, normals, 3);
         var tris = new osg.DrawElements(gl.TRIANGLES, osg.BufferArray.create(gl.ELEMENT_ARRAY_BUFFER, elements, 1));
         this.geometry.getPrimitives().push(tris);
+
+        this.geometry.getAttributes().Elevation = osg.BufferArray.create(gl.ARRAY_BUFFER, elevVecs, 3);
 
         // the textures:     
         var stateSet = this.getOrCreateStateSet();
@@ -10413,7 +10436,7 @@ ReadyMap.MapManipulator.prototype = osg.objectInehrit(ReadyMap.Manipulator.proto
 * MapView
 * Installs a 3D WebGL viewer within an HTML5 canvas elements.
 */
-ReadyMap.MapView = function(elementId, size, map) {
+ReadyMap.MapView = function(elementId, size, map, args) {
 
     this.map = map;
     this.viewer = null;
@@ -10434,7 +10457,15 @@ ReadyMap.MapView = function(elementId, size, map) {
         this.viewer.setupManipulator(new ReadyMap.EarthManipulator(map));
     else
         this.viewer.setupManipulator(new ReadyMap.MapManipulator(map));
-    this.viewer.setScene(new osgearth.MapNode(map)); //map.createNode());
+    this.mapNode = new osgearth.MapNode(map);
+
+    if (args !== undefined) {
+        if (args.verticalScale !== undefined) {
+            this.setVerticalScale(args.verticalScale);
+        }
+    }
+
+    this.viewer.setScene(this.mapNode);
     delete this.viewer.view.light;
     this.viewer.getManipulator().computeHomePosition();
     //this.viewer.run();
@@ -10447,14 +10478,18 @@ ReadyMap.MapView = function(elementId, size, map) {
     this.frameEnd = [];
 };
 
-ReadyMap.MapView.prototype = {    
+ReadyMap.MapView.prototype = {
 
     home: function() {
         this.viewer.getManipulator().computeHomePosition();
     },
-    
-    zoom: function( delta ) {
-      this.viewer.getManipulator().zoomModel(0, delta);
+
+    zoom: function(delta) {
+        this.viewer.getManipulator().zoomModel(0, delta);
+    },
+
+    setVerticalScale: function(value) {
+        this.mapNode.setVerticalScale(value);
     },
 
     projectObjectIntoWindow: function(object) {

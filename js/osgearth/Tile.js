@@ -133,6 +133,7 @@ osgearth.Tile.prototype = osg.objectInehrit(osg.Node.prototype, {
         var normals = [];
         var texcoords0 = [];
         var corner = [];
+        var elevVecs = [];
 
         var numRows = this.map.threeD ? 8 : 2;
         var numCols = this.map.threeD ? 8 : 2;
@@ -165,19 +166,28 @@ osgearth.Tile.prototype = osg.objectInehrit(osg.Node.prototype, {
             for (var col = 0; col < numCols; col++) {
                 var s = col / (numCols - 1);
                 var height = heightField != null ? heightField.getHeight(col, row) : 0;
-                height = Math.clamp(height * this.map.verticalScale, this.map.minElevation, this.map.maxElevation);
-                var lla = [extentLLA.xmin + lonSpacing * col, extentLLA.ymin + latSpacing * row, height];
+                height = Math.clamp(height, this.map.minElevation, this.map.maxElevation);
+                //var lla = [extentLLA.xmin + lonSpacing * col, extentLLA.ymin + latSpacing * row, height];
+                var lla = [extentLLA.xmin + lonSpacing * col, extentLLA.ymin + latSpacing * row, 0]; //height];
 
                 var world = this.map.lla2world(lla);
                 var vert = osg.Matrix.transformVec3(world2tile, world, []);
                 this.insertArray(vert, verts, v);
 
-                // todo: fix for elevation.
+                // todo: fix for elevation
                 var normal =
                     this.map.geocentric ? osg.Vec3.normalize(vert, []) :
                     [0, 0, 1];
-
                 this.insertArray(normal, normals, v);
+
+                // elevation extrusion vector
+                var extrude = [];
+                osg.Vec3.normalize(world, extrude);
+                extrude = osg.Matrix.transformVec3(world2tile, extrude, []);
+                osg.Vec3.normalize(extrude, extrude);
+                osg.Vec3.mult(extrude, height, extrude);
+                this.insertArray(extrude, elevVecs, v);
+
                 v += 3;
 
                 if (col < numCols - 1 && row < numRows - 1) {
@@ -210,6 +220,8 @@ osgearth.Tile.prototype = osg.objectInehrit(osg.Node.prototype, {
         this.geometry.getAttributes().Normal = osg.BufferArray.create(gl.ARRAY_BUFFER, normals, 3);
         var tris = new osg.DrawElements(gl.TRIANGLES, osg.BufferArray.create(gl.ELEMENT_ARRAY_BUFFER, elements, 1));
         this.geometry.getPrimitives().push(tris);
+
+        this.geometry.getAttributes().Elevation = osg.BufferArray.create(gl.ARRAY_BUFFER, elevVecs, 3);
 
         // the textures:     
         var stateSet = this.getOrCreateStateSet();

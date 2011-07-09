@@ -111,3 +111,14 @@ a
  filter: alpha(opacity=0) !important;
  background-color: transparent !important;
 }
+
+#ElevationSlider
+{
+    clear:both;
+    float:left;
+    position:absolute;
+    width: 300px;
+    height: 10px;
+    padding: 5;
+    margin: 5;
+}

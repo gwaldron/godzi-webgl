@@ -28,7 +28,7 @@ osgearth.Map = function(args) {
     this.zoomScale = 1.0;
 
     // vertical scale for elevation data
-    this.verticalScale = 1.0;
+    //this.verticalScale = 1.0;
 
     // minimum allowable elevation value
     this.minElevation = -1e6;
@@ -51,8 +51,8 @@ osgearth.Map = function(args) {
             this.waitForAllLayers = args.waitForAllLayers;
         if (args.zoomScale !== undefined)
             this.zoomScale = args.zoomScale;
-        if (args.verticalScale !== undefined)
-            this.verticalScale = args.verticalScale;
+//        if (args.verticalScale !== undefined)
+//            this.verticalScale = args.verticalScale;
         if (args.minElevation !== undefined)
             this.minElevation = args.minElevation;
         if (args.maxElevation !== undefined)
@@ -127,7 +127,7 @@ osgearth.Map.prototype = {
         }
         return new osgearth.HeightField(numColumns, numRows, data);
     },
-    
+
 
     //Creates a heightfield from the elevation layers or an empty heightfield
     createHeightField: function(key, loadNow) {

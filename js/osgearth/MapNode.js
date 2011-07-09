@@ -8,7 +8,9 @@
 osgearth.MapNode = function(map) {
 
     osg.Node.call(this);
+
     this.map = map;
+    this.verticalScale = 1.0;
 
     var rootSize = map.profile.getTileCount(map.minLevel);
     for (var x = 0; x < rootSize[0]; x++) {
@@ -54,9 +56,16 @@ osgearth.MapNode = function(map) {
 
         stateSet.addUniform(osg.Uniform.createInt1(i, "Texture" + i));
     }
+
+    this.verticalScaleUniform = osg.Uniform.createFloat1(this.map.verticalScale, "VerticalScale");
+    stateSet.addUniform(this.verticalScaleUniform, osg.StateAttribute.ON);
 };
 
 osgearth.MapNode.prototype = osg.objectInehrit(osg.Node.prototype, {
+
+    setVerticalScale: function(value) {
+        this.verticalScaleUniform.set([value]);
+    },
 
     traverse: function(visitor) {
         if (visitor.modelviewMatrixStack !== undefined) { // i.e., in cull visitor

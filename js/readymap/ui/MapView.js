@@ -9,7 +9,7 @@
 * MapView
 * Installs a 3D WebGL viewer within an HTML5 canvas elements.
 */
-ReadyMap.MapView = function(elementId, size, map) {
+ReadyMap.MapView = function(elementId, size, map, args) {
 
     this.map = map;
     this.viewer = null;
@@ -30,7 +30,15 @@ ReadyMap.MapView = function(elementId, size, map) {
         this.viewer.setupManipulator(new ReadyMap.EarthManipulator(map));
     else
         this.viewer.setupManipulator(new ReadyMap.MapManipulator(map));
-    this.viewer.setScene(new osgearth.MapNode(map)); //map.createNode());
+    this.mapNode = new osgearth.MapNode(map);
+
+    if (args !== undefined) {
+        if (args.verticalScale !== undefined) {
+            this.setVerticalScale(args.verticalScale);
+        }
+    }
+
+    this.viewer.setScene(this.mapNode);
     delete this.viewer.view.light;
     this.viewer.getManipulator().computeHomePosition();
     //this.viewer.run();
@@ -43,14 +51,18 @@ ReadyMap.MapView = function(elementId, size, map) {
     this.frameEnd = [];
 };
 
-ReadyMap.MapView.prototype = {    
+ReadyMap.MapView.prototype = {
 
     home: function() {
         this.viewer.getManipulator().computeHomePosition();
     },
-    
-    zoom: function( delta ) {
-      this.viewer.getManipulator().zoomModel(0, delta);
+
+    zoom: function(delta) {
+        this.viewer.getManipulator().zoomModel(0, delta);
+    },
+
+    setVerticalScale: function(value) {
+        this.mapNode.setVerticalScale(value);
     },
 
     projectObjectIntoWindow: function(object) {
