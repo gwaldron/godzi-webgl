@@ -147,6 +147,11 @@ osgearth.Tile.prototype = osg.objectInehrit(osg.Node.prototype, {
         var world2tile = [];
         osg.Matrix.inverse(tile2world, world2tile);
 
+        // rotation element:
+        var world2tileRot = [];
+        osg.Matrix.getRotate(world2tile, world2tileRot);
+
+
         //Right now just create an empty heightfield
         var heightField = this.map.threeD ? this.heightField : null;
         if (heightField != null) {
@@ -183,8 +188,7 @@ osgearth.Tile.prototype = osg.objectInehrit(osg.Node.prototype, {
                 // elevation extrusion vector
                 var extrude = [];
                 osg.Vec3.normalize(world, extrude);
-                extrude = osg.Matrix.transformVec3(world2tile, extrude, []);
-                osg.Vec3.normalize(extrude, extrude);
+                extrude = osg.Quat.transformVec3(world2tileRot, extrude);
                 osg.Vec3.mult(extrude, height, extrude);
                 this.insertArray(extrude, elevVecs, v);
 

@@ -36,6 +36,17 @@ osg.Quat.zeroRotation = function(q) {
     return q[0] === 0 && q[1] === 0 && q[2] === 0 && q[3] === 1;
 };
 
+osg.Quat.transformVec3 = function(q, v) {
+    var uv = [];
+    var uuv = [];
+    var qvec = [q[0], q[1], q[2]];
+    osg.Vec3.cross(qvec, v, uv);
+    osg.Vec3.cross(qvec, uv, uuv);
+    osg.Vec3.mult(uv, 2.0 * q[3], uv);
+    osg.Vec3.mult(uuv, 2.0, uuv);
+    return osg.Vec3.add(v, osg.Vec3.add(uv, uuv, []), []);
+};
+
 osg.Quat.rotateVecOnToVec = function(from, to, r) {
     if (r === undefined) {
         r = [];

@@ -28,7 +28,7 @@ osgearth.ShaderFactory.createVertexShaderMain = function(functions) {
         //todo: insert all function prototypes
         "",
         "void main() {",
-        "    gl_Position = ProjectionMatrix * ModelViewMatrix * vec4(Vertex - VerticalScale*Elevation, 1.0);",
+        "    gl_Position = ProjectionMatrix * ModelViewMatrix * vec4(Vertex + VerticalScale*Elevation, 1.0);",
         "    if (ArrayColorEnabled == 1)",
         "        VertexColor = Color;",
         "    else",

@@ -8052,6 +8052,17 @@ osg.Quat.zeroRotation = function(q) {
     return q[0] === 0 && q[1] === 0 && q[2] === 0 && q[3] === 1;
 };
 
+osg.Quat.transformVec3 = function(q, v) {
+    var uv = [];
+    var uuv = [];
+    var qvec = [q[0], q[1], q[2]];
+    osg.Vec3.cross(qvec, v, uv);
+    osg.Vec3.cross(qvec, uv, uuv);
+    osg.Vec3.mult(uv, 2.0 * q[3], uv);
+    osg.Vec3.mult(uuv, 2.0, uuv);
+    return osg.Vec3.add(v, osg.Vec3.add(uv, uuv, []), []);
+};
+
 osg.Quat.rotateVecOnToVec = function(from, to, r) {
     if (r === undefined) {
         r = [];
@@ -8240,7 +8251,7 @@ osgearth.ShaderFactory.createVertexShaderMain = function(functions) {
         //todo: insert all function prototypes
         "",
         "void main() {",
-        "    gl_Position = ProjectionMatrix * ModelViewMatrix * vec4(Vertex - VerticalScale*Elevation, 1.0);",
+        "    gl_Position = ProjectionMatrix * ModelViewMatrix * vec4(Vertex + VerticalScale*Elevation, 1.0);",
         "    if (ArrayColorEnabled == 1)",
         "        VertexColor = Color;",
         "    else",
@@ -9325,6 +9336,11 @@ osgearth.Tile.prototype = osg.objectInehrit(osg.Node.prototype, {
         var world2tile = [];
         osg.Matrix.inverse(tile2world, world2tile);
 
+        // rotation element:
+        var world2tileRot = [];
+        osg.Matrix.getRotate(world2tile, world2tileRot);
+
+
         //Right now just create an empty heightfield
         var heightField = this.map.threeD ? this.heightField : null;
         if (heightField != null) {
@@ -9361,8 +9377,7 @@ osgearth.Tile.prototype = osg.objectInehrit(osg.Node.prototype, {
                 // elevation extrusion vector
                 var extrude = [];
                 osg.Vec3.normalize(world, extrude);
-                extrude = osg.Matrix.transformVec3(world2tile, extrude, []);
-                osg.Vec3.normalize(extrude, extrude);
+                extrude = osg.Quat.transformVec3(world2tileRot, extrude);
                 osg.Vec3.mult(extrude, height, extrude);
                 this.insertArray(extrude, elevVecs, v);
 
