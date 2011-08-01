@@ -69,7 +69,7 @@ ReadyMap.HeatMapNode.prototype = osg.objectInehrit(osg.Node.prototype, {
         var dv = vmax - vmin;
         if (v < (vmin + 0.25 * dv)) {
             c[0] = 0;
-            c[1] = 4 * (vmin + 0.25 * dv - v) / dv;
+            c[1] = 4 * (v - vmin) / dv;
         }
         else if (v < (vmin + 0.5 * dv)) {
             c[0] = 0;
@@ -149,7 +149,7 @@ ReadyMap.HeatMapNode.prototype = osg.objectInehrit(osg.Node.prototype, {
 
                 var color = this.rampColor(nheight);
                 color[3] = nheight > 0.25 ? 0.75 : nheight * 3.0;
-                
+
                 this.insertArray(color, colors, c);
                 c += 4;
 
