@@ -1,4 +1,4 @@
-﻿// osg-debug-0.0.5.js commit 0 - http://github.com/cedricpinson/osgjs
+// osg-debug-0.0.5.js commit aa4baa76d9e1577ec065b533c5b9bd3df32fdeb2 - http://github.com/cedricpinson/osgjs
 /** -*- compile-command: "jslint-cli osg.js" -*- */
 var osg = {};
 
@@ -2047,29 +2047,28 @@ osg.BlendFunc = function (source, destination) {
 /** @lends osg.BlendFunc.prototype */
 osg.BlendFunc.prototype = osg.objectInehrit(osg.StateAttribute.prototype, {
     /** 
-    StateAttribute type of BlendFunc
-    @type String
-    */
+        StateAttribute type of BlendFunc
+        @type String
+     */
     attributeType: "BlendFunc",
     /** 
-    Create an instance of this StateAttribute
-    */
-    cloneType: function() /**osg.BlendFunc*/{ return new osg.BlendFunc(); },
+        Create an instance of this StateAttribute
+    */ 
+    cloneType: function() /**osg.BlendFunc*/ {return new osg.BlendFunc(); },
     /** 
-    @type String
-    */
-    getType: function() { return this.attributeType; },
+        @type String
+    */ 
+    getType: function() { return this.attributeType;},
     /** 
-    @type String
-    */
-    getTypeMember: function() { return this.attributeType; },
+        @type String
+    */ 
+    getTypeMember: function() { return this.attributeType;},
     /** 
-    Apply the mode, must be called in the draw traversal
-    @param state
+        Apply the mode, must be called in the draw traversal
+        @param state
     */
-    apply: function(state) {
-        gl.blendFunc(gl.FUNC_ADD);
-        gl.blendFunc(gl[this.sourceFactor], gl[this.destinationFactor]);
+    apply: function(state) { 
+        gl.blendFunc(gl[this.sourceFactor], gl[this.destinationFactor]); 
     }
 });
 osg.BoundingBox = function() {
@@ -2628,7 +2627,7 @@ osg.EllipsoidModel.prototype = {
     },
     computeLocalToWorldTransformFromLatLongHeight : function(latitude, longitude, height) {
         var pos = this.convertLatLongHeightToXYZ(latitude, longitude, height);
-        var m = osg.Matrix.makeTranslate(pos[0], pos[1], pos[2]);
+        var m = osg.Matrix.makeTranslate(pos[0], pos[1], pos[2], []);
         this.computeCoordinateFrame(latitude, longitude, m);
         return m;
     },
@@ -2646,7 +2645,7 @@ osg.EllipsoidModel.prototype = {
         var east = [-Math.sin(longitude), Math.cos(longitude), 0];
 
         // Compute north vector = outer product up x east
-        var north = osg.Vec3.cross(up,east);
+        var north = osg.Vec3.cross(up,east, []);
 
         // set matrix
         osg.Matrix.set(localToWorld,0,0, east[0]);
@@ -3301,12 +3300,12 @@ osg.Program.prototype = {
     cacheUniformList: function(str) {
         var r = str.match(/uniform\s+\w+\s+\w+/g);
         if (r !== null) {
-            for (var i in r) {
+            for (var i = 0, l = r.length; i < l; i++) {
                 var uniform = r[i].match(/uniform\s+\w+\s+(\w+)/)[1];
-                var l = gl.getUniformLocation(this.program, uniform);
-                if (l !== undefined && l !== null) {
+                var location = gl.getUniformLocation(this.program, uniform);
+                if (location !== undefined && location !== null) {
                     if (this.uniformsCache[uniform] === undefined) {
-                        this.uniformsCache[uniform] = l;
+                        this.uniformsCache[uniform] = location;
                         this.uniformsCache.uniformKeys.push(uniform);
                     }
                 }
@@ -3317,12 +3316,12 @@ osg.Program.prototype = {
     cacheAttributeList: function(str) {
         var r = str.match(/attribute\s+\w+\s+\w+/g);
         if (r !== null) {
-            for (var i in r) {
+            for (var i = 0, l = r.length; i < l; i++) {
                 var attr = r[i].match(/attribute\s+\w+\s+(\w+)/)[1];
-                var l = gl.getAttribLocation(this.program, attr);
-                if (l !== -1 && l !== undefined) {
+                var location = gl.getAttribLocation(this.program, attr);
+                if (location !== -1 && location !== undefined) {
                     if (this.attributesCache[attr] === undefined) {
-                        this.attributesCache[attr] = l;
+                        this.attributesCache[attr] = location;
                         this.attributesCache.attributeKeys.push(attr);
                     }
                 }
@@ -7003,12 +7002,12 @@ Stats.Stats.prototype = {
  */
 
 
-osgViewer.Viewer = function(canvas, options) {
+osgViewer.Viewer = function(canvas, options, error) {
     if (options === undefined) {
         options = {antialias : true};
     }
 
-    gl = WebGLUtils.setupWebGL(canvas, options );
+    gl = WebGLUtils.setupWebGL(canvas, options, error );
     if (gl) {
         this.gl = gl;
         osg.init();
@@ -7019,9 +7018,18 @@ osgViewer.Viewer = function(canvas, options) {
         this.urlOptions = true;
 
         this.mouseWheelEventNode = canvas;
-        this.eventNode = document;
-        if (options && options.mouseWheelEventNode) {
-            this.mouseWheelEventNode = options.mouseWheelEventNode;
+        this.mouseEventNode = canvas;
+        this.keyboardEventNode = document;
+        if (options) {
+            if(options.mouseWheelEventNode){
+                this.mouseWheelEventNode = options.mouseWheelEventNode;
+            }
+            if(options.mouseEventNode){
+                this.mouseEventNode = options.mouseEventNode;
+            }
+            if(options.mouseWheelEventNode){
+                this.keyboardEventNode = options.keyboardEventNode;
+            }
         }
 
     } else {
@@ -7039,6 +7047,7 @@ osgViewer.Viewer.prototype = {
     },
 
     init: function() {
+        this._done = false;
         this.root = new osg.Node();
         this.state = new osg.State();
         this.view = new osg.View();
@@ -7321,11 +7330,16 @@ osgViewer.Viewer.prototype = {
         }
     },
 
+    setDone: function() { this._done = true; },
+    done: function() { return this._done; },
+
     run: function() {
         var that = this;
         var render = function() {
-            window.requestAnimationFrame(render, this.canvas);
-            that.frame();
+            if (!that.done()) {
+                window.requestAnimationFrame(render, that.canvas);
+                that.frame();
+            }
         };
         render();
     },
@@ -7520,30 +7534,30 @@ osgViewer.Viewer.prototype = {
             };
 
             if (viewer.getManipulator().mousedown) {
-                this.eventNode.addEventListener("mousedown", mousedown, false);
+                this.mouseEventNode.addEventListener("mousedown", mousedown, false);
             }
             if (viewer.getManipulator().mouseup) {
-                this.eventNode.addEventListener("mouseup", mouseup, false);
+                this.mouseEventNode.addEventListener("mouseup", mouseup, false);
             }
             if (viewer.getManipulator().mousemove) {
-                this.eventNode.addEventListener("mousemove", mousemove, false);
+                this.mouseEventNode.addEventListener("mousemove", mousemove, false);
             }
             if (viewer.getManipulator().dblclick) {
-                this.eventNode.addEventListener("dblclick", dblclick, false);
+                this.mouseEventNode.addEventListener("dblclick", dblclick, false);
             }
             if (viewer.getManipulator().mousewheel) {
-                this.canvas.addEventListener("DOMMouseScroll", mousewheel, false);
-                this.canvas.addEventListener("mousewheel", mousewheel, false);
+                this.mouseWheelEventNode.addEventListener("DOMMouseScroll", mousewheel, false);
+                this.mouseWheelEventNode.addEventListener("mousewheel", mousewheel, false);
             }
 
             var keydown = function(ev) {return viewer.getManipulator().keydown(ev); };
             var keyup = function(ev) {return viewer.getManipulator().keyup(ev);};
 
             if (viewer.getManipulator().keydown) {
-                this.eventNode.addEventListener("keydown", keydown, false);
+                this.keyboardEventNode.addEventListener("keydown", keydown, false);
             }
             if (viewer.getManipulator().keyup) {
-                this.eventNode.addEventListener("keyup", keyup, false);
+                this.keyboardEventNode.addEventListener("keyup", keyup, false);
             }
         }
     }
@@ -7596,11 +7610,14 @@ osgGA.OrbitManipulator.prototype = {
     setNode: function(node) {
         this.node = node;
     },
+    setTarget: function(target) {
+        osg.Vec3.copy(target, this.target);
+    },
     computeHomePosition: function() {
         if (this.node !== undefined) {
             var bs = this.node.getBound();
             this.setDistance(bs.radius()*1.5);
-            this.target = bs.center();
+            this.setTarget(bs.center());
         }
     },
 
@@ -7915,10 +7932,7 @@ osgGA.FirstPersonManipulator.prototype = {
     },
     mousemove: function(ev)
     {
-        if (this.buttonup === true)
-        {
-            return;
-        }
+        if (this.buttonup === true) { return; }
 
         var curX;
         var curY;
@@ -7979,19 +7993,19 @@ osgGA.FirstPersonManipulator.prototype = {
     },
     getInverseMatrix: function()
     {
-        var target = osg.Vec3.add(this.eye, this.direction);
-        return osg.Matrix.makeLookAt(this.eye, target, this.up);
+        var target = osg.Vec3.add(this.eye, this.direction, []);
+        return osg.Matrix.makeLookAt(this.eye, target, this.up, []);
     },
     moveForward: function(distance)
     {
-        var d = osg.Vec3.mult(osg.Vec3.normalize(this.direction), distance);
-        this.eye = osg.Vec3.add(this.eye, d);
+        var d = osg.Vec3.mult(osg.Vec3.normalize(this.direction, []), distance, []);
+        this.eye = osg.Vec3.add(this.eye, d, []);
     },
     strafe: function(distance)
     {
-        var cx = osg.Vec3.cross(this.direction, this.up);
-        var d = osg.Vec3.mult(osg.Vec3.normalize(cx), distance);
-        this.eye = osg.Vec3.add(this.eye, d);
+        var cx = osg.Vec3.cross(this.direction, this.up, []);
+        var d = osg.Vec3.mult(osg.Vec3.normalize(cx,cx), distance, []);
+        this.eye = osg.Vec3.add(this.eye, d, []);
     },
     
     keydown: function(event) {
@@ -11118,11 +11132,7 @@ ReadyMap.HeatMapNode.prototype = osg.objectInehrit(osg.Node.prototype, {
 
                 var color = this.rampColor(nheight);
                 color[3] = nheight > 0.25 ? 0.75 : nheight * 3.0;
-
-                //                var r = nheight >= 0.666 ? 1.0 : 0.0;
-                //                var g = nheight >= 0.333 & nheight < 0.666 ? 1.0 : 0.0;
-                //                var b = nheight < 0.333 ? 1.0 : 0.0;
-                //                var color = [r, g, b, nheight > 0.25 ? 1.0 : 0.1]; // 0.75 : nheight*3]; //sin(nheight * Math.PI / 2)];
+                
                 this.insertArray(color, colors, c);
                 c += 4;
 
