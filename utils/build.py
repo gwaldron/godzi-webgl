@@ -81,13 +81,23 @@ READYMAP_CONTROLS = [
 version = '0.0.0'
 #commit = '0'
 
+def bomstrip(text):
+    if text.startswith( '\xef\xbb\xbf' ):
+        return text[3:]
+    else:
+        return text
+
+
 def merge(files):
 
 	buffer = []
 
 	for filename in files:
 		with open(os.path.join('..', 'js', filename), 'r') as f:
-			buffer.append(f.read())
+			text = f.read()
+			text = bomstrip(text)            
+			buffer.append(text)
+#			buffer.append(f.read())
 
 	return "".join(buffer)
 
@@ -115,7 +125,8 @@ def compress(text):
 	os.unlink(out_tuple[1])
 
 	return compressed
-
+    
+    
 
 #def addHeader(text, endFilename):
 #	return ("// %s commit %s - http://github.com/gwaldron/godzi-webgl\n" % (endFilename, commit )) + text

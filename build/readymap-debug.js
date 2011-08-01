@@ -8029,7 +8029,7 @@ osgGA.FirstPersonManipulator.prototype = {
         }
     }
 };
-﻿/**
+/**
 * ReadyMap/WebGL
 * (c) Copyright 2011 Pelican Mapping
 * License: LGPL
@@ -8188,7 +8188,8 @@ osg.Texture.destroy = function(tex) {
             tex.image = undefined;
         }
     }
-};﻿/**
+};
+/**
 * ReadyMap/WebGL
 * (c) Copyright 2011 Pelican Mapping
 * License: LGPL
@@ -8236,7 +8237,7 @@ osgearth.FunctionLocation = {
     FragmentPreLighting: 4,
     FragmentPostLighting: 5
 };
-﻿/**
+/**
 * ReadyMap/WebGL
 * (c) Copyright 2011 Pelican Mapping
 * License: LGPL
@@ -8640,7 +8641,7 @@ osgearth.EllipsoidModel.prototype = {
         var ecef = lla2ecef(lla);
         return local2worldFromECEF(ecef);
     }
-};﻿/**
+};/**
 * ReadyMap/WebGL
 * (c) Copyright 2011 Pelican Mapping
 * License: LGPL
@@ -8747,7 +8748,7 @@ osgearth.MercatorProfile.prototype = osg.objectInehrit(osgearth.Profile.prototyp
             coord[2]];
     }
 });
-﻿/**
+/**
 * ReadyMap/WebGL
 * (c) Copyright 2011 Pelican Mapping
 * License: LGPL
@@ -9202,7 +9203,7 @@ osg.CullVisitor.prototype[osgearth.MapNode.prototype.objectType] = function(node
     if (node.stateset)
         this.popStateSet();
 };
-﻿/**
+/**
 * ReadyMap/WebGL
 * (c) Copyright 2011 Pelican Mapping
 * License: LGPL
@@ -9677,7 +9678,7 @@ function handler(event) {
     return $.event.handle.apply(this, args);
 }
 
-})(jQuery);﻿/**
+})(jQuery);/**
 * ReadyMap/WebGL
 * (c) Copyright 2011 Pelican Mapping
 * License: LGPL
@@ -10981,7 +10982,7 @@ ReadyMap.GeoRSSReader.prototype = {
             updateCallback(this.items);
         }
     }
-};﻿/**
+};/**
 * ReadyMap/WebGL
 * (c) Copyright 2011 Pelican Mapping
 * License: LGPL
