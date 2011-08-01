@@ -48,6 +48,10 @@
         });
     });
 
+    function gotoDC() {
+        this.viewer.getManipulator().setViewpoint(38.95, -77.46, 0, -45, -45, 20000, 3);
+    }
+
 </script>
 </head>
 
@@ -67,6 +71,7 @@
   </div>
   <div id="Help">
     <ul>
+      <li><a href="#" onclick="gotoDC();">Fly me to the heat map!</a></li>
       <li>drag to pan</li>
       <li>wheel to zoom</li>
       <li>shift-drag to rotate</li>
