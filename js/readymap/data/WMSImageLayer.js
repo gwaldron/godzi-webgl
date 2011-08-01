@@ -58,6 +58,6 @@ ReadyMap.WMSImageLayer.prototype = osg.objectInehrit(osgearth.ImageLayer.prototy
 
     createTexture: function(key, profile) {
         var imageURL = this.getURL(key, profile);
-        return osg.Texture.create(imageURL);
+        return osg.Texture.createFromURL(imageURL);
     }
 });

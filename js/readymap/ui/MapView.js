@@ -18,8 +18,10 @@ ReadyMap.MapView = function(elementId, size, map, args) {
     canvas.width = size.w;
     canvas.height = size.h;
 
+    this.root = new osg.Node();
+
     //try {
-    this.viewer = new osgViewer.Viewer(canvas);
+    this.viewer = new osgViewer.Viewer(canvas, { alpha: false });
 
     //If you don't do this then the mouse manipulators listen for mouse events on the whole dom
     //so dragging other controls end up moving the canvas view.
@@ -30,6 +32,7 @@ ReadyMap.MapView = function(elementId, size, map, args) {
         this.viewer.setupManipulator(new ReadyMap.EarthManipulator(map));
     else
         this.viewer.setupManipulator(new ReadyMap.MapManipulator(map));
+
     this.mapNode = new osgearth.MapNode(map);
 
     if (args !== undefined) {
@@ -38,7 +41,14 @@ ReadyMap.MapView = function(elementId, size, map, args) {
         }
     }
 
-    this.viewer.setScene(this.mapNode);
+    this.root.addChild(this.mapNode);
+
+    // enable blending for transparency
+    this.root.getOrCreateStateSet().setAttributeAndMode(
+        new osg.BlendFunc('SRC_ALPHA', 'ONE_MINUS_SRC_ALPHA'));
+
+
+    this.viewer.setScene(this.root);
     delete this.viewer.view.light;
     this.viewer.getManipulator().computeHomePosition();
     //this.viewer.run();

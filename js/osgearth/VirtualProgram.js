@@ -121,10 +121,10 @@ osgearth.VirtualProgram.prototype = osg.objectInehrit(osg.Program.prototype, {
                 }
             }
 
-            this.vertex = osg.Shader.create(gl.VERTEX_SHADER, vertShaderSource);
+            this.vertex = new osg.Shader(gl.VERTEX_SHADER, vertShaderSource);
             this.vertex.compile();
 
-            this.fragment = osg.Shader.create(gl.FRAGMENT_SHADER, fragShaderSource);
+            this.fragment = new osg.Shader(gl.FRAGMENT_SHADER, fragShaderSource);
             this.fragment.compile();
 
             this.program = gl.createProgram();

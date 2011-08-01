@@ -24,6 +24,6 @@ ReadyMap.ArcGISImageLayer.prototype = osg.objectInehrit(osgearth.ImageLayer.prot
 
     createTexture: function(key, profile) {
         var imageURL = this.getURL(key, profile);
-        return osg.Texture.create(imageURL);
+        return osg.Texture.createFromURL(imageURL);
     }
 });

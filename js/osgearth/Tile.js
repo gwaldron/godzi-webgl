@@ -154,7 +154,7 @@ osgearth.Tile.prototype = osg.objectInehrit(osg.Node.prototype, {
 
         //Right now just create an empty heightfield
         var heightField = this.map.threeD ? this.heightField : null;
-        if (heightField != null) {
+        if (heightField !== null) {
             numRows = heightField.getNumRows();
             numCols = heightField.getNumColumns();
         }
@@ -220,19 +220,19 @@ osgearth.Tile.prototype = osg.objectInehrit(osg.Node.prototype, {
         }
 
         this.geometry = new osg.Geometry();
-        this.geometry.getAttributes().Vertex = osg.BufferArray.create(gl.ARRAY_BUFFER, verts, 3);
-        this.geometry.getAttributes().Normal = osg.BufferArray.create(gl.ARRAY_BUFFER, normals, 3);
-        var tris = new osg.DrawElements(gl.TRIANGLES, osg.BufferArray.create(gl.ELEMENT_ARRAY_BUFFER, elements, 1));
+        this.geometry.getAttributes().Vertex = new osg.BufferArray(gl.ARRAY_BUFFER, verts, 3);
+        this.geometry.getAttributes().Normal = new osg.BufferArray(gl.ARRAY_BUFFER, normals, 3);
+        var tris = new osg.DrawElements(gl.TRIANGLES, new osg.BufferArray(gl.ELEMENT_ARRAY_BUFFER, elements, 1));
         this.geometry.getPrimitives().push(tris);
 
-        this.geometry.getAttributes().Elevation = osg.BufferArray.create(gl.ARRAY_BUFFER, elevVecs, 3);
+        this.geometry.getAttributes().Elevation = new osg.BufferArray(gl.ARRAY_BUFFER, elevVecs, 3);
 
         // the textures:     
         var stateSet = this.getOrCreateStateSet();
         var geomStateSet = this.geometry.getOrCreateStateSet();
 
         // shared texture coordinate attribute:
-        var sharedTexCoordAttr = osg.BufferArray.create(gl.ARRAY_BUFFER, texcoords0, 2);
+        var sharedTexCoordAttr = new osg.BufferArray(gl.ARRAY_BUFFER, texcoords0, 2);
 
         for (var i = 0, n = this.map.imageLayers.length; i < n; i++) {
             //var layer = this.map.imageLayers[i];
