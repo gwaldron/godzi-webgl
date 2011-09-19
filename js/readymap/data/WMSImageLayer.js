@@ -8,6 +8,7 @@
 ReadyMap.WMSImageLayer = function(settings) {
     osgearth.ImageLayer.call(this, settings.name);
     this.url = settings.url;
+    this.version = settings.version !== undefined ? settings.version : "VersionNotDefined";
     this.format = settings.format !== undefined ? settings.format : "image/jpeg";
     this.profile = settings.profile !== undefined ? settings.profile : new osgearth.GeodeticProfile();
     this.args = settings.args !== undefined ? settings.args : null;
