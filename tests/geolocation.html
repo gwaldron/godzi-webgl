@@ -31,6 +31,8 @@
               height: 32
             });
         positionEngine.elements.push( icon );  
+        
+        mapView.viewer.manipulator.setViewpoint(lat, lon, 0.0, 0, -90, 5000, 3)
     }
 
     function locationError(msg) {
@@ -46,6 +48,12 @@
             url: "http://readymap.org/readymap/tiles/1.0.0/22/",
             tmsType: "google"
         }));
+        
+        map.addImageLayer(new ReadyMap.TMSImageLayer({
+            name: "OSM",
+            url: "http://readymap.org/readymap/tiles/1.0.0/35/",
+            tmsType: "google"
+            }));
 
         // create a view tied to a page element:
         var size = ReadyMap.getWindowSize();
