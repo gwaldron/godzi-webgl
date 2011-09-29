@@ -69,14 +69,14 @@
             var population = f.properties.POP;
             var lon = f.geometry.coordinates[0];
             var lat = f.geometry.coordinates[1];
-            var class = "low-population";            
+            var classType = "low-population";            
             var icon_url = "http://google-maps-icons.googlecode.com/files/smallcity.png";
             if (population > 100000) {
-              class = "high-population";
+              classType = "high-population";
               icon_url = "http://google-maps-icons.googlecode.com/files/bigcity.png";
             }
             var label = new ReadyMap.Label("label" + i, Math.deg2rad(lon), Math.deg2rad(lat), 0, name, {
-              class: class
+              class: classType
             });
             //Offset the label so you can see the icon
             label.offset = [34, 0];
