@@ -11294,7 +11294,7 @@ ReadyMap.WMSImageLayer = function(settings) {
 
 ReadyMap.WMSImageLayer.prototype = osg.objectInehrit(osgearth.ImageLayer.prototype, {
 
-    getURL: function(key, profile) {
+    getURL: function(key) {
         var size = this.profile.getTileSize(key[2]);
         var xmin = this.profile.extent.xmin + (size[0] * key[0]);
         var ymax = this.profile.extent.ymax - (size[1] * key[1]);
