@@ -20,6 +20,25 @@
     var mapView;
     var positionEngine;
 
+    function locationSuccess(position) {
+        var lat = position.coords.latitude;
+        var lon = position.coords.longitude;
+        
+        var iconUrl = "../images/marker.png";
+        
+        var icon = new ReadyMap.Icon("locationIcon", Math.deg2rad(lon), Math.deg2rad(lat), 0, iconUrl, {
+              width: 32,
+              height: 32
+            });
+        positionEngine.elements.push( icon );  
+        
+        mapView.viewer.manipulator.setViewpoint(lat, lon, 0.0, 0, -90, 5000, 3)
+    }
+
+    function locationError(msg) {
+        alert(msg.toString());
+    }
+
     ReadyMap.init(function() {
         // create a map model:
         map = new ReadyMap.Map();
@@ -29,19 +48,25 @@
             url: "http://readymap.org/readymap/tiles/1.0.0/22/",
             tmsType: "google"
         }));
+        
+        map.addImageLayer(new ReadyMap.TMSImageLayer({
+            name: "OSM",
+            url: "http://readymap.org/readymap/tiles/1.0.0/35/",
+            tmsType: "google"
+            }));
 
         // create a view tied to a page element:
         var size = ReadyMap.getWindowSize();
         var headerHeight = jQuery('#header').height();
         size.h -= headerHeight;
         mapView = new ReadyMap.MapView("3DView", size, map);
-        
+
         //Add some controls
         var zoom = new ReadyMap.Controls.Zoom(mapView, "ViewContainer");
         var pan = new ReadyMap.Controls.Pan(mapView, "ViewContainer");
 
         // display the Lat/Long:
-        mapView.addFrameEndCallback( function() {
+        mapView.addFrameEndCallback(function() {
             var viewMatrix = mapView.viewer.view.getViewMatrix();
             viewMatrix = osg.Matrix.inverse(viewMatrix);
             var eye = [];
@@ -52,45 +77,19 @@
             jQuery("#Coords").html(
                 "Lat: " + lla[1].toFixed(2) + "\u00B0" + "  Long = " + lla[0].toFixed(2) + "\u00B0" + "<br/>" +
                 "Azim: " + Math.rad2deg(mapView.viewer.manipulator.localAzim).toFixed(1) + "\u00B0" +
-                "  Pitch:" + Math.rad2deg(mapView.viewer.manipulator.localPitch).toFixed(1) + "\u00B0");            
+                "  Pitch:" + Math.rad2deg(mapView.viewer.manipulator.localPitch).toFixed(1) + "\u00B0");
         });
+
+        positionEngine = new ReadyMap.PositionEngine(mapView);
         
-        positionEngine = new ReadyMap.PositionEngine( mapView );
-        
-        var addedLabels = [];
-        
-               
-//        for (var i = 0; i < country_data.features.length; i++) {
-        for (var i = 0; i < 300; i++) {
-          var f = country_data.features[i];
-          var name = f.properties.NAME;
-          if (addedLabels[name] === undefined) {
-          
-            var population = f.properties.POP;
-            var lon = f.geometry.coordinates[0];
-            var lat = f.geometry.coordinates[1];
-            var classType = "low-population";            
-            var icon_url = "http://google-maps-icons.googlecode.com/files/smallcity.png";
-            if (population > 100000) {
-              classType = "high-population";
-              icon_url = "http://google-maps-icons.googlecode.com/files/bigcity.png";
-            }
-            var label = new ReadyMap.Label("label" + i, Math.deg2rad(lon), Math.deg2rad(lat), 0, name, {
-              class: classType
-            });
-            //Offset the label so you can see the icon
-            label.offset = [34, 0];
-            positionEngine.elements.push( label );     
-           
-            
-            var icon = new ReadyMap.Icon("icon" + i, Math.deg2rad(lon), Math.deg2rad(lat), 0, icon_url, {
-              width: 32,
-              height: 32
-            });
-            positionEngine.elements.push( icon );          
-            addedLabels[name] = true;
-          }
+        if (navigator.geolocation) {            
+            navigator.geolocation.getCurrentPosition(locationSuccess, locationError);
         }
+        else {
+            alert("Sorry, your browser doesn't support geolocation.");
+        }
+
+
     });
     
 

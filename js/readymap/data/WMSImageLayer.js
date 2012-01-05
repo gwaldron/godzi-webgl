@@ -8,6 +8,7 @@
 ReadyMap.WMSImageLayer = function(settings) {
     osgearth.ImageLayer.call(this, settings.name);
     this.url = settings.url;
+    this.version = settings.version !== undefined ? settings.version : "1.1.1";
     this.format = settings.format !== undefined ? settings.format : "image/jpeg";
     this.profile = settings.profile !== undefined ? settings.profile : new osgearth.GeodeticProfile();
     this.args = settings.args !== undefined ? settings.args : null;
@@ -20,7 +21,7 @@ ReadyMap.WMSImageLayer = function(settings) {
 
 ReadyMap.WMSImageLayer.prototype = osg.objectInehrit(osgearth.ImageLayer.prototype, {
 
-    getURL: function(key, profile) {
+    getURL: function(key) {
         var size = this.profile.getTileSize(key[2]);
         var xmin = this.profile.extent.xmin + (size[0] * key[0]);
         var ymax = this.profile.extent.ymax - (size[1] * key[1]);
