@@ -57,7 +57,7 @@ osgearth.MapNode = function(map) {
         stateSet.addUniform(osg.Uniform.createInt1(i, "Texture" + i));
     }
 
-    this.verticalScaleUniform = osg.Uniform.createFloat1(this.map.verticalScale, "VerticalScale");
+    this.verticalScaleUniform = osg.Uniform.createFloat1(this.verticalScale, "VerticalScale");
     stateSet.addUniform(this.verticalScaleUniform, osg.StateAttribute.ON);
 };
 
