@@ -18,7 +18,7 @@
     ReadyMap.init(function() {
 
       // create the OpenLayers map model:
-      var olLayer = new OpenLayers.Layer.WMS(
+      var wmsLayer = new OpenLayers.Layer.WMS(
           "OpenLayers Layer",
           "http://readymap.org/readymap/tiles",
           { layers: "22", format: "image/jpeg" },
@@ -32,8 +32,8 @@
       var map = new ReadyMap.Map();
 
       map.addImageLayer(new ReadyMap.OLImageLayer({
-        name: "OpenLayers Layer",
-        layer: olLayer
+        name: "OpenLayers WMS Layer",
+        sourceLayer: olLayer
       }));
 
 

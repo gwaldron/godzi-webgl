@@ -17,20 +17,22 @@ ReadyMap.OLImageLayer = function(settings) {
   this.sourceLayer = settings.sourceLayer !== undefined ? settings.sourceLayer : null;
 };
 
+
 ReadyMap.OLImageLayer.prototype = osg.objectInehrit(osgearth.ImageLayer.prototype, {
 
   getURL: function(key, profile) {
     var ex = osgearth.TileKey.getExtent(key, profile);
     var bounds = new OpenLayers.Bounds();
-    bounds.left = ex.xmin;
-    bounds.right = ex.xmax;
-    bounds.bottom = ex.ymin;
-    bounds.top = ex.ymax;
+    bounds.left = Math.rad2deg(ex.xmin);
+    bounds.right = Math.rad2deg(ex.xmax);
+    bounds.bottom = Math.rad2deg(ex.ymin);
+    bounds.top = Math.rad2deg(ex.ymax);
+    bounds.centerLonLat = new OpenLayers.LonLat(0.5 * (bounds.left + bounds.right), 0.5 * (bounds.bottom + bounds.top));
     return this.sourceLayer.getURL(bounds);
   },
 
   createTexture: function(key, profile) {
     var imageURL = this.getURL(key, profile);
-    return osg.Texture.createFromURL(imageURL);
+    return osg.Texture.createFromURL(osgearth.getURL(imageURL));
   }
 });
