@@ -16,54 +16,55 @@
 
     var mapView;
 
-    ReadyMap.init(function() {        
+    ReadyMap.init(function() {
 
-        map = new ReadyMap.Map();
+      map = new ReadyMap.Map();
 
-        map.addImageLayer(new ReadyMap.TMSImageLayer({
-            name: "Landsat",
-            url: "http://readymap.org/readymap/tiles/1.0.0/22/",
-            tmsType: "google"
-        }));
+      map.addImageLayer(new ReadyMap.TMSImageLayer({
+        name: "Landsat",
+        url: "http://readymap.org/readymap/tiles/1.0.0/22/",
+        tmsType: "google"
+      }));
 
-        // create a view tied to a page element:
-        var size = ReadyMap.getWindowSize();
-        var headerHeight = jQuery('#header').height();
-        size.h -= headerHeight;
-        mapView = new ReadyMap.MapView("3DView", size, map);
+      // create a view tied to a page element:
+      var size = ReadyMap.getWindowSize();
+      var headerHeight = jQuery('#header').height();
+      size.h -= headerHeight;
+      mapView = new ReadyMap.MapView("3DView", size, map);
 
-        //Add some controls
-        var zoom = new ReadyMap.Controls.Zoom(mapView, "ViewContainer");
-        var pan = new ReadyMap.Controls.Pan(mapView, "ViewContainer");
+      //Add some controls
+      var zoom = new ReadyMap.Controls.Zoom(mapView, "ViewContainer");
+      var pan = new ReadyMap.Controls.Pan(mapView, "ViewContainer");
 
-        // display the Lat/Long:
-        mapView.addFrameEndCallback(function() {
-            var viewMatrix = mapView.viewer.view.getViewMatrix();
-            viewMatrix = osg.Matrix.inverse(viewMatrix);
-            var eye = [];
-            osg.Matrix.getTrans(viewMatrix, eye);
-            var lla = map.profile.ellipsoid.ecef2lla(eye);
-            lla[0] = Math.rad2deg(lla[0]);
-            lla[1] = Math.rad2deg(lla[1]);
-            jQuery("#Coords").html(
+      // display the Lat/Long:
+      mapView.addFrameEndCallback(function() {
+        var viewMatrix = mapView.viewer.view.getViewMatrix();
+        viewMatrix = osg.Matrix.inverse(viewMatrix);
+        var eye = [];
+        osg.Matrix.getTrans(viewMatrix, eye);
+        var lla = map.profile.ellipsoid.ecef2lla(eye);
+        lla[0] = Math.rad2deg(lla[0]);
+        lla[1] = Math.rad2deg(lla[1]);
+        jQuery("#Coords").html(
                 "Lat: " + lla[1].toFixed(2) + "\u00B0" + "  Long = " + lla[0].toFixed(2) + "\u00B0" + "<br/>" +
                 "Azim: " + Math.rad2deg(mapView.viewer.manipulator.localAzim).toFixed(1) + "\u00B0" +
-                "  Pitch:" + Math.rad2deg(mapView.viewer.manipulator.localPitch).toFixed(1) + "\u00B0");
-        });
-		
-		var placeSearch = new ReadyMap.PlaceSearch("Search", "InputSearch", function(lat, lon, swlat, swlon, nelat, nelon) {
-		  var range = ((.5 * (nelat - swlat)) / 0.267949849) * 111000.0;
-		  mapView.viewer.manipulator.setViewpoint(lat, lon, 0.0, 0, -90, range, 3);
-		});
-		
-		//Add GeoRSSLayer
-		var proxy = "http://demo.pelicanmapping.com/rmweb/proxy.php?url=";
-		var feedUrl = "http://earthquake.usgs.gov/earthquakes/catalogs/eqs7day-M5.xml";
-		var rssLayer = new ReadyMap.GeoRSSLayer(mapView, proxy + feedUrl, 60, { url: "../images/earthquake.png" });
-		
-		//Add GeoRSSList
-		var rssPanel = new ReadyMap.Controls.GeoRSSList("RSSPanel", mapView);
-		rssLayer.reader.addCallback(function(items) { rssPanel.setItems(items); });
+                "  Pitch:" + Math.rad2deg(mapView.viewer.manipulator.localPitch).toFixed(1) + "\u00B0" + "<br/>" +
+                "FPS: " + mapView.frameRate.toFixed(1));
+      });
+
+      var placeSearch = new ReadyMap.PlaceSearch("Search", "InputSearch", function(lat, lon, swlat, swlon, nelat, nelon) {
+        var range = ((.5 * (nelat - swlat)) / 0.267949849) * 111000.0;
+        mapView.viewer.manipulator.setViewpoint(lat, lon, 0.0, 0, -90, range, 3);
+      });
+
+      //Add GeoRSSLayer
+      var proxy = "http://demo.pelicanmapping.com/rmweb/proxy.php?url=";
+      var feedUrl = "http://earthquake.usgs.gov/earthquakes/catalogs/eqs7day-M5.xml";
+      var rssLayer = new ReadyMap.GeoRSSLayer(mapView, proxy + feedUrl, 60, { url: "../images/earthquake.png" });
+
+      //Add GeoRSSList
+      var rssPanel = new ReadyMap.Controls.GeoRSSList("RSSPanel", mapView);
+      rssLayer.reader.addCallback(function(items) { rssPanel.setItems(items); });
     });
 
 </script>
