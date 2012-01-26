@@ -20,22 +20,19 @@
 
       // create the Leaflet map model:            var cloudmadeUrl = 'http://{s}.tile.cloudmade.com/BC9A493B41014CAABB98F0471D759707/997/256/{z}/{x}/{y}.png';
       var cloudmadeAttrib = 'Map data &copy; 2011 OpenStreetMap contributors, Imagery &copy; 2011 CloudMade';      var leafletLayer = new L.TileLayer(cloudmadeUrl, {maxZoom: 18, attribution: cloudmadeAttrib});
-//      var leafletLayer = new L.TileLayer(
-//          "http://tilecache.osgeo.org/wms-c/Basic.py/1.0.0/basic/{z}/{x}/{y}.png",
-//          { maxZoom: 14, scheme: 'tms' }
-//      );
-
       // create the ReadyMap map model:
       var map = new ReadyMap.Map();
+      
+      // tell ReadyMap it's a mercator map with one tile at the root:
       map.profile = new osgearth.MercatorProfile();
       map.profile.baseTilesX = 1;
       map.profile.baseTilesY = 1;
 
+      // add the Leaflet layer to the 3D map
       map.addImageLayer(new ReadyMap.LeafletImageLayer({
         name: "Leaflet TileLayer",
         sourceLayer: leafletLayer
       }));
-
 
       // create a view tied to a page element:
       var size = ReadyMap.getWindowSize();
