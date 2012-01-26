@@ -21,6 +21,15 @@ if (typeof OpenLayers !== 'undefined') {
         //Attach a new destroy function that removes the canvas from the parent div
         this.destroy = function () {
             $(this._canvas).remove();
+
+            //Remove any 
+            if (this.controls != null) {
+                for (var i = this.controls.length - 1; i >= 0; --i) {
+                    this.controls[i].destroy();
+                }
+                this.controls = null;
+            }
+
         }
 
         //Override addLayer so that it adds layers to our ReadyMap map
