@@ -41,8 +41,12 @@ OSGEARTH = [
 READYMAP = [
         "jquery/jquery.mousewheel.js",		
 		"math.js",
-		"array.js",
+		"array.js",		
         "readymap.js"
+]
+
+READYMAP_ADAPTERS = [
+        "readymap/adapters/OpenLayers.js"
 ]
 
 READYMAP_UI = [
@@ -227,7 +231,7 @@ def main(argv=None):
 	unminified = args.unminified
 
 	config = [
-                ['readymap', 'includes', OSGJS + OSGEARTH + READYMAP + READYMAP_UI + READYMAP_DATA + READYMAP_CONTROLS, args],
+                ['readymap', 'includes', OSGJS + OSGEARTH + READYMAP + READYMAP_UI + READYMAP_DATA + READYMAP_CONTROLS + READYMAP_ADAPTERS, args],
                 ]
 
         global version

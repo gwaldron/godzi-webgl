@@ -7,90 +7,155 @@
 <script type="text/javascript" src="../js/jquery/jquery-1.4.2.js"></script>
 <script type="text/javascript" src="../build/readymap-debug-0.0.1.js"></script>
 
+<!--JQuery UI-->
+<script type="text/javascript" src="../js/jquery/jquery-ui-1.8.2.custom.min.js"></script>
+
+<link href="../css/ui-lightness/jquery.ui.all.css" rel="stylesheet" type="text/css"></link>
 <link href="demo.css" rel="Stylesheet" type="text/css"></link>
 <link href="../css/readymap.css" rel="Stylesheet" type="text/css"></link>
 
+<style type="text/css">
+    body 
+    {
+    	width: 100%;
+    	height: 100%;
+    }
+    
+    #map
+    {
+    	width: 100%;
+    	height: 100%;
+    }
+    
+    #layer-control
+    {
+    	position: absolute;
+    	left: 10px;
+    	top: 300px;
+    	z-index: 1000;
+    }
+    
+    #help
+    {
+    	position: absolute;
+    	left: 10px;
+    	top: 400px;
+    	width: 300px;
+    	border: 2px solid white;
+    	z-index: 1000;
+    }
+    
+    
+</style>
 
 <script type="text/javascript">
 
-    var mapView;
+    var layer;
+    var olMap = null;
 
-    ReadyMap.init(function() {
+    var is3D = false;
 
-      // create the OpenLayers map model:
-      var wmsLayer = new OpenLayers.Layer.WMS(
+    function initialize(globe) {
+
+        //Destroy the existing map
+        if (olMap !== null) {
+            olMap.destroy();
+        }
+            
+        // create the OpenLayers map model:
+        layer = new OpenLayers.Layer.WMS(
           "OpenLayers Layer",
           "http://readymap.org/readymap/tiles",
           { layers: "22", format: "image/jpeg" },
           { isBaseLayer: true, tileSize: new OpenLayers.Size(256, 256) }
-      );
+        );
 
-      var olMap = new OpenLayers.Map();
-      olMap.addLayer(wmsLayer);
+          $("#layer_name").html(layer.name);
 
-      // create the ReadyMap map model:
-      var map = new ReadyMap.Map();
+        //If we're using a globe, add the controls to the main div instead of the map viewport.
+        //This should work with OpenLayers map as well but the controls don't seem to respond if they aren't added to the map viewport
+        var controlDiv = null;
+        if (globe) {
+            controlDiv = document.getElementById("map");
+        }
 
-      map.addImageLayer(new ReadyMap.OLImageLayer({
-        name: "OpenLayers WMS Layer",
-        sourceLayer: wmsLayer
-      }));
+        //Add OpenLayers controls, they work in 3D as well!
+        olMap = new OpenLayers.Map("map", { controls: [] });
+        olMap.addControl(new OpenLayers.Control.Navigation({ div: controlDiv }));
+        olMap.addControl(new OpenLayers.Control.PanZoom({ div: controlDiv }));
 
+        //Here is where we setup the map.  If you want a 3D map you need to call setupGlobe() on your OpenLayers map immediately after creation.
+        //When you are finished adding layers to your map, call finishGlobe() on your map.  When ReadyMap supports adding layers dynamically
+        //finishGlobe won't be necessary
+        if (globe) olMap.setupGlobe();
+        olMap.addLayer(layer);
+        if (globe) olMap.finishGlobe();
 
-      // create a view tied to a page element:
-      var size = ReadyMap.getWindowSize();
-      var headerHeight = jQuery('#header').height();
-      size.h -= headerHeight;
-      mapView = new ReadyMap.MapView("3DView", size, map);
+        //Zoom to the max extent
+        olMap.zoomToMaxExtent();
 
-      //Add some controls
-      var zoom = new ReadyMap.Controls.Zoom(mapView, "ViewContainer");
-      var pan = new ReadyMap.Controls.Pan(mapView, "ViewContainer");
+        //Setup a slider to control the layer opacity
+        $("#opacity_slider").slider({
+            range: "min",
+            value: 100,
+            min: 1,
+            max: 100,
+            slide: function (event, ui) {
+                layer.setOpacity(ui.value / 100);
+            }
+        });
 
-      // display the Lat/Long:
-      mapView.addFrameEndCallback(function() {
-        var viewMatrix = mapView.viewer.view.getViewMatrix();
-        viewMatrix = osg.Matrix.inverse(viewMatrix);
-        var eye = [];
-        osg.Matrix.getTrans(viewMatrix, eye);
-        var lla = map.profile.ellipsoid.ecef2lla(eye);
-        lla[0] = Math.rad2deg(lla[0]);
-        lla[1] = Math.rad2deg(lla[1]);
-        jQuery("#Coords").html(
-                "Lat: " + lla[1].toFixed(2) + "\u00B0" + "  Long = " + lla[0].toFixed(2) + "\u00B0" + "<br/>" +
-                "Azim: " + Math.rad2deg(mapView.viewer.manipulator.localAzim).toFixed(1) + "\u00B0" +
-                "  Pitch:" + Math.rad2deg(mapView.viewer.manipulator.localPitch).toFixed(1) + "\u00B0" + "<br/>" +
-                "Tiles: " + map.drawListSize);
-      });
+        //Setup a checkbox to toggle the layer on and off
+        $("#enabled_checkbox").click(function () {
+            var enabled = $(this).attr("checked");
+            layer.setVisibility(enabled);
+        });
+
+        $("#enabled_checkbox").attr("checked", "checked");
+    }
+
+    $(document).ready(function () {
+
+        initialize(is3D);
+
+        $("#toggleGlobeButton").click(function () {
+            is3D = !is3D;
+            if (is3D) {
+                $("#toggleGlobeButton").text("Switch to 2D");
+            } else {
+                $("#toggleGlobeButton").text("Switch to 3D");
+            }
+            initialize(is3D);
+        });
     });
+
+
+
 
 </script>
 </head>
 
 <body>
-  <div id="header">
-    <a href="http://pelicanmapping.com" border="0"><img id="logo" align="right" height="50" src="http://pelicanmapping.com/wp-content/uploads/2011/02/pelican-logo-262x93-light.png" /></a>
-    <p>
-        ReadyMap / WebGL :: 
-        <a href="index.html">demos</a> ::
-        <a href="http://godzi.org">wiki</a> :: 
-        <a href="http://github.com/gwaldron/godzi-webgl">github</a> ::
-        <a href="http://twitter.com/#!/pelicanmapping">twitter</a>
-    </p>
+  <div id="map">    
+  </div>  
+
+  <div id="layer-control" class="ui-widget ui-widget-content">  
+        
+        <div class="ui-widget-header">Layers</div>
+        <div class="'ui-widget-content ui-state-default">
+            <input id="enabled_checkbox" type="checkbox" checked="checked" />        
+            <span id="layer_name">Layer</span>
+            <div id="opacity_slider" style="width: 200px; height: 5px;"></div>
+        </div>
   </div>
-  <div id="ViewContainer">
-    <canvas id="3DView"></canvas>
+
+  <div id="help">
+    This example demonstrates the new OpenLayers integration.
+    It allows you to use ReadyMap to view your existing OpenLayers webpages as a 3D globe with just a few lines of code!<br />
+    <button id="toggleGlobeButton">Switch to 3D</button>
   </div>
-  <div id="Help">
-    <ul>
-      <li>drag to pan</li>
-      <li>wheel to zoom</li>
-      <li>shift-drag to rotate</li>
-      <li><a href="#" onclick="mapView.home();">reset view</a></li>
-    </ul>
-  </div>
-  <div id="Coords">
-  </div>
+
+
 </body>
 
 </html>

@@ -9,12 +9,32 @@
  * ImageLayer that uses the OpenLayers API to access image tiles.
  */
 
-ReadyMap.OLImageLayer = function(settings) {
-  osgearth.ImageLayer.call(this, settings.name);
-  this.args = settings.args !== undefined ? settings.args : null;
-  
-  // source OpenLayers layer object
-  this.sourceLayer = settings.sourceLayer !== undefined ? settings.sourceLayer : null;
+ReadyMap.OLImageLayer = function (settings) {
+    osgearth.ImageLayer.call(this, settings.name);
+    this.args = settings.args !== undefined ? settings.args : null;
+
+    // source OpenLayers layer object
+    this.sourceLayer = settings.sourceLayer !== undefined ? settings.sourceLayer : null;
+
+    var that = this;
+    if (this.sourceLayer !== null) {
+        //Override the setOpacity function to use our setOpacity function
+        this.sourceLayer.setOpacity = function (opacity) {
+            if (opacity != this.opacity) {
+                this.opacity = opacity;
+                that.setOpacity(opacity);
+            }
+        };
+
+        //Override the setVisibility function to use our setEnabled function
+        this.sourceLayer.setVisibility = function (visibility) {
+            if (this.visibility != visibility) {
+                this.visibility = visibility;
+                that.setVisible(this.visibility);
+            }
+        }
+
+    }
 };
 
 
