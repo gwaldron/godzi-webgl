@@ -1,0 +1,97 @@
+﻿
+<html>
+<head>
+<title>ReadyMap WebGL</title>
+
+<meta http-equiv="content-type" content="text/html; charset=ISO-8859-1">
+<script type="text/javascript" src="http://leaflet.cloudmade.com/dist/leaflet.js"></script>
+<script type="text/javascript" src="../js/jquery/jquery-1.4.2.js"></script>
+<script type="text/javascript" src="../build/readymap-debug-0.0.1.js"></script>
+
+<link href="demo.css" rel="Stylesheet" type="text/css"></link>
+<link href="../css/readymap.css" rel="Stylesheet" type="text/css"></link>
+
+
+<script type="text/javascript">
+
+    var mapView;
+
+    ReadyMap.init(function() {
+
+      // create the Leaflet map model:            var cloudmadeUrl = 'http://{s}.tile.cloudmade.com/BC9A493B41014CAABB98F0471D759707/997/256/{z}/{x}/{y}.png';
+      var cloudmadeAttrib = 'Map data &copy; 2011 OpenStreetMap contributors, Imagery &copy; 2011 CloudMade';      var leafletLayer = new L.TileLayer(cloudmadeUrl, {maxZoom: 18, attribution: cloudmadeAttrib});
+//      var leafletLayer = new L.TileLayer(
+//          "http://tilecache.osgeo.org/wms-c/Basic.py/1.0.0/basic/{z}/{x}/{y}.png",
+//          { maxZoom: 14, scheme: 'tms' }
+//      );
+
+      // create the ReadyMap map model:
+      var map = new ReadyMap.Map();
+      map.profile = new osgearth.MercatorProfile();
+      map.profile.baseTilesX = 1;
+      map.profile.baseTilesY = 1;
+
+      map.addImageLayer(new ReadyMap.LeafletImageLayer({
+        name: "Leaflet TileLayer",
+        sourceLayer: leafletLayer
+      }));
+
+
+      // create a view tied to a page element:
+      var size = ReadyMap.getWindowSize();
+      var headerHeight = jQuery('#header').height();
+      size.h -= headerHeight;
+      mapView = new ReadyMap.MapView("3DView", size, map);
+
+      //Add some controls
+      var zoom = new ReadyMap.Controls.Zoom(mapView, "ViewContainer");
+      var pan = new ReadyMap.Controls.Pan(mapView, "ViewContainer");
+
+      // display the Lat/Long:
+      mapView.addFrameEndCallback(function() {
+        var viewMatrix = mapView.viewer.view.getViewMatrix();
+        viewMatrix = osg.Matrix.inverse(viewMatrix);
+        var eye = [];
+        osg.Matrix.getTrans(viewMatrix, eye);
+        var lla = map.profile.ellipsoid.ecef2lla(eye);
+        lla[0] = Math.rad2deg(lla[0]);
+        lla[1] = Math.rad2deg(lla[1]);
+        jQuery("#Coords").html(
+                "Lat: " + lla[1].toFixed(2) + "\u00B0" + "  Long = " + lla[0].toFixed(2) + "\u00B0" + "<br/>" +
+                "Azim: " + Math.rad2deg(mapView.viewer.manipulator.localAzim).toFixed(1) + "\u00B0" +
+                "  Pitch:" + Math.rad2deg(mapView.viewer.manipulator.localPitch).toFixed(1) + "\u00B0" + "<br/>" +
+                "Tiles: " + map.drawListSize);
+      });
+    });
+
+</script>
+</head>
+
+<body>
+  <div id="header">
+    <a href="http://pelicanmapping.com" border="0"><img id="logo" align="right" height="50" src="http://pelicanmapping.com/wp-content/uploads/2011/02/pelican-logo-262x93-light.png" /></a>
+    <p>
+        ReadyMap / WebGL :: 
+        <a href="index.html">demos</a> ::
+        <a href="http://godzi.org">wiki</a> :: 
+        <a href="http://github.com/gwaldron/godzi-webgl">github</a> ::
+        <a href="http://twitter.com/#!/pelicanmapping">twitter</a>
+    </p>
+  </div>
+  <div id="ViewContainer">
+    <canvas id="3DView"></canvas>
+  </div>
+  <div id="Help">
+    <h3><a href="http://leaflet.cloudmade.com/">Leaflet</a> Integration Example</h3>
+    <ul>
+      <li>drag to pan</li>
+      <li>wheel to zoom</li>
+      <li>shift-drag to rotate</li>
+      <li><a href="#" onclick="mapView.home();">reset view</a></li>
+    </ul>
+  </div>
+  <div id="Coords">
+  </div>
+</body>
+
+</html>

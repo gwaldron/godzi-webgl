@@ -30,6 +30,7 @@
 		<script type="text/javascript" src="../../js/readymap/data/GeoRSSLayer.js"></script>
 		<script type="text/javascript" src="../../js/readymap/data/GeoRSSReader.js"></script>
 		<script type="text/javascript" src="../../js/readymap/data/HeatMap.js"></script>
+		<script type="text/javascript" src="../../js/readymap/data/LeafletImageLayer.js"></script>
 		<script type="text/javascript" src="../../js/readymap/data/Map.js"></script>
 		<script type="text/javascript" src="../../js/readymap/data/OLImageLayer.js"></script>
 		<script type="text/javascript" src="../../js/readymap/data/TMSImageLayer.js"></script>

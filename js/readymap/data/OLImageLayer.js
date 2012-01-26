@@ -33,6 +33,10 @@ ReadyMap.OLImageLayer.prototype = osg.objectInehrit(osgearth.ImageLayer.prototyp
 
   createTexture: function(key, profile) {
     var imageURL = this.getURL(key, profile);
-    return osg.Texture.createFromURL(osgearth.getURL(imageURL));
+    var encodedURL = osgearth.getURL(imageURL);
+    if (this.sourceLayer.format !== undefined) {
+      encodedURL += "&mimeType=" + this.sourceLayer.format;
+    }
+    return osg.Texture.createFromURL(encodedURL); //osgearth.getURL(imageURL));
   }
 });
