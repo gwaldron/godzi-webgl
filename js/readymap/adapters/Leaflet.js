@@ -7,7 +7,7 @@
     var divHeight = $("#" + id).height();
     var divWidth = $("#" + id).width();
     if (options.globe && options.splitview)
-      divWidth = Math.floor(divWidth / 2) - 4;
+      divWidth = Math.floor(divWidth / 2);
 
     this._leafletDivId = 'leaflet_div';
     this._leafletDiv = L.DomUtil.create('div', '', container);
@@ -27,7 +27,6 @@
       document.getElementById(this._rmDivId).style.height = divHeight
 
       if (this.options.splitview) {
-        document.getElementById(this._leafletDivId).style.marginRight = 4;
         document.getElementById(this._leafletDivId).style.position = 'relative';
         document.getElementById(this._leafletDivId).style.float = 'left';
         document.getElementById(this._rmDivId).style.position = 'relative';
