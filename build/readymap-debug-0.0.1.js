@@ -12007,7 +12007,7 @@ if (typeof OpenLayers !== 'undefined') {
         this._mapView = new ReadyMap.MapView(this._canvasId, size, this._map);
     }
 
-    OpenLayers.Map.prototype.setupGlobe = function () {
+    OpenLayers.Map.prototype.setupGlobe = function (globe) {
         // create the ReadyMap map model:
         this._map = new ReadyMap.Map();
 
@@ -12015,91 +12015,121 @@ if (typeof OpenLayers !== 'undefined') {
         this._canvas = $("<canvas/>").attr("id", this._canvasId);
         $(this.div).append(this._canvas);
 
-        this.div.removeChild(this.viewPortDiv);
-
-        //Initialize the prototypes
+        //Initialize the prototypes        
 
         //Attach a new destroy function that removes the canvas from the parent div
         this.destroy = function () {
+            OpenLayers.Map.prototype.destroy.call(this);
             $(this._canvas).remove();
-
-            //Remove any 
-            if (this.controls != null) {
-                for (var i = this.controls.length - 1; i >= 0; --i) {
-                    this.controls[i].destroy();
-                }
-                this.controls = null;
-            }
-
         }
 
         //Override addLayer so that it adds layers to our ReadyMap map
         this.addLayer = function (layer) {
-            for (var i = 0, len = this.layers.length; i < len; i++) {
-                if (this.layers[i] == layer) {
-                    throw new Error("You tried to add the layer: " + layer.name +
-                                " to the map, but it has already been added");
-                }
-            }
-            if (this.events.triggerEvent("preaddlayer", { layer: layer }) === false) {
-                return;
-            }
-
-            if (this.allOverlays) {
-                layer.isBaseLayer = false;
-            }
-
-            this.setLayerZIndex(layer, this.layers.length);
-
-            this.layers.push(layer);
-            layer.setMap(this);
-
-            if (layer.isBaseLayer || (this.allOverlays && !this.baseLayer)) {
-                if (this.baseLayer == null) {
-                    // set the first baselaye we add as the baselayer
-                    this.setBaseLayer(layer);
-                } else {
-                    layer.setVisibility(false);
-                }
-            }
-
+            OpenLayers.Map.prototype.addLayer.call(this, layer);
             //Add the layer to the ReadyMap map
             this._map.addImageLayer(new ReadyMap.OLImageLayer({
                 name: layer.name,
                 sourceLayer: layer
             }));
-
-            this.events.triggerEvent("addlayer", { layer: layer });
-            layer.events.triggerEvent("added", { map: this, layer: layer });
-            layer.afterAdd();
         };
 
         var panScale = 0.002;
         this.pan = function (dx, dy, options) {
-            this._mapView.viewer.getManipulator().panModel(-dx * panScale, dy * panScale);
+            if (this.is3D) {
+                this._mapView.viewer.getManipulator().panModel(-dx * panScale, dy * panScale);
+            }
+            else {
+                OpenLayers.Map.prototype.pan.call(this, dx, dy, options);
+            }
         };
 
         var zoomScale = 0.1;
         this.zoomIn = function () {
-            this._mapView.viewer.getManipulator().zoomModel(0, -zoomScale);
+            if (this.is3D) {
+                this._mapView.viewer.getManipulator().zoomModel(0, -zoomScale);
+            }
+            else {
+                OpenLayers.Map.prototype.zoomIn.call(this);
+            }
         };
 
         this.zoomOut = function () {
-            this._mapView.viewer.getManipulator().zoomModel(0, zoomScale);
+            if (this.is3D) {
+                this._mapView.viewer.getManipulator().zoomModel(0, zoomScale);
+            }
+            else {
+                OpenLayers.Map.prototype.zoomOut.call(this);
+            }
         };
 
         this.zoomToExtent = function (bounds, closest) {
+            if (this.is3D) {
+                if (bounds === null) {
+                    bounds = new OpenLayers.Bounds(-180, -90, 180, 90);
+                }
+                var width = bounds.getWidth();
+                var height = bounds.getHeight();
+                var maxDim = width > height ? width : height;
+                var radius = maxDim / 2.0;
+                var center = bounds.getCenterLonLat();
 
-            var width = bounds.getWidth();
-            var height = bounds.getHeight();
-            var maxDim = width > height ? width : height;
-            var radius = maxDim / 2.0;
-            var center = bounds.getCenterLonLat();
-
-            var range = ((.5 * radius) / 0.267949849) * 111000.0;
-            if (range != 0)
-                this._mapView.viewer.manipulator.setViewpoint(center.lat, center.lon, 0.0, 0, -90, range);
+                var range = ((.5 * radius) / 0.267949849) * 111000.0;
+                if (range != 0)
+                    this._mapView.viewer.manipulator.setViewpoint(center.lat, center.lon, 0.0, 0, -90, range);
+            }
+            else {
+                OpenLayers.Map.prototype.zoomToExtent.call(this, bounds, closest);
+            }
         }
+
+        this.show3D = function () {
+            this.is3D = true;
+            $(this._canvas).show();
+            $(this.viewPortDiv).hide();
+
+            if (this._mapView !== undefined) {
+                var extent = this.getExtent();
+                if (extent !== null) {
+                    this.zoomToExtent(extent, false);
+                }
+                else {
+                    this.zoomToMaxExtent();
+                }
+            }
+        };
+
+        this.show2D = function () {
+            this.is3D = false;
+            $(this._canvas).hide();
+            $(this.viewPortDiv).show();
+
+            if (this._mapView !== undefined) {
+                var viewMatrix = this._mapView.viewer.view.getViewMatrix();
+                viewMatrix = osg.Matrix.inverse(viewMatrix);
+                var eye = [];
+                osg.Matrix.getTrans(viewMatrix, eye);
+                var lla = this._mapView.map.profile.ellipsoid.ecef2lla(eye);
+                lla[0] = Math.rad2deg(lla[0]);
+                lla[1] = Math.rad2deg(lla[1]);
+                var range = lla[2];
+                
+                var radius = ((range / 111000.0) * 0.267949849) / 0.5;
+                var bounds = new OpenLayers.Bounds(lla[0] - radius, lla[1] - radius, lla[0] + radius, lla[1] + radius);
+                this.zoomToExtent(bounds, false);
+            }
+
+            //var extent = this.getExtent();
+            //this.zoomToExtent(this.getExtent());
+        };
+
+        this.set3D = function (is3D) {
+            if (is3D) this.show3D();
+            else this.show2D();
+        };
+
+        this.set3D(true);
+
+
     }
 }if (typeof L !== 'undefined') {
 

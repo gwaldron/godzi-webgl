@@ -19,27 +19,30 @@
     #layer-control
     {
     	position: absolute;
-    	left: 10px;
+    	right: 10px;
     	top: 300px;
     	z-index: 1000;
     }
        
     
-    #example-help
-    {
-    	position: absolute;
-    	left: 10px;
-    	top: 400px;
-    	width: 300px;
-    	border: 2px solid white;
-    	z-index: 1000;
+    #example-help    
+    {      
+      position:absolute;
+      top: 100px;
+      right: 4px;
+      z-index:1000;
+      margin-top: 4px;
+      padding: 4px;
+      width: 300px;
+      background-color: #666;
+      border: 1px solid #999;
+     font-family :Helvetica,Verdana,Arial,sans-serif;
     }
     
     #Help
     {
-    	z-index: 1000 !important;
-    	float: none;
-    	right: 100px;
+    	z-index: 1000 !important;    	
+    	left: 100px;
     	top: 100px;
     }
     
@@ -51,7 +54,7 @@
     var layer;
     var olMap = null;
 
-    var is3D = false;
+    var is3D = true;
 
     function initialize(globe) {
 
@@ -73,9 +76,9 @@
         //If we're using a globe, add the controls to the main div instead of the map viewport.
         //This should work with OpenLayers map as well but the controls don't seem to respond if they aren't added to the map viewport
         var controlDiv = null;
-        if (globe) {
-            controlDiv = document.getElementById("map");
-        }
+        //if (globe) {
+        //    controlDiv = document.getElementById("map");
+        //}
 
         //Add OpenLayers controls, they work in 3D as well!
         olMap = new OpenLayers.Map("map", { controls: [] });
@@ -112,11 +115,15 @@
         $("#enabled_checkbox").attr("checked", "checked");
     }
 
+    function handleCheckChange(cb) {
+        olMap.set3D(cb.checked);
+    }
+
     $(document).ready(function () {
 
         // create a view tied to a page element:
         var size = ReadyMap.getWindowSize();
-        var headerHeight = jQuery('#header').height();        
+        var headerHeight = jQuery('#header').height();
         size.h -= headerHeight;
         $("#map").width(size.w);
         $("#map").height(size.h);
@@ -126,13 +133,12 @@
         initialize(is3D);
 
         $("#toggleGlobeButton").click(function () {
-            is3D = !is3D;
-            if (is3D) {
-                $("#toggleGlobeButton").text("Switch to 2D");
-            } else {
-                $("#toggleGlobeButton").text("Switch to 3D");
+            if (olMap.is3D) {
+                olMap.show2D();
             }
-            initialize(is3D);
+            else {
+                olMap.show3D();
+            }            
         });
     });
 
@@ -171,7 +177,7 @@
   <div id="example-help">
     This example demonstrates the new OpenLayers integration.
     It allows you to use ReadyMap to view your existing OpenLayers webpages as a 3D globe with just a few lines of code!<br />
-    <button id="toggleGlobeButton">Switch to 3D</button>
+    <input type="checkbox" checked="checked" onchange="handleCheckChange(this)" /> Show globe
   </div>
 
   <div id="Help">
