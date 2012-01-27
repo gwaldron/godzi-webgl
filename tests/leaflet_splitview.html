@@ -1,0 +1,91 @@
+
+<html>
+<head>
+	<title>ReadyMap WebGL Leaflet Demo</title>
+	
+	<meta http-equiv="content-type" content="text/html; charset=ISO-8859-1">	
+	<script type="text/javascript" src="leaflet/dist/leaflet.js"></script>
+	<script type="text/javascript" src="../js/jquery/jquery-1.4.2.js"></script>
+  <script type="text/javascript" src="../build/readymap-debug-0.0.1.js"></script>
+  
+  <link rel="stylesheet" href="leaflet/dist/leaflet.css" />
+  <!--[if lte IE 8]><link rel="stylesheet" href="leaflet/dist/leaflet.ie.css" /><![endif]-->
+  <link href="demo.css" rel="Stylesheet" type="text/css"></link>
+  <link href="../css/readymap.css" rel="Stylesheet" type="text/css"></link>
+  
+  <style type="text/css">
+    
+    #DemoHelp
+    {
+      float:right;
+      position:absolute;
+      right: 4px;
+      z-index:100;
+      margin-top: 4px;
+      padding: 4px;
+      width: 300px;
+      background-color: #666;
+    	border: 1px solid #999;
+    	font-family:Helvetica,Verdana,Arial,sans-serif;
+    }
+    
+    #DemoHelp a:link {color:#be6;}
+    #DemoHelp a:visited {color:#be6;}
+    #DemoHelp a:hover {color:#be6;}
+    
+  </style>
+  
+  <script type="text/javascript">
+    var map;
+    
+    $(document).ready(function () {
+
+        // create a view tied to a page element:
+        var size = ReadyMap.getWindowSize();
+        var headerHeight = jQuery('#header').height();        
+        size.h -= headerHeight;
+        $("#ViewContainer").width(size.w);
+        $("#ViewContainer").height(size.h);
+
+        // create Leaflet map
+        map = new L.Map('ViewContainer', { globe: true, splitview: true });
+
+	      var cloudmadeUrl = 'http://{s}.tile.cloudmade.com/BC9A493B41014CAABB98F0471D759707/997/256/{z}/{x}/{y}.png',
+			    cloudmadeAttribution = 'Map data &copy; 2011 OpenStreetMap contributors, Imagery &copy; 2011 CloudMade',
+			    cloudmade = new L.TileLayer(cloudmadeUrl, { maxZoom: 18, attribution: cloudmadeAttribution });
+
+	      map.setView(new L.LatLng(40.0, -95.977), 3).addLayer(cloudmade);
+	      map.finalizeGlobe();
+    });
+    
+    function handleCheckChange(cb) {
+      if (cb.checked)
+        map.show3D();
+      else
+        map.show2D();
+    }
+  </script>
+
+</head>
+<body>
+	<div id="header">
+    <a href="http://pelicanmapping.com" border="0"><img id="logo" align="right" height="50" src="http://pelicanmapping.com/wp-content/uploads/2011/02/pelican-logo-262x93-light.png" /></a>
+    <p>
+        ReadyMap / WebGL :: 
+        <a href="index.html">demos</a> ::
+        <a href="http://godzi.org">wiki</a> :: 
+        <a href="http://github.com/gwaldron/godzi-webgl">github</a> ::
+        <a href="http://twitter.com/#!/pelicanmapping">twitter</a>
+    </p>
+  </div>
+
+  <div id="ViewContainer">
+  </div>
+  
+  <div id="DemoHelp">
+  <p>This example demonstrates ReadyMap integration with <a href="http://leaflet.cloudmade.com/">Leaflet</a>. This allows you to view your existing Leaflet maps in 3D with minimal changes to your existing code.</p>
+  <p>The example shows a split-view display with the globe on the right synchronized to the 2D Leaflet map on the left.</p>
+  </div>
+
+</body>
+</html>

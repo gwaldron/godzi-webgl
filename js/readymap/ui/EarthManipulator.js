@@ -68,7 +68,7 @@ ReadyMap.EarthManipulator.prototype = osg.objectInehrit(ReadyMap.Manipulator.pro
     },
 
     mousewheel: function(ev, intDelta, deltaX, deltaY) {
-        this.zoomModel(0, intDelta * 0.1);
+        this.zoomModel(0, intDelta * -0.1);
     },
 
     dblclick: function(ev) {

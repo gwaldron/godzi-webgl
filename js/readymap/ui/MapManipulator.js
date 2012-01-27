@@ -86,6 +86,6 @@ ReadyMap.MapManipulator.prototype = osg.objectInehrit(ReadyMap.Manipulator.proto
     },
 
     mousewheel: function(ev, intDelta, deltaX, deltaY) {
-        this.zoomModel(0, intDelta * 0.1);
+        this.zoomModel(0, intDelta * -0.1);
     }
 });

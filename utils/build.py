@@ -46,7 +46,8 @@ READYMAP = [
 ]
 
 READYMAP_ADAPTERS = [
-        "readymap/adapters/OpenLayers.js"
+        "readymap/adapters/OpenLayers.js",
+        "readymap/adapters/Leaflet.js"
 ]
 
 READYMAP_UI = [

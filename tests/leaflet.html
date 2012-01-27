@@ -1,71 +1,88 @@
-﻿
+
 <html>
 <head>
-<title>ReadyMap WebGL</title>
+	<title>ReadyMap WebGL Leaflet Demo</title>
+	
+	<meta http-equiv="content-type" content="text/html; charset=ISO-8859-1">	
+	<script type="text/javascript" src="leaflet/dist/leaflet.js"></script>
+	<script type="text/javascript" src="../js/jquery/jquery-1.4.2.js"></script>
+  <script type="text/javascript" src="../build/readymap-debug-0.0.1.js"></script>
+  
+  <link rel="stylesheet" href="leaflet/dist/leaflet.css" />
+  <!--[if lte IE 8]><link rel="stylesheet" href="leaflet/dist/leaflet.ie.css" /><![endif]-->
+  <link href="demo.css" rel="Stylesheet" type="text/css"></link>
+  <link href="../css/readymap.css" rel="Stylesheet" type="text/css"></link>
+  
+  <style type="text/css">
+    
+    #Controls
+    {
+      float: left;
+      position: absolute;
+	    bottom: 2px;
+	    left: 2px;
+      z-index: 100;
+      margin: 2px;
+      padding: 4px;
+      background-color: #666;
+      border: 1px solid #999;
+      font-family:Helvetica,Verdana,Arial,sans-serif;
+    }
+    
+    #DemoHelp
+    {
+      float:right;
+      position:absolute;
+      right: 4px;
+      z-index:100;
+      margin-top: 4px;
+      padding: 4px;
+      width: 300px;
+      background-color: #666;
+    	border: 1px solid #999;
+    	font-family:Helvetica,Verdana,Arial,sans-serif;
+    }
+    
+    #DemoHelp a:link {color:#be6;}
+    #DemoHelp a:visited {color:#be6;}
+    #DemoHelp a:hover {color:#be6;}
+    
+  </style>
+  
+  <script type="text/javascript">
+    var map;
+    
+    $(document).ready(function () {
 
-<meta http-equiv="content-type" content="text/html; charset=ISO-8859-1">
-<script type="text/javascript" src="http://leaflet.cloudmade.com/dist/leaflet.js"></script>
-<script type="text/javascript" src="../js/jquery/jquery-1.4.2.js"></script>
-<script type="text/javascript" src="../build/readymap-debug-0.0.1.js"></script>
+        // create a view tied to a page element:
+        var size = ReadyMap.getWindowSize();
+        var headerHeight = jQuery('#header').height();        
+        size.h -= headerHeight;
+        $("#ViewContainer").width(size.w);
+        $("#ViewContainer").height(size.h);
+        
+        // create Leaflet map
+        map = new L.Map('ViewContainer', { globe: true });
 
-<link href="demo.css" rel="Stylesheet" type="text/css"></link>
-<link href="../css/readymap.css" rel="Stylesheet" type="text/css"></link>
+	      var cloudmadeUrl = 'http://{s}.tile.cloudmade.com/BC9A493B41014CAABB98F0471D759707/997/256/{z}/{x}/{y}.png',
+			    cloudmadeAttribution = 'Map data &copy; 2011 OpenStreetMap contributors, Imagery &copy; 2011 CloudMade',
+			    cloudmade = new L.TileLayer(cloudmadeUrl, { maxZoom: 18, attribution: cloudmadeAttribution });
 
-
-<script type="text/javascript">
-
-    var mapView;
-
-    ReadyMap.init(function() {
-
-      // create the Leaflet map model:            var cloudmadeUrl = 'http://{s}.tile.cloudmade.com/BC9A493B41014CAABB98F0471D759707/997/256/{z}/{x}/{y}.png';
-      var cloudmadeAttrib = 'Map data &copy; 2011 OpenStreetMap contributors, Imagery &copy; 2011 CloudMade';      var leafletLayer = new L.TileLayer(cloudmadeUrl, {maxZoom: 18, attribution: cloudmadeAttrib});
-      // create the ReadyMap map model:
-      var map = new ReadyMap.Map();
-      
-      // tell ReadyMap it's a mercator map with one tile at the root:
-      map.profile = new osgearth.MercatorProfile();
-      map.profile.baseTilesX = 1;
-      map.profile.baseTilesY = 1;
-
-      // add the Leaflet layer to the 3D map
-      map.addImageLayer(new ReadyMap.LeafletImageLayer({
-        name: "Leaflet TileLayer",
-        sourceLayer: leafletLayer
-      }));
-
-      // create a view tied to a page element:
-      var size = ReadyMap.getWindowSize();
-      var headerHeight = jQuery('#header').height();
-      size.h -= headerHeight;
-      mapView = new ReadyMap.MapView("3DView", size, map);
-
-      //Add some controls
-      var zoom = new ReadyMap.Controls.Zoom(mapView, "ViewContainer");
-      var pan = new ReadyMap.Controls.Pan(mapView, "ViewContainer");
-
-      // display the Lat/Long:
-      mapView.addFrameEndCallback(function() {
-        var viewMatrix = mapView.viewer.view.getViewMatrix();
-        viewMatrix = osg.Matrix.inverse(viewMatrix);
-        var eye = [];
-        osg.Matrix.getTrans(viewMatrix, eye);
-        var lla = map.profile.ellipsoid.ecef2lla(eye);
-        lla[0] = Math.rad2deg(lla[0]);
-        lla[1] = Math.rad2deg(lla[1]);
-        jQuery("#Coords").html(
-                "Lat: " + lla[1].toFixed(2) + "\u00B0" + "  Long = " + lla[0].toFixed(2) + "\u00B0" + "<br/>" +
-                "Azim: " + Math.rad2deg(mapView.viewer.manipulator.localAzim).toFixed(1) + "\u00B0" +
-                "  Pitch:" + Math.rad2deg(mapView.viewer.manipulator.localPitch).toFixed(1) + "\u00B0" + "<br/>" +
-                "Tiles: " + map.drawListSize);
-      });
+	      map.setView(new L.LatLng(0.0, 0.0), 4).addLayer(cloudmade);
+	      map.finalizeGlobe();
     });
+    
+    function handleCheckChange(cb) {
+      if (cb.checked)
+        map.show3D();
+      else
+        map.show2D();
+    }
+  </script>
 
-</script>
 </head>
-
 <body>
-  <div id="header">
+	<div id="header">
     <a href="http://pelicanmapping.com" border="0"><img id="logo" align="right" height="50" src="http://pelicanmapping.com/wp-content/uploads/2011/02/pelican-logo-262x93-light.png" /></a>
     <p>
         ReadyMap / WebGL :: 
@@ -75,20 +92,16 @@
         <a href="http://twitter.com/#!/pelicanmapping">twitter</a>
     </p>
   </div>
+
   <div id="ViewContainer">
-    <canvas id="3DView"></canvas>
   </div>
-  <div id="Help">
-    <h3><a href="http://leaflet.cloudmade.com/">Leaflet</a> Integration Example</h3>
-    <ul>
-      <li>drag to pan</li>
-      <li>wheel to zoom</li>
-      <li>shift-drag to rotate</li>
-      <li><a href="#" onclick="mapView.home();">reset view</a></li>
-    </ul>
+  
+  <div id="DemoHelp">
+  <p>This example demonstrates ReadyMap integration with <a href="http://leaflet.cloudmade.com/">Leaflet</a>. This allows you to view your existing Leaflet maps in 3D with minimal changes to your existing code.</p>
   </div>
-  <div id="Coords">
+  
+  <div id="Controls">
+    <input type="checkbox" checked="checked" onchange="handleCheckChange(this)" /> Show globe
   </div>
 </body>
-
 </html>

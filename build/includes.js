@@ -46,3 +46,4 @@
 		<script type="text/javascript" src="../../js/readymap/controls/Pan.js"></script>
 		<script type="text/javascript" src="../../js/readymap/controls/Zoom.js"></script>
 		<script type="text/javascript" src="../../js/readymap/adapters/OpenLayers.js"></script>
+		<script type="text/javascript" src="../../js/readymap/adapters/Leaflet.js"></script>
