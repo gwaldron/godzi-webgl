@@ -12112,10 +12112,15 @@ if (typeof OpenLayers !== 'undefined') {
                 lla[0] = Math.rad2deg(lla[0]);
                 lla[1] = Math.rad2deg(lla[1]);
                 var range = lla[2];
-                
+
                 var radius = ((range / 111000.0) * 0.267949849) / 0.5;
                 var bounds = new OpenLayers.Bounds(lla[0] - radius, lla[1] - radius, lla[0] + radius, lla[1] + radius);
-                this.zoomToExtent(bounds, false);
+                if (bounds.getWidth() > 360.0 || bounds.getHeight() > 180) {
+                    this.zoomToMaxExtent();
+                }
+                else {
+                    this.zoomToExtent(bounds, false);
+                }
             }
 
             //var extent = this.getExtent();

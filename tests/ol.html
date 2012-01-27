@@ -52,9 +52,7 @@
 <script type="text/javascript">
 
     var layer;
-    var olMap = null;
-
-    var is3D = true;
+    var olMap = null;    
 
     function initialize(globe) {
 
@@ -73,24 +71,18 @@
 
           $("#layer_name").html(layer.name);
 
-        //If we're using a globe, add the controls to the main div instead of the map viewport.
-        //This should work with OpenLayers map as well but the controls don't seem to respond if they aren't added to the map viewport
         var controlDiv = null;
-        //if (globe) {
-        //    controlDiv = document.getElementById("map");
-        //}
-
         //Add OpenLayers controls, they work in 3D as well!
         olMap = new OpenLayers.Map("map", { controls: [] });
-        olMap.addControl(new OpenLayers.Control.Navigation({ div: controlDiv }));
-        olMap.addControl(new OpenLayers.Control.PanZoom({ div: controlDiv }));
+        olMap.addControl(new OpenLayers.Control.Navigation());
+        olMap.addControl(new OpenLayers.Control.PanZoom());
 
         //Here is where we setup the map.  If you want a 3D map you need to call setupGlobe() on your OpenLayers map immediately after creation.
         //When you are finished adding layers to your map, call finishGlobe() on your map.  When ReadyMap supports adding layers dynamically
         //finishGlobe won't be necessary
-        if (globe) olMap.setupGlobe();
+        olMap.setupGlobe();
         olMap.addLayer(layer);
-        if (globe) olMap.finishGlobe();
+        olMap.finishGlobe();
 
         //Zoom to the max extent
         olMap.zoomToMaxExtent();
@@ -130,7 +122,7 @@
 
 
 
-        initialize(is3D);
+        initialize();
 
         $("#toggleGlobeButton").click(function () {
             if (olMap.is3D) {
