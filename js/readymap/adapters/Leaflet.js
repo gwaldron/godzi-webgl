@@ -7,14 +7,14 @@
     var divHeight = $("#" + id).height();
     var divWidth = $("#" + id).width();
     if (options.globe && options.splitview)
-      divWidth = Math.floor(divWidth / 2);
+      divWidth = Math.floor(divWidth / 2) - 2;
 
     this._leafletDivId = 'leaflet_div';
     this._leafletDiv = L.DomUtil.create('div', '', container);
     this._leafletDiv.id = this._leafletDivId;
 
-    document.getElementById(this._leafletDivId).style.width = divWidth;
-    document.getElementById(this._leafletDivId).style.height = divHeight;
+    document.getElementById(this._leafletDivId).style.width = divWidth + "px";
+    document.getElementById(this._leafletDivId).style.height = divHeight + "px";
 
     this._base_initialize(this._leafletDivId, options);
 
@@ -23,14 +23,16 @@
       this._rmDiv = L.DomUtil.create('div', '', container);
       this._rmDiv.id = this._rmDivId;
 
-      document.getElementById(this._rmDivId).style.width = divWidth;
-      document.getElementById(this._rmDivId).style.height = divHeight
+      document.getElementById(this._rmDivId).style.width = divWidth + "px";
+      document.getElementById(this._rmDivId).style.height = divHeight + "px";
 
       if (this.options.splitview) {
-        document.getElementById(this._leafletDivId).style.position = 'relative';
-        document.getElementById(this._leafletDivId).style.float = 'left';
-        document.getElementById(this._rmDivId).style.position = 'relative';
-        document.getElementById(this._rmDivId).style.float = 'left';
+        document.getElementById(this._leafletDivId).style.position = 'absolute';
+        document.getElementById(this._leafletDivId).style.left = "0px";
+        document.getElementById(this._leafletDivId).style.top = "0px";
+        document.getElementById(this._rmDivId).style.position = 'absolute';
+        document.getElementById(this._rmDivId).style.left = (divWidth + 4) + "px";
+        document.getElementById(this._rmDivId).style.top = "0px";
       }
 
       this._rmMap = new ReadyMap.Map();
