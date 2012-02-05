@@ -24,15 +24,13 @@
 
             map.addImageLayer(new ReadyMap.TMSImageLayer({
                 name: "Landsat",
-                url: "http://readymap.org/readymap/tiles/1.0.0/22/",
-                tmsType: "google"
+                url: "http://readymap.org/readymap/tiles/1.0.0/22/"
             }));
 
             map.addElevationLayer(new ReadyMap.TMSElevationLayer({
                 name: "Elevation",
                 url: "http://readymap.org/readymap/tiles/1.0.0/9",
-                args: "json=true",
-                tmsType: "google"
+                args: "json=true"
             }));
 
             // create a view tied to a page element:

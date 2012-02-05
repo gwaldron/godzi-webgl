@@ -11373,7 +11373,7 @@ ReadyMap.OLImageLayer.prototype = osg.objectInehrit(osgearth.ImageLayer.prototyp
 ReadyMap.TMSImageLayer = function(settings) {
     osgearth.ImageLayer.call(this, settings.name);
     this.url = settings.url;
-    this.flipY = settings.tmsType === "google";
+    this.flipY = settings.tmsType !== "google";
     this.extension = settings.imageType !== undefined ? settings.imageType : "jpg";
     this.baseLevel = settings.baseLevel !== undefined ? settings.baseLevel : 0;
     this.args = settings.args !== undefined ? settings.args : null;
@@ -11411,7 +11411,7 @@ ReadyMap.TMSImageLayer.prototype = osg.objectInehrit(osgearth.ImageLayer.prototy
 ReadyMap.TMSElevationLayer = function(settings) {
     osgearth.ElevationLayer.call(this, settings.name);
     this.url = settings.url;
-    this.flipY = settings.tmsType === "google";
+    this.flipY = settings.tmsType !== "google";
     this.extension = "json";
     this.baseLevel = settings.baseLevel !== undefined ? settings.baseLevel : 0;
     this.args = settings.args !== undefined ? settings.args : null;
