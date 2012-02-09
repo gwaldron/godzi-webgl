@@ -201,8 +201,9 @@ class ElevationDataset:
         #Transform the points if necessary
         if self.transformer:
             local_x, local_y, z = self.transformer.TransformPoint(x, y, 0)        
-        
-        return getInterpolatedValue(self.band, self.invgeotransform, local_x, local_y, interp)
+            
+        #Always convert to meters              
+        return self.srs.GetLinearUnits() * getInterpolatedValue(self.band, self.invgeotransform, local_x, local_y, interp)
         
         
 class ElevationLayer:
