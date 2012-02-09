@@ -20,6 +20,9 @@ ReadyMap.Manipulator = function(map) {
     this.continuousZoom = 0;
     this.continuousPanX = 0;
     this.continuousPanY = 0;
+    this.touchSensitivity = 0.1;
+    this.touchStartDistance = 0;
+    this.touchStartVec = [0, 0];
 };
 
 ReadyMap.Manipulator.prototype = {
@@ -48,6 +51,31 @@ ReadyMap.Manipulator.prototype = {
         this.clientX = pos[0];
         this.clientY = pos[1];
         this.pushButton(ev);
+    },
+
+    touchStart: function(ev) {
+      if (!ev.touches)
+        return;
+
+      if (ev.touches.length == 1)
+        this.mousedown(ev);
+      else if (ev.touches.length == 2) {
+        var p1 = [ev.touches[0].clientX, ev.touches[0].clientY];
+        var p2 = [ev.touches[1].clientX, ev.touches[1].clientY];
+
+        var diff = osg.Vec2.sub(p2, p1, []);
+        this.touchStartDistance = osg.Vec2.length(diff);
+        this.touchStartVec = osg.Vec2.normalize(diff, []);
+      }
+
+    },
+
+    touchEnd: function(ev) {
+      //if (ev.touches && ev.touches.length == 1)
+      this.mouseup(ev);
+    },
+
+    touchMove: function(ev) {
     },
 
     pushButton: function() {

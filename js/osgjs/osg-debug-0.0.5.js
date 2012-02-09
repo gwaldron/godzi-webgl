@@ -7456,15 +7456,15 @@ osgViewer.Viewer.prototype = {
 
             var disableMouse = false;
 
-            var touchDown = function(ev)
+            var touchStart = function(ev)
             {
                 disableMouse = true;
-                return viewer.getManipulator().touchDown(ev);
+                return viewer.getManipulator().touchStart(ev);
             };
-            var touchUp = function(ev)
+            var touchEnd = function(ev)
             {
                 disableMouse = true;
-                return viewer.getManipulator().touchUp(ev);
+                return viewer.getManipulator().touchEnd(ev);
             };
             var touchMove = function(ev)
             {
@@ -7473,9 +7473,9 @@ osgViewer.Viewer.prototype = {
             };
 
             // touch events
-            this.canvas.addEventListener("MozTouchDown", touchDown, false);
-            this.canvas.addEventListener("MozTouchUp", touchUp, false);
-            this.canvas.addEventListener("MozTouchMove", touchMove, false);
+            this.canvas.addEventListener("touchstart", touchStart, false);
+            this.canvas.addEventListener("touchend", touchEnd, false);
+            this.canvas.addEventListener("touchmove", touchMove, false);
 
             // mouse
             var mousedown = function (ev) 
