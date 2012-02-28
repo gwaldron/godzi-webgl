@@ -85,6 +85,12 @@ READYMAP_CONTROLS = [
 		"readymap/controls/Zoom.js"
 ]
 
+
+CONTRIB = [
+        "../contrib/RealFlow/js/Buildings.js"
+]
+
+
 version = '0.0.0'
 #commit = '0'
 
@@ -232,7 +238,7 @@ def main(argv=None):
 	unminified = args.unminified
 
 	config = [
-                ['readymap', 'includes', OSGJS + OSGEARTH + READYMAP + READYMAP_UI + READYMAP_DATA + READYMAP_CONTROLS + READYMAP_ADAPTERS, args],
+                ['readymap', 'includes', OSGJS + OSGEARTH + READYMAP + READYMAP_UI + READYMAP_DATA + READYMAP_CONTROLS + READYMAP_ADAPTERS + CONTRIB, args],
                 ]
 
         global version
