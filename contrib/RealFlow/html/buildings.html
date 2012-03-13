@@ -58,6 +58,8 @@
 
         mapView = new ReadyMap.MapView("3DView", size, map, { verticalScale: 3.0 });
 
+        mapView.viewer.view.nearFarRatio = 0.00001;
+
         //Add some controls
         var zoom = new ReadyMap.Controls.Zoom(mapView, "ViewContainer");
 
