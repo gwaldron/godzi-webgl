@@ -6,7 +6,7 @@ if (typeof OpenLayers !== 'undefined') {
         this._mapView = new ReadyMap.MapView(this._canvasId, size, this._map);
     }
 
-    OpenLayers.Map.prototype.setupGlobe = function (globe) {
+    OpenLayers.Map.prototype.setupGlobe = function(globe) {
         // create the ReadyMap map model:
         this._map = new ReadyMap.Map();
 
@@ -17,23 +17,29 @@ if (typeof OpenLayers !== 'undefined') {
         //Initialize the prototypes        
 
         //Attach a new destroy function that removes the canvas from the parent div
-        this.destroy = function () {
+        this.destroy = function() {
             OpenLayers.Map.prototype.destroy.call(this);
             $(this._canvas).remove();
         }
 
         //Override addLayer so that it adds layers to our ReadyMap map
-        this.addLayer = function (layer) {
+        this.addLayer = function(layer) {
             OpenLayers.Map.prototype.addLayer.call(this, layer);
-            //Add the layer to the ReadyMap map
-            this._map.addImageLayer(new ReadyMap.OLImageLayer({
-                name: layer.name,
-                sourceLayer: layer
-            }));
+
+            if (layer instanceof OpenLayers.Layer.Grid) {
+                //Add the layer to the ReadyMap map
+                this._map.addImageLayer(new ReadyMap.OLImageLayer({
+                    name: layer.name,
+                    sourceLayer: layer
+                }));
+            }
+            else if (layer instanceof OpenLayers.Layer.MarkerLayer) {
+                this._map.addMarkerLayer(new ReadyMap.OLMarkerLayer({}));
+            }
         };
 
         var panScale = 0.002;
-        this.pan = function (dx, dy, options) {
+        this.pan = function(dx, dy, options) {
             if (this.is3D) {
                 this._mapView.viewer.getManipulator().panModel(-dx * panScale, dy * panScale);
             }
@@ -43,7 +49,7 @@ if (typeof OpenLayers !== 'undefined') {
         };
 
         var zoomScale = 0.1;
-        this.zoomIn = function () {
+        this.zoomIn = function() {
             if (this.is3D) {
                 this._mapView.viewer.getManipulator().zoomModel(0, -zoomScale);
             }
@@ -52,7 +58,7 @@ if (typeof OpenLayers !== 'undefined') {
             }
         };
 
-        this.zoomOut = function () {
+        this.zoomOut = function() {
             if (this.is3D) {
                 this._mapView.viewer.getManipulator().zoomModel(0, zoomScale);
             }
@@ -61,7 +67,7 @@ if (typeof OpenLayers !== 'undefined') {
             }
         };
 
-        this.zoomToExtent = function (bounds, closest) {
+        this.zoomToExtent = function(bounds, closest) {
             if (this.is3D) {
                 if (bounds === null) {
                     bounds = new OpenLayers.Bounds(-180, -90, 180, 90);
@@ -79,9 +85,11 @@ if (typeof OpenLayers !== 'undefined') {
             else {
                 OpenLayers.Map.prototype.zoomToExtent.call(this, bounds, closest);
             }
-        }
+        };
 
-        this.show3D = function () {
+
+
+        this.show3D = function() {
             this.is3D = true;
             $(this._canvas).show();
             $(this.viewPortDiv).hide();
@@ -97,7 +105,7 @@ if (typeof OpenLayers !== 'undefined') {
             }
         };
 
-        this.show2D = function () {
+        this.show2D = function() {
             this.is3D = false;
             $(this._canvas).hide();
             $(this.viewPortDiv).show();
@@ -126,7 +134,7 @@ if (typeof OpenLayers !== 'undefined') {
             //this.zoomToExtent(this.getExtent());
         };
 
-        this.set3D = function (is3D) {
+        this.set3D = function(is3D) {
             if (is3D) this.show3D();
             else this.show2D();
         };

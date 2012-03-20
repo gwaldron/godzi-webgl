@@ -10516,130 +10516,134 @@ ReadyMap.MapManipulator.prototype = osg.objectInehrit(ReadyMap.Manipulator.proto
 */
 ReadyMap.MapView = function(elementId, size, map, args) {
 
-  this.map = map;
-  this.viewer = null;
-  this.endFrame = undefined;
-  this.frameNum = 0;
-  this.frameTimes = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
-  this.frameRate = 0.0;
-  this.lastTime = new Date().getTime();
+    this.map = map;
+    this.viewer = null;
+    this.endFrame = undefined;
+    this.frameNum = 0;
+    this.frameTimes = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+    this.frameRate = 0.0;
+    this.lastTime = new Date().getTime();
 
-  var canvas = document.getElementById(elementId);
-  canvas.width = size.w;
-  canvas.height = size.h;
+    var canvas = document.getElementById(elementId);
+    canvas.width = size.w;
+    canvas.height = size.h;
 
-  this.root = new osg.Node();
+    this.root = new osg.Node();
 
-  //try {
-  this.viewer = new osgViewer.Viewer(canvas, { alpha: false });
+    //try {    
+    this.viewer = new osgViewer.Viewer(canvas, { alpha: false });
 
-  //If you don't do this then the mouse manipulators listen for mouse events on the whole dom
-  //so dragging other controls end up moving the canvas view.
-  this.viewer.eventNode = this.viewer.canvas;
+    //If you don't do this then the mouse manipulators listen for mouse events on the whole dom
+    //so dragging other controls end up moving the canvas view.
+    this.viewer.eventNode = this.viewer.canvas;
 
-  this.viewer.init();
-  if (map.geocentric)
-    this.viewer.setupManipulator(new ReadyMap.EarthManipulator(map));
-  else
-    this.viewer.setupManipulator(new ReadyMap.MapManipulator(map));
+    this.viewer.init();
+    if (map.geocentric)
+        this.viewer.setupManipulator(new ReadyMap.EarthManipulator(map));
+    else
+        this.viewer.setupManipulator(new ReadyMap.MapManipulator(map));
 
-  this.mapNode = new osgearth.MapNode(map);
+    // by default, set up a small near/far clipping plane ratio:
+    this.viewer.view.nearFarRatio = 0.00001;
 
-  if (args !== undefined) {
-    if (args.verticalScale !== undefined) {
-      this.setVerticalScale(args.verticalScale);
+    this.mapNode = new osgearth.MapNode(map);
+
+    if (args !== undefined) {
+        if (args.verticalScale !== undefined) {
+            this.setVerticalScale(args.verticalScale);
+        }
     }
-  }
 
-  this.root.addChild(this.mapNode);
+    this.root.addChild(this.mapNode);
 
-  // enable blending for transparency
-  this.root.getOrCreateStateSet().setAttributeAndMode(
+    // enable blending for transparency
+    this.root.getOrCreateStateSet().setAttributeAndMode(
         new osg.BlendFunc('SRC_ALPHA', 'ONE_MINUS_SRC_ALPHA'));
 
 
-  this.viewer.setScene(this.root);
-  delete this.viewer.view.light;
-  this.viewer.getManipulator().computeHomePosition();
-  //this.viewer.run();
-  this.run();
-  //}
-  //catch (er) {
-  //osg.log("exception in osgViewer " + er);
-  //}
+    this.viewer.setScene(this.root);
+    delete this.viewer.view.light;
+    this.viewer.getManipulator().computeHomePosition();
+    //this.viewer.run();
+    this.run();
+    //}
+    //catch (er) {
+    //osg.log("exception in osgViewer " + er);
+    //}
 
-  this.frameEnd = [];
+    this.frameEnd = [];
 };
 
 ReadyMap.MapView.prototype = {
 
-  home: function() {
-    this.viewer.getManipulator().computeHomePosition();
-  },
+    home: function() {
+        this.viewer.getManipulator().computeHomePosition();
+    },
 
-  zoom: function(delta) {
-    this.viewer.getManipulator().zoomModel(0, delta);
-  },
+    zoom: function(delta) {
+        this.viewer.getManipulator().zoomModel(0, delta);
+    },
 
-  setVerticalScale: function(value) {
-    this.mapNode.setVerticalScale(value);
-  },
+    setVerticalScale: function(value) {
+        this.mapNode.setVerticalScale(value);
+    },
 
-  projectObjectIntoWindow: function(object) {
-    var viewMatrix = this.viewer.view.getViewMatrix();
-    var projectionMatrix = this.viewer.view.getProjectionMatrix();
-    var windowMatrix = null;
-    var vp = this.viewer.view.getViewport();
-    if (vp !== undefined) {
-      windowMatrix = vp.computeWindowMatrix();
-    }
-
-    var matrix = [];
-    osg.Matrix.copy(windowMatrix, matrix);
-    osg.Matrix.preMult(matrix, projectionMatrix);
-    osg.Matrix.preMult(matrix, viewMatrix);
-
-    var result = osg.Matrix.transformVec3(matrix, object);
-    var height = this.viewer.canvas.height;
-    result[1] = height - result[1] - 1;
-    return result;
-  },
-
-  run: function() {
-    var that = this;
-    var render = function() {
-      window.requestAnimationFrame(render, this.canvas);
-
-      var startTime = new Date().getTime() * 0.001;
-
-      that.viewer.frame();
-      if (that.frameEnd !== undefined && that.frameEnd != null) {
-        //Fire off any frame end callbacks
-        for (var i = 0; i < that.frameEnd.length; i++) {
-          that.frameEnd[i]();
+    projectObjectIntoWindow: function(object) {
+        var viewMatrix = this.viewer.view.getViewMatrix();
+        var projectionMatrix = this.viewer.view.getProjectionMatrix();
+        var windowMatrix = null;
+        var vp = this.viewer.view.getViewport();
+        if (vp !== undefined) {
+            windowMatrix = vp.computeWindowMatrix();
         }
-      }
 
-      var endTime = new Date().getTime() * 0.001;
-      var f0 = that.frameNum % 10;
-      that.frameTimes[f0] = endTime - that.lastTime;
-      var total = 0.001;
-      for (var t = 0; t < 10; t++) {
-        total += that.frameTimes[t];
-      }
-      that.frameRate = 10.0 / total;
-      that.lastTime = endTime;
-      that.frameNum++;
+        var matrix = [];
+        osg.Matrix.copy(windowMatrix, matrix);
+        osg.Matrix.preMult(matrix, projectionMatrix);
+        osg.Matrix.preMult(matrix, viewMatrix);
 
-      that.map.frame();
-    };
+        var result = osg.Matrix.transformVec3(matrix, object);
+        var height = this.viewer.canvas.height;
+        result[1] = height - result[1] - 1;
+        return result;
+    },
 
-    render();
-  },
+    run: function() {
+        var that = this;
+        var render = function() {
+            window.requestAnimationFrame(render, this.canvas);
 
-  addFrameEndCallback: function(callback) {
-    this.frameEnd.push(callback);
-  }
+            var startTime = new Date().getTime() * 0.001;
+
+            that.viewer.frame();
+
+            if (that.frameEnd !== undefined && that.frameEnd != null) {
+                //Fire off any frame end callbacks
+                for (var i = 0; i < that.frameEnd.length; i++) {
+                    that.frameEnd[i]();
+                }
+            }
+
+            var endTime = new Date().getTime() * 0.001;
+            var f0 = that.frameNum % 10;
+            that.frameTimes[f0] = endTime - that.lastTime;
+            var total = 0.001;
+            for (var t = 0; t < 10; t++) {
+                total += that.frameTimes[t];
+            }
+            that.frameRate = 10.0 / total;
+            that.lastTime = endTime;
+            that.frameNum++;
+
+            that.map.frame();
+        };
+
+        render();
+    },
+
+    addFrameEndCallback: function(callback) {
+        this.frameEnd.push(callback);
+    }
 };
 /**
 * ReadyMap/WebGL
@@ -11363,7 +11367,8 @@ ReadyMap.OLImageLayer.prototype = osg.objectInehrit(osgearth.ImageLayer.prototyp
     }
     return osg.Texture.createFromURL(encodedURL); //osgearth.getURL(imageURL));
   }
-});/**
+});
+/**
 * ReadyMap/WebGL
 * (c) Copyright 2011 Pelican Mapping
 * License: LGPL
@@ -12054,7 +12059,7 @@ if (typeof OpenLayers !== 'undefined') {
         this._mapView = new ReadyMap.MapView(this._canvasId, size, this._map);
     }
 
-    OpenLayers.Map.prototype.setupGlobe = function (globe) {
+    OpenLayers.Map.prototype.setupGlobe = function(globe) {
         // create the ReadyMap map model:
         this._map = new ReadyMap.Map();
 
@@ -12065,23 +12070,29 @@ if (typeof OpenLayers !== 'undefined') {
         //Initialize the prototypes        
 
         //Attach a new destroy function that removes the canvas from the parent div
-        this.destroy = function () {
+        this.destroy = function() {
             OpenLayers.Map.prototype.destroy.call(this);
             $(this._canvas).remove();
         }
 
         //Override addLayer so that it adds layers to our ReadyMap map
-        this.addLayer = function (layer) {
+        this.addLayer = function(layer) {
             OpenLayers.Map.prototype.addLayer.call(this, layer);
-            //Add the layer to the ReadyMap map
-            this._map.addImageLayer(new ReadyMap.OLImageLayer({
-                name: layer.name,
-                sourceLayer: layer
-            }));
+
+            if (layer instanceof OpenLayers.Layer.Grid) {
+                //Add the layer to the ReadyMap map
+                this._map.addImageLayer(new ReadyMap.OLImageLayer({
+                    name: layer.name,
+                    sourceLayer: layer
+                }));
+            }
+            else if (layer instanceof OpenLayers.Layer.MarkerLayer) {
+                this._map.addMarkerLayer(new ReadyMap.OLMarkerLayer({}));
+            }
         };
 
         var panScale = 0.002;
-        this.pan = function (dx, dy, options) {
+        this.pan = function(dx, dy, options) {
             if (this.is3D) {
                 this._mapView.viewer.getManipulator().panModel(-dx * panScale, dy * panScale);
             }
@@ -12091,7 +12102,7 @@ if (typeof OpenLayers !== 'undefined') {
         };
 
         var zoomScale = 0.1;
-        this.zoomIn = function () {
+        this.zoomIn = function() {
             if (this.is3D) {
                 this._mapView.viewer.getManipulator().zoomModel(0, -zoomScale);
             }
@@ -12100,7 +12111,7 @@ if (typeof OpenLayers !== 'undefined') {
             }
         };
 
-        this.zoomOut = function () {
+        this.zoomOut = function() {
             if (this.is3D) {
                 this._mapView.viewer.getManipulator().zoomModel(0, zoomScale);
             }
@@ -12109,7 +12120,7 @@ if (typeof OpenLayers !== 'undefined') {
             }
         };
 
-        this.zoomToExtent = function (bounds, closest) {
+        this.zoomToExtent = function(bounds, closest) {
             if (this.is3D) {
                 if (bounds === null) {
                     bounds = new OpenLayers.Bounds(-180, -90, 180, 90);
@@ -12127,9 +12138,11 @@ if (typeof OpenLayers !== 'undefined') {
             else {
                 OpenLayers.Map.prototype.zoomToExtent.call(this, bounds, closest);
             }
-        }
+        };
 
-        this.show3D = function () {
+
+
+        this.show3D = function() {
             this.is3D = true;
             $(this._canvas).show();
             $(this.viewPortDiv).hide();
@@ -12145,7 +12158,7 @@ if (typeof OpenLayers !== 'undefined') {
             }
         };
 
-        this.show2D = function () {
+        this.show2D = function() {
             this.is3D = false;
             $(this._canvas).hide();
             $(this.viewPortDiv).show();
@@ -12174,7 +12187,7 @@ if (typeof OpenLayers !== 'undefined') {
             //this.zoomToExtent(this.getExtent());
         };
 
-        this.set3D = function (is3D) {
+        this.set3D = function(is3D) {
             if (is3D) this.show3D();
             else this.show2D();
         };
