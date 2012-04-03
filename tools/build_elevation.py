@@ -83,7 +83,7 @@ def process_tile( tile, layer, options ):
                      
 def main():
     if not OptionParser:
-        raise Exception("tile.py requires optparse/OptionParser.")
+        raise Exception("build_elevation.py requires optparse/OptionParser.")
         
     parser = OptionParser()
 
