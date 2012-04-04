@@ -12332,7 +12332,7 @@ var RealFlow = {};
 RealFlow.BuildingNode = function(map, data, polOrLinOrPoi, buil_start, buil_end, color_choice) {
 
     osg.Node.call(this);
-    var height_weighting = 10; //vertical exaggeration
+    var height_weighting = 1; //vertical exaggeration
     this.map = map;
 
     this.originLLA = {
@@ -12609,6 +12609,7 @@ RealFlow.BuildingNode.prototype = osg.objectInehrit(osg.Node.prototype, {
 
                     var check = 0;
 
+					//JB:  What is this check doing
                     for (var j = 0; j < 3; j++) {
 
                         tempx = triangles[i].points_[j].x;
@@ -12621,12 +12622,20 @@ RealFlow.BuildingNode.prototype = osg.objectInehrit(osg.Node.prototype, {
                             }
                         }
                     }
-                    if (check != 3) {
-                        window.alert('Triangle point retrieving Error. Building: ' + index);
+					
+                    if (check != 3) {				
+					    console.log('Triangle point retrieving Error. Building: ' + index + " check=" + check);
+                        //window.alert('Triangle point retrieving Error. Building: ' + index + " check=" + check);												
+						//Remove the last points that are causing errors					
                     }
                 }
             } else {
-                //window.alert('Triangle point retrieving Error. Building: ' + index); //redundant. RealFlow.poly2tri_sweep_Triangulate is already within try-catch 
+				console.log('Triangle point retrieving Error. Building: ' + index);
+                //window.alert('Triangle point retrieving Error. Building: ' + index); //redundant. RealFlow.poly2tri_sweep_Triangulate is already within try-catch 				
+				/*
+				for (var i = 0; i < check; i++) {
+				   roof.splice( roof.length -1, 1 );
+				}*/
             }
         }
 
@@ -12684,12 +12693,16 @@ RealFlow.BuildingNode.prototype = osg.objectInehrit(osg.Node.prototype, {
                 this.insertArray(normal, normals, v);
                 v += 3;
 
+				var color = [0.5,0.5,0.5,1];				
                 if (color_choice == '0') {
-                    var color = this.rampColor(height, height_weighting);
+                    color = this.rampColor(height, height_weighting);
                 }
-                if (color_choice == '1') {
-                    var color = this.rampColor2(index, height, height_weighting, data[index].hoja, hojas);
-                }
+                else if (color_choice == '1') {
+                    color = this.rampColor2(index, height, height_weighting, data[index].hoja, hojas);
+                }				
+					
+				
+				
                 this.insertArray(color, colors, c);
                 c += 4;
 
@@ -13164,7 +13177,8 @@ RealFlow.poly2tri_Triangle.prototype.MarkNeighbor = function() {
         if ((p1.equals(this.points_[2]) && p2.equals(this.points_[1])) || (p1.equals(this.points_[1]) && p2.equals(this.points_[2]))) this.neighbors_[0] = t;
         else if ((p1.equals(this.points_[0]) && p2.equals(this.points_[2])) || (p1.equals(this.points_[2]) && p2.equals(this.points_[0]))) this.neighbors_[1] = t;
         else if ((p1.equals(this.points_[0]) && p2.equals(this.points_[1])) || (p1.equals(this.points_[1]) && p2.equals(this.points_[0]))) this.neighbors_[2] = t;
-        else alert('Invalid RealFlow.poly2tri_Triangle.MarkNeighbor call (1)!');
+        //else alert('Invalid RealFlow.poly2tri_Triangle.MarkNeighbor call (1)!');
+		else console.log('Triangle point retrieving Error. Building: ' + index);
     } else if (arguments.length == 1) {
         // exhaustive search to update neighbor pointers
         t = arguments[0];
