@@ -14,6 +14,14 @@ try:
 except ImportError:
     import gdal, osr, ogr
 
+def is_clockwise( geometry ):
+    area = 0
+    for i in range(geometry.GetPointCount()-1):
+        start = geometry.GetPoint(i)
+        end   = geometry.GetPoint(i+1)
+        area += (start[0] * -end[1]) - (end[0] * -start[1])
+    return area < 0
+
 def print_geometry(geometry, height):   
     geom_count = geometry.GetGeometryCount()
     if geom_count > 0:
@@ -36,7 +44,8 @@ def print_geometry(geometry, height):
                      add = False                                          
 
 	      if add: pts.append('{"lon": %s, "lat": %s}' % (p[0], p[1]))
-          pts.reverse()
+          if is_clockwise( geometry ): pts.reverse()
+
 	  print ','.join(pts)
 	  print ']'
           print '}'
