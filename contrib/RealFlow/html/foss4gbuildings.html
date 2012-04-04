@@ -31,24 +31,8 @@
 
         map.addImageLayer(new ReadyMap.TMSImageLayer({
             name: "OSM",
-            url: "http://readymap.org/readymap/tiles/1.0.0/23/",
+            url: "http://readymap.org/readymap/tiles/1.0.0/35/",
             imageType: "png"
-        }));
-
-        /*			
-        map.addImageLayer(new ReadyMap.WMSImageLayer({ //PNOA imagery
-        name: "PNOA",
-        url: "http://www.idee.es/wms/PNOA/PNOA",			
-        layers: "pnoa",
-        format: "image/jpeg"            
-        }));
-        */
-
-        map.addElevationLayer(new ReadyMap.TMSElevationLayer({ // SRTM elevation
-            name: "Elevation",
-            url: "http://readymap.org/readymap/tiles/1.0.0/9",
-            args: "json=true",
-            tmsType: "google"
         }));
 
         // create a view tied to a page element:
@@ -99,8 +83,7 @@
         }
         //var num_buff_choice = window.prompt('Please select the number of children to add to the scene graph: \r \r     - Select a number between 1 and 4897  \r     - Adding just 1 child may cause memory overflow  \r     - It is highly recommendable choosing a very low number of children (2,3,4...)', '2');
 		//var num_buff_choice = window.prompt('Please select the number of children to add to the scene graph: \r \r     - Select a number between 1 and 4897  \r     - Adding just 1 child may cause memory overflow  \r     - It is highly recommendable choosing a very low number of children (2,3,4...)', '2');
-		//var num_buff_choice = '4897';
-		var num_buff_choice = '10000';
+		var num_buff_choice = '10000';		
         num_buff_choice = parseInt(num_buff_choice);
         /*if (num_buff_choice < 2 || num_buff_choice > 4897) {
             alert('Error in syntax \r \r Default value 2 selected');
@@ -111,12 +94,13 @@
         var num_vert = 0;
         $.ajax({
 
-            url: "../data/dc-buildings.json",
+            url: "../data/boston-buildings.json",
             processData: true,
             dataType: "json",
             success: function(data) {
 
                 length = data.length;
+				alert("Total " + data.length);
                 console.log('Total number of buildings: ' + data.length);
 
                 //duplicates each vertex and places them in a predefined height
@@ -153,6 +137,8 @@
                 dif_buff = Math.floor((num_buil / num_buff_choice));
                 temp_buil = dif_buff * num_buff_choice;
                 buildToAdd = num_buil - temp_buil;
+				
+				alert("Adding " + buildToAdd);
 
                 for (var i = 0; i < num_buff_choice; i++) {
 
@@ -185,8 +171,8 @@
     });
 
 	
-	function gotoFoss4g() {
-	  mapView.viewer.getManipulator().setViewpoint(39.0496527419, -77.0865468345, 2612, 0, -29.5, 11000, 4);
+	function gotoBoston() {
+	  mapView.viewer.getManipulator().setViewpoint(42.3589832413, -71.0508185924, 2612, 0, -29.5, 11000, 4);
 	}
 
 </script>
@@ -199,7 +185,7 @@
   </div>
   <div id="Help">
     <ul>
-	  <li><a href="#" onclick="gotoFoss4g();">Fly to Foss4G!</a></li>      
+	  <li><a href="#" onclick="gotoBoston();">Fly to Boston!</a></li>      
     </ul>
 	<div id="LayerSwitcher" class="ui-widget-content">
     </div>

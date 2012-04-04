@@ -733,7 +733,7 @@ RealFlow.poly2tri_Edge = function() {
                 this.q = arguments[0];
                 this.p = arguments[1];
             } else if (arguments[0].x == arguments[1].x) {
-                alert('Invalid RealFlow.poly2tri_edge constructor call: repeated points!');
+                alert('Invalid RealFlow.poly2tri_edge constructor call: repeated points!' + arguments[0].x + "," + arguments[0].y);
             } else {
                 this.p = arguments[0];
                 this.q = arguments[1];
