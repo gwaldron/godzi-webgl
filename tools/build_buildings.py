@@ -50,7 +50,7 @@ def main():
         raise Exception("build_buildings.py requires optparse/OptionParser.")
         
     parser = OptionParser()
-    parser.add_option("-b", "--bounds", dest="bounds", type="float", nargs=4, default=(-180,-90,180,90))       
+    parser.add_option("-b", "--bounds", dest="bounds", type="float", nargs=4, default=(-180.0,-90.0,180.0,90.0))       
     #parser.add_option("--random-height", action="store_true", default=False)
     #parser.add_option("--height-attrib", dest="height_attrib", type="string", default=None)
     #parser.add_option("--height", dest="height", type="float", default=None)
@@ -85,6 +85,7 @@ def main():
     wkt = layer.GetSpatialRef()
     srs.ImportFromWkt( str(wkt) )
 
+
     transformer = osr.CoordinateTransformation( latlon_srs, srs)
     bounds[0], bounds[1], tmp = transformer.TransformPoint( bounds[0], bounds[1], 0 )
     bounds[2], bounds[3], tmp = transformer.TransformPoint( bounds[2], bounds[3], 0 )
@@ -112,7 +113,7 @@ def main():
     #print spatialFilter.ExportToWkt()
 
         
-    max_features = 1000
+    #max_features = 1000
     print '['
     f = layer.GetNextFeature()
     i = 0
@@ -121,9 +122,9 @@ def main():
         print_feature( f, options )
         f = None
         i = i+1
-        if i < max_features:
-            f = layer.GetNextFeature()
-        #f = layer.GetNextFeature() 
+        #if i < max_features:
+        #    f = layer.GetNextFeature()
+        f = layer.GetNextFeature() 
         if f is not None:
             print ','
     print ']'    
