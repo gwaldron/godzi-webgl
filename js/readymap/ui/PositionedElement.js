@@ -68,6 +68,18 @@ ReadyMap.PositionedElement.prototype = {
 	  return true;
   },
   
+  hide : function() {
+    this.element.hide();
+  },
+  
+  show : function() {
+    this.element.show();
+  },
+  
+  toggle: function(visible) {
+     this.element.toggle(visible);
+  },
+  
   update : function(mapView) {
       if (this.ecf == null || this._dirty) {      
         var ecf = mapView.map.lla2world([this.lon, this.lat, this.alt]);

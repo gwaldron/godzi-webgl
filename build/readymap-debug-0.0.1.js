@@ -10715,6 +10715,18 @@ ReadyMap.PositionedElement.prototype = {
 	  return true;
   },
   
+  hide : function() {
+    this.element.hide();
+  },
+  
+  show : function() {
+    this.element.show();
+  },
+  
+  toggle: function(visible) {
+     this.element.toggle(visible);
+  },
+  
   update : function(mapView) {
       if (this.ecf == null || this._dirty) {      
         var ecf = mapView.map.lla2world([this.lon, this.lat, this.alt]);
@@ -10814,10 +10826,22 @@ ReadyMap.PositionEngine.prototype = {
     this.elements = [];
   },
   
+  hide: function() {
+    for (var i = 0; i < this.elements.length; i++) {
+      this.elements[i].hide();
+    }
+  },
+  
+  show: function() {
+    for (var i = 0; i < this.elements.length; i++) {
+      this.elements[i].show();
+    }
+  },
+  
   frameEnd: function() {
   
     //Cull elements on the other side of the earth.
-    var viewMatrix = mapView.viewer.view.getViewMatrix();
+    var viewMatrix = this.mapView.viewer.view.getViewMatrix();
       
 	var viewChanged = true;
     if (this._lastViewMatrix !== undefined) {
@@ -10829,7 +10853,7 @@ ReadyMap.PositionEngine.prototype = {
       
       //Save the last view matrix
 	osg.Matrix.copy(viewMatrix, this._lastViewMatrix);
-	mapView._inverseViewMatrix = osg.Matrix.inverse( viewMatrix );                        
+	this.mapView._inverseViewMatrix = osg.Matrix.inverse( viewMatrix );                        
 
 	for (var i = 0; i < this.elements.length; i++) {
 	  if (viewChanged || this.elements[i]._dirty || this.elements[i].sizeChanged()) {
@@ -12086,8 +12110,9 @@ if (typeof OpenLayers !== 'undefined') {
                     sourceLayer: layer
                 }));
             }
-            else if (layer instanceof OpenLayers.Layer.MarkerLayer) {
-                this._map.addMarkerLayer(new ReadyMap.OLMarkerLayer({}));
+            else if (layer instanceof OpenLayers.Layer.Markers) {                		
+			    //TODO:  Draw any markers that are within the layer
+                //this._map.addMarkerLayer(new ReadyMap.OLMarkerLayer({}));
             }
         };
 
@@ -12155,6 +12180,11 @@ if (typeof OpenLayers !== 'undefined') {
                 else {
                     this.zoomToMaxExtent();
                 }
+				
+				//Show any markers
+				if (this._positionEngine !== undefined) {
+				  this._positionEngine.show();
+				}
             }
         };
 
@@ -12181,6 +12211,11 @@ if (typeof OpenLayers !== 'undefined') {
                 else {
                     this.zoomToExtent(bounds, false);
                 }
+				
+				//Hide any markers
+				if (this._positionEngine !== undefined) {
+				  this._positionEngine.hide();
+				}
             }
 
             //var extent = this.getExtent();
@@ -12193,9 +12228,33 @@ if (typeof OpenLayers !== 'undefined') {
         };
 
         this.set3D(true);
-
-
     }
+	
+	var markerId = 0;
+	
+	OpenLayers.Layer.Markers.prototype.base_addMarker = OpenLayers.Layer.Markers.prototype.addMarker;
+	OpenLayers.Layer.Markers.prototype.addMarker = function( marker ) {
+        OpenLayers.Layer.Markers.prototype.base_addMarker.call( this, marker );				
+		
+		if (this.map._mapView) {		  
+		  if (this.map._positionEngine === undefined) {
+		    this.map._positionEngine = new ReadyMap.PositionEngine( this.map._mapView )
+		  }
+		  
+		  var lat = marker.lonlat.lat;
+		  var lon = marker.lonlat.lon;
+		  var icon_url = marker.icon.url;
+		  var width = marker.icon.size.w;
+		  var height = marker.icon.size.h;
+		  
+		  markerId++;
+		  var icon = new ReadyMap.Icon("icon" + markerId, Math.deg2rad(lon), Math.deg2rad(lat), 0, icon_url, {
+              width: width,
+              height: height
+            });
+          this.map._positionEngine.elements.push( icon );  
+		}
+	}
 }if (typeof L !== 'undefined') {
 
   L.Map.prototype._base_initialize = L.Map.prototype.initialize;
