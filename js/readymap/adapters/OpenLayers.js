@@ -33,8 +33,9 @@ if (typeof OpenLayers !== 'undefined') {
                     sourceLayer: layer
                 }));
             }
-            else if (layer instanceof OpenLayers.Layer.MarkerLayer) {
-                this._map.addMarkerLayer(new ReadyMap.OLMarkerLayer({}));
+            else if (layer instanceof OpenLayers.Layer.Markers) {                		
+			    //TODO:  Draw any markers that are within the layer
+                //this._map.addMarkerLayer(new ReadyMap.OLMarkerLayer({}));
             }
         };
 
@@ -102,6 +103,11 @@ if (typeof OpenLayers !== 'undefined') {
                 else {
                     this.zoomToMaxExtent();
                 }
+				
+				//Show any markers
+				if (this._positionEngine !== undefined) {
+				  this._positionEngine.show();
+				}
             }
         };
 
@@ -128,6 +134,11 @@ if (typeof OpenLayers !== 'undefined') {
                 else {
                     this.zoomToExtent(bounds, false);
                 }
+				
+				//Hide any markers
+				if (this._positionEngine !== undefined) {
+				  this._positionEngine.hide();
+				}
             }
 
             //var extent = this.getExtent();
@@ -140,7 +151,31 @@ if (typeof OpenLayers !== 'undefined') {
         };
 
         this.set3D(true);
-
-
     }
+	
+	var markerId = 0;
+	
+	OpenLayers.Layer.Markers.prototype.base_addMarker = OpenLayers.Layer.Markers.prototype.addMarker;
+	OpenLayers.Layer.Markers.prototype.addMarker = function( marker ) {
+        OpenLayers.Layer.Markers.prototype.base_addMarker.call( this, marker );				
+		
+		if (this.map._mapView) {		  
+		  if (this.map._positionEngine === undefined) {
+		    this.map._positionEngine = new ReadyMap.PositionEngine( this.map._mapView )
+		  }
+		  
+		  var lat = marker.lonlat.lat;
+		  var lon = marker.lonlat.lon;
+		  var icon_url = marker.icon.url;
+		  var width = marker.icon.size.w;
+		  var height = marker.icon.size.h;
+		  
+		  markerId++;
+		  var icon = new ReadyMap.Icon("icon" + markerId, Math.deg2rad(lon), Math.deg2rad(lat), 0, icon_url, {
+              width: width,
+              height: height
+            });
+          this.map._positionEngine.elements.push( icon );  
+		}
+	}
 }

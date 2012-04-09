@@ -34,10 +34,22 @@ ReadyMap.PositionEngine.prototype = {
     this.elements = [];
   },
   
+  hide: function() {
+    for (var i = 0; i < this.elements.length; i++) {
+      this.elements[i].hide();
+    }
+  },
+  
+  show: function() {
+    for (var i = 0; i < this.elements.length; i++) {
+      this.elements[i].show();
+    }
+  },
+  
   frameEnd: function() {
   
     //Cull elements on the other side of the earth.
-    var viewMatrix = mapView.viewer.view.getViewMatrix();
+    var viewMatrix = this.mapView.viewer.view.getViewMatrix();
       
 	var viewChanged = true;
     if (this._lastViewMatrix !== undefined) {
@@ -49,7 +61,7 @@ ReadyMap.PositionEngine.prototype = {
       
       //Save the last view matrix
 	osg.Matrix.copy(viewMatrix, this._lastViewMatrix);
-	mapView._inverseViewMatrix = osg.Matrix.inverse( viewMatrix );                        
+	this.mapView._inverseViewMatrix = osg.Matrix.inverse( viewMatrix );                        
 
 	for (var i = 0; i < this.elements.length; i++) {
 	  if (viewChanged || this.elements[i]._dirty || this.elements[i].sizeChanged()) {
