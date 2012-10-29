@@ -6,8 +6,8 @@
 */
 
 ReadyMap.PositionedElement = function(id, lon, lat, alt, options) {
-  this.hAlign = "left";
-  this.vAlign = "top";
+  this.hAlign = "center";
+  this.vAlign = "bottom";
   this.lat = lat;
   this.lon = lon;
   this.alt = alt;
@@ -16,8 +16,8 @@ ReadyMap.PositionedElement = function(id, lon, lat, alt, options) {
   this._dirty = true;
   
   var defaults = {
-    hAlign: "left",
-    vAlign: "top",
+    hAlign: "center",
+    vAlign: "bottom",
     offset: [0,0]
   };
   
@@ -125,11 +125,17 @@ ReadyMap.PositionedElement.prototype = {
       if (this.hAlign == "right") {
         x = x - width;
       }
+      else if (this.hAlign == "center") {
+        x = x - width/2.0;
+      }     
       
 	  var height = this.element.height();
       if (this.vAlign == "bottom") {	  
         y = y - height;
       }      
+      else if (this.vAlign == "center") {
+        y = y - height/2.0;
+      }
 	  
 	  this.element._lastSize = [width, height];
           
