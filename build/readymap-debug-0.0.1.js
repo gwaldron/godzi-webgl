@@ -9384,12 +9384,15 @@ osgearth.Tile.prototype = osg.objectInehrit(osg.Node.prototype, {
                 var vert = osg.Matrix.transformVec3(world2tile, world, []);
                 this.insertArray(vert, verts, v);
 
-                // todo: fix for elevation
-                var normal =
-                    this.map.geocentric ? osg.Vec3.normalize(vert, []) :
-                    [0, 0, 1];
+                // normal vector
+                // TODO: adjust for elevation.
+                var normal = [0,0,1];
+                if ( this.map.geocentric ) {
+                    osg.Vec3.normalize(world, normal);
+                    normal = osg.Quat.transformVec3(world2tileRot, normal);
+                }
                 this.insertArray(normal, normals, v);
-
+                
                 // elevation extrusion vector
                 var extrude = [];
                 osg.Vec3.normalize(world, extrude);
@@ -11378,25 +11381,30 @@ ReadyMap.OLImageLayer = function (settings) {
 
 ReadyMap.OLImageLayer.prototype = osg.objectInehrit(osgearth.ImageLayer.prototype, {
 
-  getURL: function(key, profile) {
-    var ex = osgearth.TileKey.getExtent(key, profile);
-    var bounds = new OpenLayers.Bounds();
-    bounds.left = Math.rad2deg(ex.xmin);
-    bounds.right = Math.rad2deg(ex.xmax);
-    bounds.bottom = Math.rad2deg(ex.ymin);
-    bounds.top = Math.rad2deg(ex.ymax);
-    bounds.centerLonLat = new OpenLayers.LonLat(0.5 * (bounds.left + bounds.right), 0.5 * (bounds.bottom + bounds.top));
-    return this.sourceLayer.getURL(bounds);
-  },
+    getURL: function(key, profile) {
+        var ex = osgearth.TileKey.getExtent(key, profile);
+        var bounds = new OpenLayers.Bounds();
+        bounds.left = Math.rad2deg(ex.xmin);
+        bounds.right = Math.rad2deg(ex.xmax);
+        bounds.bottom = Math.rad2deg(ex.ymin);
+        bounds.top = Math.rad2deg(ex.ymax);
+        bounds.centerLonLat = new OpenLayers.LonLat(0.5 * (bounds.left + bounds.right), 0.5 * (bounds.bottom + bounds.top));
+        
+        // set the OL map's active resolution before we call getURL:
+        this.sourceLayer.map.zoomTo(key[2]);
+        
+        // ask OL for the URL.
+        return this.sourceLayer.getURL(bounds);
+    },
 
-  createTexture: function(key, profile) {
-    var imageURL = this.getURL(key, profile);
-    var encodedURL = osgearth.getURL(imageURL);
-    if (this.sourceLayer.format !== undefined) {
-      encodedURL += "&mimeType=" + this.sourceLayer.format;
+    createTexture: function(key, profile) {
+        var imageURL = this.getURL(key, profile);
+        var encodedURL = osgearth.getURL(imageURL);
+        if (this.sourceLayer.format !== undefined) {
+            encodedURL += "&mimeType=" + this.sourceLayer.format;
+        }
+        return osg.Texture.createFromURL(encodedURL); //osgearth.getURL(imageURL));
     }
-    return osg.Texture.createFromURL(encodedURL); //osgearth.getURL(imageURL));
-  }
 });
 /**
 * ReadyMap/WebGL

@@ -50,7 +50,7 @@ ReadyMap.OLImageLayer.prototype = osg.objectInehrit(osgearth.ImageLayer.prototyp
         bounds.centerLonLat = new OpenLayers.LonLat(0.5 * (bounds.left + bounds.right), 0.5 * (bounds.bottom + bounds.top));
         
         // set the OL map's active resolution before we call getURL:
-        this.sourceLayer.zoomTo(key[2]);
+        this.sourceLayer.map.zoomTo(key[2]);
         
         // ask OL for the URL.
         return this.sourceLayer.getURL(bounds);
