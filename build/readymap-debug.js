@@ -10668,8 +10668,7 @@ ReadyMap.PositionedElement = function(id, lon, lat, alt, options) {
   var defaults = {
     hAlign: "center",
     vAlign: "bottom",
-  };
-    offset: [0,0]
+  };    
   
   var options = jQuery.extend({}, defaults, options);     
   
@@ -10704,7 +10703,7 @@ ReadyMap.PositionedElement.prototype = {
       this.lon = lon;
       this.lat = lat;
       this.alt = alt;
-      _dirty = true;
+      this._dirty = true;
     }      
   },
   
@@ -10761,8 +10760,8 @@ ReadyMap.PositionedElement.prototype = {
            
       var window = mapView.projectObjectIntoWindow(this.ecf);      
       
-      var x = (window[0] + this.offset[0]).toFixed();
-      var y = (window[1] + this.offset[1]).toFixed();
+      var x = window[0] + this.offset[0];
+      var y = window[1] + this.offset[1];
      
       
       //Don't reposition this element if it hasn't changed
@@ -11814,7 +11813,7 @@ ReadyMap.Label = function(id, lon, lat, alt, text, options) {
   
   this.cssClass = options.cssClass;
   
-  this.element = jQuery('<span id="' + this.id + '" class="' + options.cssClass + '">' + this.text + '</span>');
+  this.element = jQuery('<div id="' + this.id + '" class="' + options.cssClass + '">' + this.text + '</div>');
   //Disable selection
   this.element[0].onselectstart = function() { return false;} //id;
   this.element[0].onmousedown   = function() { return false;} //id;
