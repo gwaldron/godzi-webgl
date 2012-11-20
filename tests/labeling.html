@@ -5,12 +5,10 @@
 <meta http-equiv="content-type" content="text/html; charset=ISO-8859-1">
 
 <script type="text/javascript" src="../js/jquery/jquery-1.4.2.js"></script>
-<script type="text/javascript" src="../js/jquery/jquery-ui-1.8.2.custom.min.js"></script>
-<script type="text/javascript" src="../build/readymap.js"></script>
+<script type="text/javascript" src="../build/readymap-debug-0.0.1.js"></script>
 <script type="text/javascript" src="../js/data/country_data.js"></script>
 
 <link href="demo.css" rel="Stylesheet" type="text/css"></link>
-<link href="../css/ui-lightness/jquery.ui.all.css" rel="stylesheet" type="text/css"></link>
 <link href="../css/readymap.css" rel="Stylesheet" type="text/css"></link>
 
 <script type="text/javascript">
@@ -54,13 +52,15 @@
                 "  Pitch:" + Math.rad2deg(mapView.viewer.manipulator.localPitch).toFixed(1) + "\u00B0");            
         });
         
-        positionEngine = new ReadyMap.PositionEngine( mapView );
+        positionEngine = new ReadyMap.PositionEngine( mapView);
         
         var addedLabels = [];
         
-               
-//        for (var i = 0; i < country_data.features.length; i++) {
-        for (var i = 0; i < 300; i++) {
+        
+        var maxFeatures = 50;       
+        var numFeatures = 0;        
+        for (var i = 0; i < country_data.features.length; i++) {
+        //for (var i = 0; i < 300; i++) {
           var f = country_data.features[i];
           var name = f.properties.NAME;
           if (addedLabels[name] === undefined) {
@@ -79,17 +79,19 @@
             });
             //Offset the label so you can see the icon
             label.offset = [34, 0];
-            positionEngine.elements.push( label );     
+            positionEngine.addElement( label );     
            
             
             var icon = new ReadyMap.Icon("icon" + i, Math.deg2rad(lon), Math.deg2rad(lat), 0, icon_url, {
               width: 32,
               height: 32
             });
-            positionEngine.elements.push( icon );          
+            positionEngine.addElement( icon );          
             addedLabels[name] = true;
+            numFeatures++;
+            if (numFeatures == maxFeatures) break;
           }
-        }
+        }        
     });
     
 

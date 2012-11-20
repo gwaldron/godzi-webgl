@@ -31,7 +31,7 @@ ReadyMap.Icon = function(id, lon, lat, alt, url, options) {
   this.element[0].onselectstart = function() { return false;} //id;
   this.element[0].onmousedown   = function() { return false;} //id;
 						
-  jQuery("body").append(this.element);                         
+  //jQuery("body").append(this.element);                         
 }
 
 ReadyMap.Icon.prototype = osg.objectInehrit(ReadyMap.PositionedElement.prototype, {

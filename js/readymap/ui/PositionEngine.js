@@ -6,7 +6,7 @@
 */
 
 ReadyMap.PositionEngine = function(mapView) {
-  this.mapView = mapView;
+  this.mapView = mapView;  
   var me = this;
   this.mapView.addFrameEndCallback( function() {
     me.frameEnd();
@@ -17,12 +17,14 @@ ReadyMap.PositionEngine = function(mapView) {
 ReadyMap.PositionEngine.prototype = {
   addElement: function(element) {
     this.elements.push( element );
+    //Add the element to the parent of the canvas
+    $(this.mapView.viewer.canvas).parent().append( element.element );    
   },
   
   removeElement: function(element) {  
     var index = this.elements.indexOf( element );
     if (index >= 0) {
-      element.destroy();
+      element.destroy();      
       this.elements.splice( index, 1 );
     }       
   },

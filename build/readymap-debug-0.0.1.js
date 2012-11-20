@@ -10665,8 +10665,8 @@ ReadyMap.PositionedElement = function(id, lon, lat, alt, options) {
   var defaults = {
     hAlign: "center",
     vAlign: "bottom",
-    offset: [0,0]
   };
+    offset: [0,0]
   
   var options = jQuery.extend({}, defaults, options);     
   
@@ -10748,10 +10748,13 @@ ReadyMap.PositionedElement.prototype = {
           osg.Vec3.normalize( worldUp, worldUp );
           var dot = osg.Vec3.dot(lookVector, worldUp);
           if (dot > 0) {
-            this.element.offset({top:0, left:-10000});
+            this.element.hide();
+            //this.element.offset({top:0, left:-10000});
             return;
           }                  
       }
+      
+      this.element.show();
            
       var window = mapView.projectObjectIntoWindow(this.ecf);      
       
@@ -10785,14 +10788,7 @@ ReadyMap.PositionedElement.prototype = {
       }
 	  
 	  this.element._lastSize = [width, height];
-          
-      this.element.position( {        
-        my: "left top",
-        at: "left top",
-        of: mapView.viewer.canvas,
-        offset: x + " " + y,
-        collision: "none none"
-      });      
+      this.element.css({position: "absolute", left: x, top: y});      
       
       this.lastWindow = [x,y];                       
   }
@@ -10804,7 +10800,7 @@ ReadyMap.PositionedElement.prototype = {
 */
 
 ReadyMap.PositionEngine = function(mapView) {
-  this.mapView = mapView;
+  this.mapView = mapView;  
   var me = this;
   this.mapView.addFrameEndCallback( function() {
     me.frameEnd();
@@ -10815,12 +10811,14 @@ ReadyMap.PositionEngine = function(mapView) {
 ReadyMap.PositionEngine.prototype = {
   addElement: function(element) {
     this.elements.push( element );
+    //Add the element to the parent of the canvas
+    $(this.mapView.viewer.canvas).parent().append( element.element );    
   },
   
   removeElement: function(element) {  
     var index = this.elements.indexOf( element );
     if (index >= 0) {
-      element.destroy();
+      element.destroy();      
       this.elements.splice( index, 1 );
     }       
   },
@@ -11757,7 +11755,7 @@ ReadyMap.Icon = function(id, lon, lat, alt, url, options) {
   this.element[0].onselectstart = function() { return false;} //id;
   this.element[0].onmousedown   = function() { return false;} //id;
 						
-  jQuery("body").append(this.element);                         
+  //jQuery("body").append(this.element);                         
 }
 
 ReadyMap.Icon.prototype = osg.objectInehrit(ReadyMap.PositionedElement.prototype, {
@@ -11813,7 +11811,7 @@ ReadyMap.Label = function(id, lon, lat, alt, text, options) {
   this.element[0].onselectstart = function() { return false;} //id;
   this.element[0].onmousedown   = function() { return false;} //id;
 
-  jQuery("body").append(this.element);                         
+  //jQuery("body").append(this.element);                         
 }
 
 ReadyMap.Label.prototype = osg.objectInehrit(ReadyMap.PositionedElement.prototype, {

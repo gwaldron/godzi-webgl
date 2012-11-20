@@ -18,8 +18,8 @@ ReadyMap.PositionedElement = function(id, lon, lat, alt, options) {
   var defaults = {
     hAlign: "center",
     vAlign: "bottom",
-    offset: [0,0]
   };
+    offset: [0,0]
   
   var options = jQuery.extend({}, defaults, options);     
   
@@ -101,10 +101,13 @@ ReadyMap.PositionedElement.prototype = {
           osg.Vec3.normalize( worldUp, worldUp );
           var dot = osg.Vec3.dot(lookVector, worldUp);
           if (dot > 0) {
-            this.element.offset({top:0, left:-10000});
+            this.element.hide();
+            //this.element.offset({top:0, left:-10000});
             return;
           }                  
       }
+      
+      this.element.show();
            
       var window = mapView.projectObjectIntoWindow(this.ecf);      
       
@@ -138,14 +141,7 @@ ReadyMap.PositionedElement.prototype = {
       }
 	  
 	  this.element._lastSize = [width, height];
-          
-      this.element.position( {        
-        my: "left top",
-        at: "left top",
-        of: mapView.viewer.canvas,
-        offset: x + " " + y,
-        collision: "none none"
-      });      
+      this.element.css({position: "absolute", left: x, top: y});      
       
       this.lastWindow = [x,y];                       
   }

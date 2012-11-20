@@ -24,7 +24,7 @@ ReadyMap.Label = function(id, lon, lat, alt, text, options) {
   this.element[0].onselectstart = function() { return false;} //id;
   this.element[0].onmousedown   = function() { return false;} //id;
 
-  jQuery("body").append(this.element);                         
+  //jQuery("body").append(this.element);                         
 }
 
 ReadyMap.Label.prototype = osg.objectInehrit(ReadyMap.PositionedElement.prototype, {

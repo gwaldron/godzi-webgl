@@ -5,8 +5,7 @@
 <meta http-equiv="content-type" content="text/html; charset=ISO-8859-1">
 
 <script type="text/javascript" src="../js/jquery/jquery-1.4.2.js"></script>
-<script type="text/javascript" src="../js/jquery/jquery-ui-1.8.2.custom.min.js"></script>
-<script type="text/javascript" src="../build/readymap.js"></script>
+<script type="text/javascript" src="../build/readymap-debug-0.0.1.js"></script>
 <script type="text/javascript" src="../js/data/country_data.js"></script>
 
 <link href="demo.css" rel="Stylesheet" type="text/css"></link>
@@ -30,7 +29,7 @@
               width: 32,
               height: 32
             });
-        positionEngine.elements.push( icon );  
+        positionEngine.addElement( icon );  
         
         mapView.viewer.manipulator.setViewpoint(lat, lon, 0.0, 0, -90, 5000, 3)
     }
@@ -78,7 +77,7 @@
                 "  Pitch:" + Math.rad2deg(mapView.viewer.manipulator.localPitch).toFixed(1) + "\u00B0");
         });
 
-        positionEngine = new ReadyMap.PositionEngine(mapView);
+        positionEngine = new ReadyMap.PositionEngine( mapView);
         
         if (navigator.geolocation) {            
             navigator.geolocation.getCurrentPosition(locationSuccess, locationError);
