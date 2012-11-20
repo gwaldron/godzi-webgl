@@ -40,23 +40,28 @@ ReadyMap.OLImageLayer = function (settings) {
 
 ReadyMap.OLImageLayer.prototype = osg.objectInehrit(osgearth.ImageLayer.prototype, {
 
-  getURL: function(key, profile) {
-    var ex = osgearth.TileKey.getExtent(key, profile);
-    var bounds = new OpenLayers.Bounds();
-    bounds.left = Math.rad2deg(ex.xmin);
-    bounds.right = Math.rad2deg(ex.xmax);
-    bounds.bottom = Math.rad2deg(ex.ymin);
-    bounds.top = Math.rad2deg(ex.ymax);
-    bounds.centerLonLat = new OpenLayers.LonLat(0.5 * (bounds.left + bounds.right), 0.5 * (bounds.bottom + bounds.top));
-    return this.sourceLayer.getURL(bounds);
-  },
+    getURL: function(key, profile) {
+        var ex = osgearth.TileKey.getExtent(key, profile);
+        var bounds = new OpenLayers.Bounds();
+        bounds.left = Math.rad2deg(ex.xmin);
+        bounds.right = Math.rad2deg(ex.xmax);
+        bounds.bottom = Math.rad2deg(ex.ymin);
+        bounds.top = Math.rad2deg(ex.ymax);
+        bounds.centerLonLat = new OpenLayers.LonLat(0.5 * (bounds.left + bounds.right), 0.5 * (bounds.bottom + bounds.top));
+        
+        // set the OL map's active resolution before we call getURL:
+        this.sourceLayer.map.zoomTo(key[2]);
+        
+        // ask OL for the URL.
+        return this.sourceLayer.getURL(bounds);
+    },
 
-  createTexture: function(key, profile) {
-    var imageURL = this.getURL(key, profile);
-    var encodedURL = osgearth.getURL(imageURL);
-    if (this.sourceLayer.format !== undefined) {
-      encodedURL += "&mimeType=" + this.sourceLayer.format;
+    createTexture: function(key, profile) {
+        var imageURL = this.getURL(key, profile);
+        var encodedURL = osgearth.getURL(imageURL);
+        if (this.sourceLayer.format !== undefined) {
+            encodedURL += "&mimeType=" + this.sourceLayer.format;
+        }
+        return osg.Texture.createFromURL(encodedURL); //osgearth.getURL(imageURL));
     }
-    return osg.Texture.createFromURL(encodedURL); //osgearth.getURL(imageURL));
-  }
 });

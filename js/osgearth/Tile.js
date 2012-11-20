@@ -179,12 +179,15 @@ osgearth.Tile.prototype = osg.objectInehrit(osg.Node.prototype, {
                 var vert = osg.Matrix.transformVec3(world2tile, world, []);
                 this.insertArray(vert, verts, v);
 
-                // todo: fix for elevation
-                var normal =
-                    this.map.geocentric ? osg.Vec3.normalize(vert, []) :
-                    [0, 0, 1];
+                // normal vector
+                // TODO: adjust for elevation.
+                var normal = [0,0,1];
+                if ( this.map.geocentric ) {
+                    osg.Vec3.normalize(world, normal);
+                    normal = osg.Quat.transformVec3(world2tileRot, normal);
+                }
                 this.insertArray(normal, normals, v);
-
+                
                 // elevation extrusion vector
                 var extrude = [];
                 osg.Vec3.normalize(world, extrude);
