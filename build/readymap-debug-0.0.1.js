@@ -10264,7 +10264,8 @@ ReadyMap.EarthManipulator.prototype = osg.objectInehrit(ReadyMap.Manipulator.pro
 
   recalculateCenter: function(localFrame) {
     var lla = this.map.profile.ellipsoid.ecef2lla(osg.Matrix.getTrans(localFrame));
-    lla[2] = 0.0;
+    //JB:  Removed b/c this was causing issues with setting a focal point with an elevation > 0
+    //lla[2] = 0.0;
     this.center = this.map.profile.ellipsoid.lla2ecef(lla);
   },
 
