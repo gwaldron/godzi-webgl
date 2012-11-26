@@ -25,8 +25,16 @@ ReadyMap.MapView = function(elementId, size, map, args) {
 
     this.root = new osg.Node();
 
-    //try {    
-    this.viewer = new osgViewer.Viewer(canvas, { alpha: false });
+    this.valid = true;
+    var that = this;
+    try {    
+        this.viewer = new osgViewer.Viewer(canvas, { alpha: false }, function(msg) { that.valid = false;});
+    }
+    catch(error) {
+        this.valid = false;
+    }
+    
+    if (!this.valid) throw "Failed to initialize MapView, WebGL not supported!.";
 
     //If you don't do this then the mouse manipulators listen for mouse events on the whole dom
     //so dragging other controls end up moving the canvas view.
