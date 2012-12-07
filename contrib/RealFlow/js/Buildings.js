@@ -1,4 +1,4 @@
-﻿/*
+/*
 * Daniel Gaston
 * 
 * Add Buildings functionality for ReadyMap/WebGL
