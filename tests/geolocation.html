@@ -49,8 +49,9 @@
         
         map.addImageLayer(new ReadyMap.TMSImageLayer({
             name: "OSM",
-            url: "http://readymap.org/readymap/tiles/1.0.0/35/"
-            }));
+            url: "http://readymap.org/readymap/tiles/1.0.0/35/",
+            imageType: "png"            
+        }));
 
         // create a view tied to a page element:
         var size = ReadyMap.getWindowSize();

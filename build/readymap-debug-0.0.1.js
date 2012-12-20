@@ -11426,7 +11426,7 @@ ReadyMap.TMSImageLayer = function(settings) {
        this.url = this.url + "/";
     }
     this.flipY = settings.tmsType !== "google";
-    this.extension = settings.imageType !== undefined ? settings.imageType : "jpg";
+    this.extension = settings.imageType !== undefined ? settings.imageType : "jpeg";
     this.baseLevel = settings.baseLevel !== undefined ? settings.baseLevel : 0;
     this.args = settings.args !== undefined ? settings.args : null;
 };
