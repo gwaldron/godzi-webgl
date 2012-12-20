@@ -8,6 +8,10 @@
 ReadyMap.TMSImageLayer = function(settings) {
     osgearth.ImageLayer.call(this, settings.name);
     this.url = settings.url;
+    //Make sure the url ends with a slash
+    if (this.url.indexOf("/", this.url.length - 1) === -1) {       
+       this.url = this.url + "/";
+    }
     this.flipY = settings.tmsType !== "google";
     this.extension = settings.imageType !== undefined ? settings.imageType : "jpg";
     this.baseLevel = settings.baseLevel !== undefined ? settings.baseLevel : 0;
@@ -23,8 +27,9 @@ ReadyMap.TMSImageLayer.prototype = osg.objectInehrit(osgearth.ImageLayer.prototy
             var size = profile.getTileCount(key[2]);
             y = (size[1] - 1) - key[1];
         }
+               
 
-        var imageURL = this.url + "/" + (key[2] + this.baseLevel) + "/" + key[0] + "/" + y + "." + this.extension;
+        var imageURL = this.url + (key[2] + this.baseLevel) + "/" + key[0] + "/" + y + "." + this.extension;        
         if (this.args !== undefined && this.args != null) {
             imageURL += "?" + this.args;
         }
