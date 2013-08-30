@@ -1,4 +1,4 @@
-﻿if (typeof L !== 'undefined') {
+if (typeof L !== 'undefined') {
 
   L.Map.prototype._base_initialize = L.Map.prototype.initialize;
 

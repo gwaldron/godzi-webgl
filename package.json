@@ -1,0 +1,22 @@
+{
+  "name": "readymap",
+  "version": "0.0.2",
+  "homepage": "http://readymap.com/websdk.html",
+  "author": {
+    "name": "Pelicanmapping"
+  },
+  "licenses": [
+    {
+      "type": "LGPL"
+    }
+  ],
+  "dependencies": {
+    "grunt": "0.3.x",
+    "grunt-contrib": "0.3.x",
+  	"grunt-contrib-compress": "0.3.x",
+  	"grunt-contrib-uglify": "0.1.x",
+  	"grunt-linter": "0.1.x",
+    "grunt-jsvalidate": "0.1.x",
+    "grunt-strip": "0.1.3"
+  }
+}

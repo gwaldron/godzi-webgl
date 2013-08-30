@@ -10,7 +10,7 @@ ReadyMap.EarthManipulator = function(map) {
     this.minPitch = Math.deg2rad(-89.9);
     this.maxPitch = Math.deg2rad(-10.0);
     this.buttonup = true;
-    this.centerRotation = osg.Quat.makeIdentity();
+    this.centerRotation = osg.Quat.makeIdentity([]);
     this.lockAzimWhilePanning = true;
     this.settingVP = false;
     this.computeHomePosition();
